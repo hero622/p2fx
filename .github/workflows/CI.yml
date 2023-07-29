@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: '**'
+    tags-ignore: '**'
+    paths-ignore:
+      - '.github/*'
+      - '.github/workflows/CD.yml'
+      - '.mailmap'
+      - '.gitattributes'
+      - '.gitignore'
+      - 'docs/**'
+      - 'livesplit/**'
+      - '**.md'
+      - 'LICENSE'
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-lin:
+    name: Linux Build
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with: { fetch-depth: 0 }
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++-10-multilib
+      - name: Build
+        env:
+          DEMO_SIGN_PUBKEY: ${{ secrets.SAR_DEMO_SIGN_PUBKEY }}
+          DEMO_SIGN_PRIVKEY: ${{ secrets.SAR_DEMO_SIGN_PRIVKEY }}
+        run: make -j$(nproc)
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: sar-linux
+          path: sar.so
+          if-no-files-found: error
+  build-win:
+    name: Windows Build
+    runs-on: windows-2019
+    env:
+      POWERSHELL_TELEMETRY_OPTOUT: 1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with: { fetch-depth: 0 }
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1.1
+      - name: Build
+        env:
+          DEMO_SIGN_PUBKEY: ${{ secrets.SAR_DEMO_SIGN_PUBKEY }}
+          DEMO_SIGN_PRIVKEY: ${{ secrets.SAR_DEMO_SIGN_PRIVKEY }}
+        run: msbuild -m -t:SourceAutoRecord -p:"Configuration=Release;Platform=x86" SourceAutoRecord.sln
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: sar-windows
+          path: |
+            bin\sar.dll
+            bin\sar.pdb
+          if-no-files-found: error
