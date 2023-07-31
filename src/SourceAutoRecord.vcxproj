@@ -133,6 +133,7 @@
     <ClCompile Include="CrashHandler.cpp" />
     <ClCompile Include="Checksum.cpp" />
     <ClCompile Include="Command.cpp" />
+    <ClCompile Include="Features\Hud\DemoHud.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="Event.cpp" />
     <ClCompile Include="Features\AchievementTracker.cpp" />
@@ -321,6 +322,7 @@
     <ClInclude Include="CrashHandler.hpp" />
     <ClInclude Include="Checksum.hpp" />
     <ClInclude Include="Command.hpp" />
+    <ClInclude Include="Features\Hud\DemoHud.hpp" />
     <ClInclude Include="Entity.hpp" />
     <ClInclude Include="Event.hpp" />
     <ClInclude Include="Features\AchievementTracker.hpp" />

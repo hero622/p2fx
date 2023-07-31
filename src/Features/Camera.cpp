@@ -312,7 +312,7 @@ void Camera::DrawInWorld() const {
 	Vector startPoints[4];
 	Vector endPoints[4];
 
-	/* for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 4; i++) {
 		startPoints[i] = state.origin + (forward + right * 0.2f * uvs[i].x + up * 0.2f * uvs[i].y) * 5.0f;
 		endPoints[i] = state.origin + (forward + right * 0.2f * uvs[i].x + up * 0.2f * uvs[i].y) * 50.0f;
 
@@ -339,7 +339,7 @@ void Camera::DrawInWorld() const {
 		beamInfo.m_vecStart = startPoints[i];
 		beamInfo.m_vecEnd = endPoints[i];
 		client->CreateAndDrawBeam(beamInfo);
-	} */
+	}
 }
 
 //Overrides view.
@@ -650,7 +650,7 @@ CON_COMMAND_F_COMPLETION(
 			campos.fov = nums[6];
 		}
 		camera->states[curFrame] = campos;
-		camera->DrawInWorld();
+		// camera->DrawInWorld();
 		console->Print("Camera key frame %d created: ", curFrame);
 		console->Print(std::string(campos).c_str());
 		console->Print("\n");
