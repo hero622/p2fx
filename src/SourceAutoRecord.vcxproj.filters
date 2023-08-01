@@ -496,6 +496,9 @@
     <ClCompile Include="Features\Hud\DemoHud.cpp">
       <Filter>SourceAutoRecord\Features\Hud</Filter>
     </ClCompile>
+    <ClCompile Include="Features\DemoViewer.cpp">
+      <Filter>SourceAutoRecord\Features</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\lib\minhook\buffer.h">
@@ -1277,6 +1280,9 @@
     </ClInclude>
     <ClInclude Include="Features\Hud\DemoHud.hpp">
       <Filter>SourceAutoRecord\Features\Hud</Filter>
+    </ClInclude>
+    <ClInclude Include="Features\DemoViewer.hpp">
+      <Filter>SourceAutoRecord\Features</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

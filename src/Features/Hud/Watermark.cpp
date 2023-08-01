@@ -7,8 +7,8 @@
 #	include "Modules/Surface.hpp"
 #	include "Modules/Scheme.hpp"
 
-#	define WATERMARK_MSG_HEADER "Activate SAR"
-#	define WATERMARK_MSG_HELPTEXT "Development SAR build. Do not use."
+#	define WATERMARK_MSG_HEADER "P2FX"
+#	define WATERMARK_MSG_HELPTEXT "P2FX is loaded. Do not use in speedruns."
 
 class WatermarkHud : public Hud {
 public:
@@ -17,7 +17,7 @@ public:
 	}
 
 	bool ShouldDraw() override {
-		return true;
+		return !engine->demoplayer->IsPlaying();
 	}
 
 	bool GetCurrentSize(int &w, int &h) override {

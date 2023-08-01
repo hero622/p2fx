@@ -6,8 +6,8 @@
 #include "Modules/Surface.hpp"
 #include "Modules/Engine.hpp"
 
+#include "Features/DemoViewer.hpp"
 #include "Features/Camera.hpp"
-#include "Features/Demo/DemoParser.hpp"
 
 #include "Variable.hpp"
 
@@ -29,6 +29,8 @@ bool DemoHud::ShouldDraw() {
 }
 
 void DemoHud::Paint(int slot) {
+	int playbackTicks = demoViewer->g_demoPlaybackTicks;
+
 	if (!(playbackTicks > 0))
 		return;
 
@@ -67,19 +69,25 @@ void DemoHud::Paint(int slot) {
 
 	x += 16;
 
-	int pbtLength = surface->GetFontLength(font, "%i", playbackTicks);
+	int pbtLength = surface->GetFontLength(font, "%d", playbackTicks);
 
 	surface->DrawRect({70, 70, 70}, x + 8, y + 8, x + w - pbtLength - 48, y + 26);
 	surface->DrawRect({20, 20, 20}, x + 9, y + 9, x + w - pbtLength - 49, y + 25);
 	surface->DrawRect({0, 0, 0}, x + 9, y + 16, x + w - pbtLength - 49, y + 25);
 
-	surface->DrawTxt(font, x + w - pbtLength - 40, y + 3, white, "%i", playbackTicks);
-
 	int timelineSize = x + w - pbtLength - 49 - (x + 9);
 
 	int tick = engine->demoplayer->GetTick();
-	float playbackFrac = (float)tick / (float)playbackTicks;
 
+	int demoStart = demoViewer->g_demoStart;
+	float demoStartFrac = (float)demoStart / (float)playbackTicks;
+	float demoStartPos = demoStartFrac * timelineSize;
+
+	surface->DrawRect({100, 0, 0}, x + 9, y + 9, x + demoStartPos, y + 25);
+
+	surface->DrawTxt(font, x + w - pbtLength - 40, y + 3, white, "%d", playbackTicks);
+
+	float playbackFrac = (float)tick / (float)playbackTicks;
 	int playbackMarker = playbackFrac * timelineSize;
 
 	surface->DrawColoredLine(x + 9 + playbackMarker - 1, y + 6, x + 9 + playbackMarker + 1, y + 6, white);
@@ -90,7 +98,15 @@ void DemoHud::Paint(int slot) {
 	surface->DrawColoredLine(x + 9 + playbackMarker - 6, y + 1, x + 9 + playbackMarker + 6, y + 1, white);
 	surface->DrawColoredLine(x + 9 + playbackMarker - 7, y, x + 9 + playbackMarker + 7, y, white);
 
-	DRAW_CENTERED_TEXT(font, x + 9 + playbackMarker, y - 24, white, "%i", tick);
+	DRAW_CENTERED_TEXT(font, x + 9 + playbackMarker, y - 24, white, "%d", tick);
+
+	for (auto const &state : camera->states) {
+		int keyframeTick = state.first;
+		float keyframeFrac = (float)keyframeTick / (float)playbackTicks;
+		int keyframeMarker = keyframeFrac * timelineSize;
+
+		surface->DrawRect(white, x + 9 + keyframeMarker, y + 9, x + 10 + keyframeMarker, y + 25);
+	}
 
 	y += 30;
 
@@ -140,19 +156,4 @@ void DemoHud::Paint(int slot) {
 
 bool DemoHud::GetCurrentSize(int& xSize, int& ySize) {
 	return false;
-}
-
-ON_EVENT(DEMO_START) {
-	demoHud.ParseDemoData();
-}
-
-void DemoHud::ParseDemoData() {
-	DemoParser parser;
-	Demo demo;
-	auto dir = std::string(engine->GetGameDirectory()) + std::string("/") + std::string(engine->demoplayer->DemoName);
-	if (parser.Parse(dir, &demo)) {
-		parser.Adjust(&demo);
-
-		playbackTicks = demo.playbackTicks;
-	}
 }
