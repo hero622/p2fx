@@ -13,8 +13,8 @@ public:
 	DemoViewer();
 
 	void Think();
-	void OnDemoStart();
 	void ParseDemoData();
+	void HandleGotoTick();
 };
 
 extern DemoViewer *demoViewer;

@@ -6,6 +6,7 @@
 // #include "Modules/InputSystem.hpp"
 
 #include "Demo/DemoParser.hpp"
+#include "Hud/DemoHud.hpp"
 #include "Camera.hpp"
 
 DemoViewer *demoViewer;
@@ -20,15 +21,48 @@ void DemoViewer::Think() {
 
 	// replace GetAsyncKeyState for IsButtonDown later
 
+	if (GetAsyncKeyState(VK_F4) & 1) {
+		demoHud.g_shouldDraw = !demoHud.g_shouldDraw;
+	}
+
+	if (GetAsyncKeyState(0x46) & 1) {
+		for (const auto &state : camera->states) {
+			float dist = (camera->currentState.origin - state.second.origin).Length();
+			if (dist < 50.0f) {
+				engine->ExecuteCommand("sar_cam_path_remkf");
+				return;
+			}
+		}
+
+		engine->ExecuteCommand("sar_cam_path_setkf");
+	}
+
+	if (GetAsyncKeyState(VK_F2) & 1) {
+
+	}
+
 	if (GetAsyncKeyState(VK_F3) & 1) {
 		engine->ExecuteCommand("incrementvar sar_cam_control 0 3 1");
 	}
 
+	if (GetAsyncKeyState(VK_SPACE) & 1) {
+		engine->ExecuteCommand("demo_togglepause");
+	}
+
+	auto host_timescale = Variable("host_timescale");
+	float timescale = host_timescale.GetFloat();
+	if (GetAsyncKeyState(VK_DOWN) & 1) {
+		timescale -= 0.1f;
+	}
+	if (GetAsyncKeyState(VK_UP) & 1) {
+		timescale += 0.1f;
+	}
+	host_timescale.SetValue(std::clamp(timescale, 0.1f, 2.0f));
+	
 	if (GetAsyncKeyState(VK_LEFT) & 1) {
 		for (auto itr = camera->states.rbegin(); itr != camera->states.rend(); ++itr) {
 			if (itr->first < engine->demoplayer->GetTick()) {
-				engine->ExecuteCommand("demo_gototick 0");
-				gotoTick = itr->first;
+				gotoTick = itr->first - 2;
 				return;
 			}
 		}
@@ -36,38 +70,14 @@ void DemoViewer::Think() {
 		engine->ExecuteCommand("demo_gototick 0");
 		gotoTick = 0;
 	}
-
-	if (GetAsyncKeyState(VK_DOWN) & 1) {
-		engine->ExecuteCommand("incrementvar host_timescale 0.1 2.0 -0.1");
-	}
-
-	if (GetAsyncKeyState(VK_SPACE) & 1) {
-		engine->ExecuteCommand("demo_togglepause");
-	}
-
-	if (GetAsyncKeyState(VK_UP) & 1) {
-		engine->ExecuteCommand("incrementvar host_timescale 0.1 2.0 0.1");
-	}
-
 	if (GetAsyncKeyState(VK_RIGHT) & 1) {
 		for (const auto &state : camera->states) {
 			if (state.first > engine->demoplayer->GetTick()) {
-				engine->ExecuteCommand(Utils::ssprintf("demo_gototick %d", state.first).c_str());
+				engine->ExecuteCommand(Utils::ssprintf("sv_alternateticks 0; demo_gototick %d; demo_resume; hwait 1 demo_pause; hwait 1 sv_alternateticks 1", state.first - 2).c_str());
 				return;
 			}
 		}
-
-		engine->ExecuteCommand(Utils::ssprintf("demo_gototick %d", g_demoPlaybackTicks - 1).c_str());
 	}
-}
-
-void DemoViewer::OnDemoStart() {
-	ParseDemoData();
-
-	if (!(gotoTick > 0))
-		return;
-
-	engine->SendToCommandBuffer(Utils::ssprintf("demo_gototick %d", gotoTick).c_str(), 0);
 }
 
 void DemoViewer::ParseDemoData() {
@@ -82,10 +92,58 @@ void DemoViewer::ParseDemoData() {
 	}
 }
 
+static bool g_waitingForSession = false;
+ON_EVENT(SESSION_START) {
+	g_waitingForSession = false;
+}
+
+void DemoViewer::HandleGotoTick() {
+	if (!(gotoTick > 0)) return;
+
+	// 0 = not done anything
+	// 1 = queued skip
+	// 2 = in skip
+	static int state = 0;
+
+	int tick = engine->demoplayer->GetTick();
+
+	auto sar_demo_remove_broken = Variable("sar_demo_remove_broken");
+	static int remove_broken_value = sar_demo_remove_broken.GetInt();
+
+	if (state == 0) {
+		if (tick > g_demoStart + 2) {
+			g_waitingForSession = true;
+			sar_demo_remove_broken.SetValue(0);
+			engine->ExecuteCommand(Utils::ssprintf("demo_gototick %d; demo_pause", gotoTick).c_str());
+			state = 1;
+		}
+	} else if (state == 1) {
+		if (engine->hoststate->m_currentState == HS_RUN && !g_waitingForSession) {
+			state = 2;
+		}
+	} else if (state == 2) {
+		if (!engine->demoplayer->IsSkipping()) {
+			if (tick % 2 == g_demoStart % 2) {
+				engine->SendToCommandBuffer("sv_alternateticks 0; demo_resume", 0);
+			}
+			state = 3;
+		}
+	} else if (state == 3) {
+		if (tick % 2 != g_demoStart % 2) {
+			engine->SendToCommandBuffer("sv_alternateticks 1; demo_pause", 0);
+			sar_demo_remove_broken.SetValue(remove_broken_value);
+			state = 0;
+			gotoTick = 0;
+		}
+	}
+}
+
 ON_EVENT(FRAME) {
 	demoViewer->Think();
+
+	demoViewer->HandleGotoTick();
 }
 
 ON_EVENT(DEMO_START) {
-	demoViewer->OnDemoStart();
+	demoViewer->ParseDemoData();
 }

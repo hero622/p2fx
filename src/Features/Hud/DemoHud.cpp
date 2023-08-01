@@ -25,7 +25,7 @@ DemoHud::DemoHud()
 }
 
 bool DemoHud::ShouldDraw() {
-	return engine->demoplayer->IsPlaying() && Hud::ShouldDraw();
+	return g_shouldDraw && engine->demoplayer->IsPlaying() && Hud::ShouldDraw();
 }
 
 void DemoHud::Paint(int slot) {
@@ -52,9 +52,18 @@ void DemoHud::Paint(int slot) {
 
 	DRAW_MULTI_COLOR_TEXT(font, x, y - 30, accent, white, "F4 ", "Toggle Controls");
 
-	int icmtxLength = surface->GetFontLength(font, "F Insert Camera Marker");
-	int icmtxPos = w / 2 - icmtxLength / 2;
-	DRAW_MULTI_COLOR_TEXT(font, x + icmtxPos, y - 30, accent, white, "F ", "Insert Camera Marker");
+	auto cmtx = "Insert Camera Marker";
+	for (const auto &state : camera->states) {
+		float dist = (camera->currentState.origin - state.second.origin).Length();
+		if (dist < 50.0f) {
+			cmtx = "Remove Camera Marker";
+			break;
+		}
+	}
+
+	int cmtxLength = surface->GetFontLength(font, "F %s", cmtx);
+	int cmtxPos = w / 2 - cmtxLength / 2;
+	DRAW_MULTI_COLOR_TEXT(font, x + cmtxPos, y - 30, accent, white, "F ", cmtx);
 
 	int tghtxLength = surface->GetFontLength(font, "F2 Toggle Hud");
 	int tghtxPos = w - tghtxLength;

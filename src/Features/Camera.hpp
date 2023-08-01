@@ -77,8 +77,8 @@ public:
 	void RequestCameraRefresh();
 	void OverrideMovement(CUserCmd *cmd);
 
-	Vector GetPosition(int slot, bool raw = true);
-	Vector GetForwardVector(int slot, bool raw = true);
+	Vector GetPosition(bool raw = true);
+	Vector GetForwardVector(bool raw = true);
 
 	template <bool serverside>
 	void TransformThroughPortal(int slot, Vector &eyePos, QAngle &eyeAng) {

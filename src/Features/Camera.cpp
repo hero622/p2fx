@@ -572,7 +572,7 @@ void Camera::OverrideMovement(CUserCmd *cmd) {
 }
 
 
-Vector Camera::GetPosition(int slot, bool raw) {
+Vector Camera::GetPosition(bool raw) {
 	bool cam_control = sar_cam_control.GetInt() == 1 && sv_cheats.GetBool();
 
 	Vector cam_pos = (!raw && cam_control) ? camera->currentState.origin : rawState.origin;
@@ -580,7 +580,7 @@ Vector Camera::GetPosition(int slot, bool raw) {
 	return cam_pos;
 }
 
-Vector Camera::GetForwardVector(int slot, bool raw) {
+Vector Camera::GetForwardVector(bool raw) {
 	bool cam_control = sar_cam_control.GetInt() == 1 && sv_cheats.GetBool();
 
 	QAngle ang = (!raw && cam_control) ? camera->currentState.angles : rawState.angles;
@@ -752,7 +752,15 @@ CON_COMMAND_F_COMPLETION(
 	if (!engine->demoplayer->IsPlaying())
 		return console->Print("Cinematic mode cannot be used outside of demo player.\n");
 
-	if (args.ArgC() == 2) {
+	if (args.ArgC() == 1) {
+		for (const auto &state : camera->states) {
+			float dist = (camera->currentState.origin - state.second.origin).Length();
+			if (dist < 50.0f) {
+				camera->states.erase(state.first);
+				break;
+			}
+		}
+	} else if (args.ArgC() == 2) {
 		int i = std::atoi(args[1]);
 		if (camera->states.count(i)) {
 			camera->states.erase(i);
