@@ -19,8 +19,6 @@ jobs:
       - name: Build
         env:
           RELEASE_BUILD: 1
-          DEMO_SIGN_PUBKEY: ${{ secrets.P2FX_DEMO_SIGN_PUBKEY }}
-          DEMO_SIGN_PRIVKEY: ${{ secrets.P2FX_DEMO_SIGN_PRIVKEY }}
         run: make -j$(nproc)
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
@@ -42,8 +40,6 @@ jobs:
       - name: Build
         env:
           RELEASE_BUILD: 1
-          DEMO_SIGN_PUBKEY: ${{ secrets.P2FX_DEMO_SIGN_PUBKEY }}
-          DEMO_SIGN_PRIVKEY: ${{ secrets.P2FX_DEMO_SIGN_PRIVKEY }}
         run: msbuild -m -t:p2fx -p:"Configuration=Release;Platform=x86" p2fx.sln
       - name: Upload Artifact
         uses: actions/upload-artifact@v3

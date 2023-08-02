@@ -30,9 +30,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y g++-10-multilib
       - name: Build
-        env:
-          DEMO_SIGN_PUBKEY: ${{ secrets.P2FX_DEMO_SIGN_PUBKEY }}
-          DEMO_SIGN_PRIVKEY: ${{ secrets.P2FX_DEMO_SIGN_PRIVKEY }}
         run: make -j$(nproc)
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
@@ -52,9 +49,6 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1.1
       - name: Build
-        env:
-          DEMO_SIGN_PUBKEY: ${{ secrets.P2FX_DEMO_SIGN_PUBKEY }}
-          DEMO_SIGN_PRIVKEY: ${{ secrets.P2FX_DEMO_SIGN_PRIVKEY }}
         run: msbuild -m -t:p2fx -p:"Configuration=Release;Platform=x86" p2fx.sln
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
