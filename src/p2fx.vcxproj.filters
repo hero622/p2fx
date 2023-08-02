@@ -172,9 +172,6 @@
     <ClCompile Include="CrashHandler.cpp">
       <Filter>p2fx</Filter>
     </ClCompile>
-    <ClCompile Include="Checksum.cpp">
-      <Filter>p2fx</Filter>
-    </ClCompile>
     <ClCompile Include="Command.cpp">
       <Filter>p2fx</Filter>
     </ClCompile>
@@ -676,9 +673,6 @@
       <Filter>p2fx</Filter>
     </ClInclude>
     <ClInclude Include="CrashHandler.hpp">
-      <Filter>p2fx</Filter>
-    </ClInclude>
-    <ClInclude Include="Checksum.hpp">
       <Filter>p2fx</Filter>
     </ClInclude>
     <ClInclude Include="Command.hpp">

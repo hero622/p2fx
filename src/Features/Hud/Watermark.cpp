@@ -1,7 +1,5 @@
 #include "Version.hpp"
 
-#if defined(P2FX_DEV_BUILD) && !defined(NO_DEV_WATERMARK)
-
 #	include "Hud.hpp"
 #	include "Modules/Engine.hpp"
 #	include "Modules/Surface.hpp"
@@ -41,5 +39,3 @@ public:
 };
 
 WatermarkHud watermark;
-
-#endif

@@ -11,7 +11,6 @@
 #endif
 
 #include "Cheats.hpp"
-#include "Checksum.hpp"
 #include "Command.hpp"
 #include "CrashHandler.hpp"
 #include "Event.hpp"
@@ -104,8 +103,6 @@ bool P2FX::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServer
 			this->modules->AddModule<MaterialSystem>(&materialSystem);
 			this->modules->AddModule<FileSystem>(&fileSystem);
 			this->modules->InitAll();
-
-			InitP2FXChecksum();
 
 			if (engine && engine->hasLoaded) {
 				engine->demoplayer->Init();

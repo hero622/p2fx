@@ -1,6 +1,5 @@
 #include "EngineDemoRecorder.hpp"
 
-#include "Checksum.hpp"
 #include "Command.hpp"
 #include "Console.hpp"
 #include "Engine.hpp"
@@ -137,10 +136,6 @@ DETOUR(EngineDemoRecorder::SetSignonState, int state) {
 
 		lastName += ".dem";
 
-		if (!AddDemoChecksum(lastName.c_str())) {
-			// TODO: report failure?
-		}
-
 		timescaleDetect->Spawn();
 		needToRecordInitialVals = true;
 	}
@@ -148,7 +143,6 @@ DETOUR(EngineDemoRecorder::SetSignonState, int state) {
 	if (state == SIGNONSTATE_FULL && needToRecordInitialVals) {
 		needToRecordInitialVals = false;
 		RecordTimestamp();
-		AddDemoFileChecksums();
 		/*
 		RecordInitialVal("host_timescale");
 		RecordInitialVal("m_yaw");
@@ -220,13 +214,6 @@ DETOUR(EngineDemoRecorder::StopRecording) {
 	//   m_bRecording = false
 	//   m_nDemoNumber = 0
 	auto result = EngineDemoRecorder::StopRecording(thisptr);
-
-	if (engine->demorecorder->isRecordingDemo) {
-		std::string demoName = engine->demorecorder->GetDemoFilename();
-		if (!AddDemoChecksum(demoName.c_str())) {
-			// TODO: report failure?
-		}
-	}
 
 	if (engine->demorecorder->isRecordingDemo && p2fx_autorecord.GetInt() == 1 && !engine->demorecorder->requestedStop) {
 		*engine->demorecorder->m_nDemoNumber = engine->demorecorder->lastDemoNumber;
