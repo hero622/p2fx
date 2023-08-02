@@ -43,7 +43,7 @@ void AbsoluteMoveTool::Apply(TasFramebulk &fb, const TasPlayerInfo &playerInfo) 
 	fb.moveAnalog.x = x;
 	fb.moveAnalog.y = y;
 
-	if (sar_tas_debug.GetBool()) {
+	if (p2fx_tas_debug.GetBool()) {
 		console->Print("absmov %.3f %.3f\n", x, y);
 	}
 }

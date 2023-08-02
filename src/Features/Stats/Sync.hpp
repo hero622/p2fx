@@ -33,10 +33,10 @@ public:
 
 extern Sync *synchro;
 
-extern Variable sar_strafesync;
-extern Variable sar_strafesync_session_time;
-extern Variable sar_strafesync_noground;
-extern Command sar_strafesync_pause;
-extern Command sar_strafesync_resume;
-extern Command sar_strafesync_reset;
-extern Command sar_strafesync_split;
+extern Variable p2fx_strafesync;
+extern Variable p2fx_strafesync_session_time;
+extern Variable p2fx_strafesync_noground;
+extern Command p2fx_strafesync_pause;
+extern Command p2fx_strafesync_resume;
+extern Command p2fx_strafesync_reset;
+extern Command p2fx_strafesync_split;

@@ -37,7 +37,7 @@ void DecelTool::Apply(TasFramebulk &bulk, const TasPlayerInfo &playerInfo) {
 	}
 
 
-	if (sar_tas_debug.GetBool()) {
+	if (p2fx_tas_debug.GetBool()) {
 		console->Print("decel %.3fdeg %.3fups\n", RAD2DEG(moveAngle), bulk.moveAnalog.Length());
 	}
 }

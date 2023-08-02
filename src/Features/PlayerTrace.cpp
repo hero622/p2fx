@@ -18,32 +18,32 @@
 
 PlayerTrace *playerTrace;
 
-Variable sar_trace_autoclear("sar_trace_autoclear", "1", 0, 1, "Automatically clear the trace on session start\n");
-Variable sar_trace_override("sar_trace_override", "1", 0, 1, "Clears old trace when you start recording to it instead of recording on top of it.\n");
-Variable sar_trace_record("sar_trace_record", "0", "Record the trace to a slot. Set to 0 for not recording\n", 0);
-Variable sar_trace_use_shot_eyeoffset("sar_trace_use_shot_eyeoffset", "1", 0, 1, "Uses eye offset and angles accurate for portal shooting.\n");
+Variable p2fx_trace_autoclear("p2fx_trace_autoclear", "1", 0, 1, "Automatically clear the trace on session start\n");
+Variable p2fx_trace_override("p2fx_trace_override", "1", 0, 1, "Clears old trace when you start recording to it instead of recording on top of it.\n");
+Variable p2fx_trace_record("p2fx_trace_record", "0", "Record the trace to a slot. Set to 0 for not recording\n", 0);
+Variable p2fx_trace_use_shot_eyeoffset("p2fx_trace_use_shot_eyeoffset", "1", 0, 1, "Uses eye offset and angles accurate for portal shooting.\n");
 
-Variable sar_trace_draw("sar_trace_draw", "0", 0, 1, "Display the recorded player trace. Requires cheats\n");
-Variable sar_trace_draw_through_walls("sar_trace_draw_through_walls", "1", "Display the player trace through walls. Requires sar_trace_draw\n");
-Variable sar_trace_draw_speed_deltas("sar_trace_draw_speed_deltas", "0", "Display the speed deltas. Requires sar_trace_draw\n");
-Variable sar_trace_draw_time("sar_trace_draw_time", "3", 0, 3, 
+Variable p2fx_trace_draw("p2fx_trace_draw", "0", 0, 1, "Display the recorded player trace. Requires cheats\n");
+Variable p2fx_trace_draw_through_walls("p2fx_trace_draw_through_walls", "1", "Display the player trace through walls. Requires p2fx_trace_draw\n");
+Variable p2fx_trace_draw_speed_deltas("p2fx_trace_draw_speed_deltas", "0", "Display the speed deltas. Requires p2fx_trace_draw\n");
+Variable p2fx_trace_draw_time("p2fx_trace_draw_time", "3", 0, 3, 
 	"Display tick above trace hover info\n"
 	"0 = hide tick info\n"
 	"1 = ticks since trace recording started\n"
 	"2 = session timer\n"
 	"3 = TAS timer (if no TAS was played, uses 1 instead)\n"
 );
-Variable sar_trace_font_size("sar_trace_font_size", "3.0", 0.1, "The size of text overlaid on recorded traces.\n");
+Variable p2fx_trace_font_size("p2fx_trace_font_size", "3.0", 0.1, "The size of text overlaid on recorded traces.\n");
 
-Variable sar_trace_bbox_at("sar_trace_bbox_at", "-1", -1, "Display a player-sized bbox at the given tick.\n");
-Variable sar_trace_bbox_use_hover("sar_trace_bbox_use_hover", "0", 0, 1, "Move trace bbox to hovered trace point tick on given trace.\n");
-Variable sar_trace_bbox_ent_record("sar_trace_bbox_ent_record", "1", "Record hitboxes of nearby entities in the trace. You may want to disable this if memory consumption gets too high.\n");
-Variable sar_trace_bbox_ent_draw("sar_trace_bbox_ent_draw", "1", "Draw hitboxes of nearby entities in the trace.\n");
-Variable sar_trace_bbox_ent_dist("sar_trace_bbox_ent_dist", "200", 50, "Distance from which to capture entity hitboxes.\n");
+Variable p2fx_trace_bbox_at("p2fx_trace_bbox_at", "-1", -1, "Display a player-sized bbox at the given tick.\n");
+Variable p2fx_trace_bbox_use_hover("p2fx_trace_bbox_use_hover", "0", 0, 1, "Move trace bbox to hovered trace point tick on given trace.\n");
+Variable p2fx_trace_bbox_ent_record("p2fx_trace_bbox_ent_record", "1", "Record hitboxes of nearby entities in the trace. You may want to disable this if memory consumption gets too high.\n");
+Variable p2fx_trace_bbox_ent_draw("p2fx_trace_bbox_ent_draw", "1", "Draw hitboxes of nearby entities in the trace.\n");
+Variable p2fx_trace_bbox_ent_dist("p2fx_trace_bbox_ent_dist", "200", 50, "Distance from which to capture entity hitboxes.\n");
 
-Variable sar_trace_portal_record("sar_trace_portal_record", "1", "Record portal locations.\n");
-Variable sar_trace_portal_oval("sar_trace_portal_oval", "0", "Draw trace portals as ovals rather than rectangles.\n");
-Variable sar_trace_portal_opacity("sar_trace_portal_opacity", "100", 0, 255, "Opacity of trace portal previews.\n");
+Variable p2fx_trace_portal_record("p2fx_trace_portal_record", "1", "Record portal locations.\n");
+Variable p2fx_trace_portal_oval("p2fx_trace_portal_oval", "0", "Draw trace portals as ovals rather than rectangles.\n");
+Variable p2fx_trace_portal_opacity("p2fx_trace_portal_opacity", "100", 0, 255, "Opacity of trace portal previews.\n");
 
 Vector g_playerTraceTeleportLocation;
 int g_playerTraceTeleportSlot;
@@ -51,7 +51,7 @@ bool g_playerTraceNeedsTeleport = false;
 
 static int tickInternalToUser(int tick, const Trace &trace) {
 	if (tick == -1) return -1;
-	switch (sar_trace_draw_time.GetInt()) {
+	switch (p2fx_trace_draw_time.GetInt()) {
 	case 2:
 		return tick + trace.startSessionTick;
 	case 3:
@@ -63,7 +63,7 @@ static int tickInternalToUser(int tick, const Trace &trace) {
 
 static int tickUserToInternal(int tick, const Trace &trace) {
 	if (tick == -1) return -1;
-	switch (sar_trace_draw_time.GetInt()) {
+	switch (p2fx_trace_draw_time.GetInt()) {
 	case 2:
 		return tick - trace.startSessionTick;
 	case 3:
@@ -112,7 +112,7 @@ PlayerTrace::PlayerTrace() {
 }
 
 bool PlayerTrace::ShouldRecord() {
-	return IsTraceNameValid(sar_trace_record.GetString()) && !engine->IsGamePaused();
+	return IsTraceNameValid(p2fx_trace_record.GetString()) && !engine->IsGamePaused();
 }
 
 bool PlayerTrace::IsTraceNameValid(std::string trace_name) {
@@ -212,7 +212,7 @@ void PlayerTrace::ClearAll() {
 void PlayerTrace::DrawInWorld() const {
 	if (engine->IsSkipping()) return;
 
-	bool draw_through_walls = sar_trace_draw_through_walls.GetBool();
+	bool draw_through_walls = p2fx_trace_draw_through_walls.GetBool();
 
 	hovers.clear();
 
@@ -356,7 +356,7 @@ void PlayerTrace::DrawSpeedDeltas() const {
 					float speed_delta = trace.velocities[slot][i].Length2D() - trace.velocities[slot][last_delta_end].Length2D();
 					Vector update_pos = trace.positions[slot][(last_delta_end + i) / 2];
 
-					OverlayRender::addText(update_pos + hud_offset, Utils::ssprintf("%10.2f", speed_delta), sar_trace_font_size.GetFloat(), true, sar_trace_draw_through_walls.GetBool());
+					OverlayRender::addText(update_pos + hud_offset, Utils::ssprintf("%10.2f", speed_delta), p2fx_trace_font_size.GetFloat(), true, p2fx_trace_draw_through_walls.GetBool());
 
 					last_delta_end = i;
 				}
@@ -410,7 +410,7 @@ void PlayerTrace::DrawBboxAt(int tick) const {
 			OverlayRender::addLine(eyeLine, eyepos, eyepos + forward*50.0);
 			OverlayRender::addBoxMesh(eyepos, {-1,-1,-1}, {1,1,1}, angles, RenderCallback::constant({0, 255, 255}), RenderCallback::none);
 
-			if (sar_trace_bbox_ent_draw.GetBool()) {
+			if (p2fx_trace_bbox_ent_draw.GetBool()) {
 				auto &boxes = trace.hitboxes[slot][localtick];
 
 				for (auto &vphys : boxes.vphys) {
@@ -471,7 +471,7 @@ void PlayerTrace::DrawPortalsAt(int tick) const {
 		Color pbody_second {  58,   3,   3, 255 };
 
 		auto drawPortal = [&](Color portalColor, Vector origin, QAngle angles) {
-			portalColor.a = (uint8_t)sar_trace_portal_opacity.GetInt();
+			portalColor.a = (uint8_t)p2fx_trace_portal_opacity.GetInt();
 
 			// Bump portal by slightly more than DIST_EPSILON
 			Vector tmp;
@@ -498,7 +498,7 @@ void PlayerTrace::DrawPortalsAt(int tick) const {
 
 			MeshId mesh = OverlayRender::createMesh(RenderCallback::constant(portalColor), RenderCallback::none);
 
-			if (sar_trace_portal_oval.GetBool()) {
+			if (p2fx_trace_portal_oval.GetBool()) {
 				int tris = 20;
 				for (int i = 0; i < tris; ++i) {
 					double lang = M_PI * 2 * i / tris;
@@ -559,7 +559,7 @@ void PlayerTrace::TeleportAt(std::string trace_name, int slot, int tick, bool ey
 	}
 
 	if (tick == -1) {
-		tick = sar_trace_bbox_at.GetInt();
+		tick = p2fx_trace_bbox_at.GetInt();
 	}
 
 	tick = tickUserToInternal(tick, traces[trace_name]);
@@ -587,9 +587,9 @@ void PlayerTrace::TeleportAt(std::string trace_name, int slot, int tick, bool ey
 }
 
 HitboxList PlayerTrace::ConstructHitboxList(Vector center) const {
-	if (!sar_trace_bbox_ent_record.GetBool()) return HitboxList{};
+	if (!p2fx_trace_bbox_ent_record.GetBool()) return HitboxList{};
 
-	const float d = sar_trace_bbox_ent_dist.GetFloat();
+	const float d = p2fx_trace_bbox_ent_dist.GetFloat();
 
 	Vector incl_mins = center - Vector{d, d, d};
 	Vector incl_maxs = center + Vector{d, d, d};
@@ -664,7 +664,7 @@ HitboxList PlayerTrace::ConstructHitboxList(Vector center) const {
 }
 
 PortalLocations PlayerTrace::ConstructPortalLocations() const {
-	if (!sar_trace_portal_record.GetBool()) return PortalLocations{};
+	if (!p2fx_trace_portal_record.GetBool()) return PortalLocations{};
 
 	PortalLocations portals;
 
@@ -701,7 +701,7 @@ ON_EVENT(PROCESS_MOVEMENT) {
 	// Record trace
 	if (playerTrace->ShouldRecord()) {
 		if (engine->IsOrange()) {
-			sar_trace_record.SetValue(0);
+			p2fx_trace_record.SetValue(0);
 			console->Print("The trace only works for the host! Turning off trace recording.\n");
 			return;
 		}
@@ -720,17 +720,17 @@ ON_EVENT(PROCESS_MOVEMENT) {
 		}
 
 		if (player) {
-			playerTrace->AddPoint(sar_trace_record.GetString(), player, event.slot, use_client_offset);
+			playerTrace->AddPoint(p2fx_trace_record.GetString(), player, event.slot, use_client_offset);
 		}
 	}
 }
 
 void PlayerTrace::TweakLatestEyeOffsetForPortalShot(CMoveData *moveData, int slot, bool clientside) {
 
-	if (!sar_trace_use_shot_eyeoffset.GetBool()) return;
+	if (!p2fx_trace_use_shot_eyeoffset.GetBool()) return;
 	if (!ShouldRecord()) return;
 
-	Trace *trace = playerTrace->GetTrace(sar_trace_record.GetString());
+	Trace *trace = playerTrace->GetTrace(p2fx_trace_record.GetString());
 	if (trace == nullptr) return;
 
 	// portal shooting position is funky. Basically, shooting happens after movement
@@ -749,21 +749,21 @@ void PlayerTrace::TweakLatestEyeOffsetForPortalShot(CMoveData *moveData, int slo
 }
 
 void PlayerTrace::CheckTraceChanged() {
-	std::string currentTrace = sar_trace_record.GetString();
+	std::string currentTrace = p2fx_trace_record.GetString();
 	if (currentTrace == lastRecordedTrace) return;
 	
 	// trace changed!
 	lastRecordedTrace = currentTrace;
 
 	// clean old trace if needed
-	if (sar_trace_override.GetBool()) {
+	if (p2fx_trace_override.GetBool()) {
 		Clear(currentTrace);
 	}
 	
 }
 
 ON_EVENT(SESSION_START) {
-	if (sar_trace_autoclear.GetBool())
+	if (p2fx_trace_autoclear.GetBool())
 		playerTrace->ClearAll();
 }
 
@@ -771,7 +771,7 @@ void PlayerTrace::DrawTraceHud(HudContext *ctx) {
 	for (auto it = playerTrace->traces.begin(); it != playerTrace->traces.end(); ++it) {
 		const char *name = it->first.c_str();
 		const Trace &t = it->second;
-		int tick = tickUserToInternal(sar_trace_bbox_at.GetInt(), t);
+		int tick = tickUserToInternal(p2fx_trace_bbox_at.GetInt(), t);
 		for (int slot = 0; slot < 2; slot++) {
 			drawTraceInfo(tick, slot, t, [=](const std::string &line) {
 				ctx->DrawElement("trace %s %s: %s", name, slot == 1 ? " (orange)" : "", line.c_str());
@@ -781,17 +781,17 @@ void PlayerTrace::DrawTraceHud(HudContext *ctx) {
 }
 
 int PlayerTrace::GetTasTraceTick() {
-	if (sar_trace_draw_time.GetInt() != 3) return -1;
+	if (p2fx_trace_draw_time.GetInt() != 3) return -1;
 
 	int max_tas_tick = -1;
 
 	// we want the highest tastick number that some trace is having its bbox drawn
-	// at, i.e. the highest tastick <= sar_trace_bbox_at with some trace being at
+	// at, i.e. the highest tastick <= p2fx_trace_bbox_at with some trace being at
 	// least that long
 
 	for (auto it = playerTrace->traces.begin(); it != playerTrace->traces.end(); ++it) {
 		const Trace &trace = it->second;
-		int tick = tickUserToInternal(sar_trace_bbox_at.GetInt(), trace);
+		int tick = tickUserToInternal(p2fx_trace_bbox_at.GetInt(), trace);
 		for (int slot = 0; slot < 2; slot++) {
 			if ((int)trace.positions[slot].size() <= tick) {
 				// we're missing data - correct the tick number to the highest possible
@@ -810,16 +810,16 @@ HUD_ELEMENT2(trace, "0", "Draws info about current trace bbox tick.\n", HudType_
 	playerTrace->DrawTraceHud(ctx);
 }
 
-CON_COMMAND(sar_trace_dump, "sar_trace_dump <tick> [player slot] [trace name] - dump the player state from the given trace tick on the given trace ID (defaults to 1) in the given slot (defaults to 0).\n") {
+CON_COMMAND(p2fx_trace_dump, "p2fx_trace_dump <tick> [player slot] [trace name] - dump the player state from the given trace tick on the given trace ID (defaults to 1) in the given slot (defaults to 0).\n") {
 	if (!sv_cheats.GetBool()) return;
 
 	if (args.ArgC() < 2 || args.ArgC() > 4)
-		return console->Print(sar_trace_dump.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_trace_dump.ThisPtr()->m_pszHelpString);
 
 	std::string trace_name = (args.ArgC() == 4) ? args[3] : playerTrace->GetDefaultTraceName();
 	int slot = (args.ArgC()>=3 && engine->IsCoop()) ? std::atoi(args[2]) : 0;
 	int usertick = std::atoi(args[1]);
-	if (usertick == -1) usertick = sar_trace_bbox_at.GetInt();
+	if (usertick == -1) usertick = p2fx_trace_bbox_at.GetInt();
 
 	if (slot > 1) slot = 1;
 	if (slot < 0) slot = 0;
@@ -834,11 +834,11 @@ CON_COMMAND(sar_trace_dump, "sar_trace_dump <tick> [player slot] [trace name] - 
 }
 
 ON_EVENT(RENDER) {
-	if (!sar_trace_draw.GetBool()) return;
+	if (!p2fx_trace_draw.GetBool()) return;
 	if (!sv_cheats.GetBool()) return;
 
-	// overriding the value of sar_trace_bbox_at if hovered position is used
-	if (sar_trace_bbox_use_hover.GetBool()) {
+	// overriding the value of p2fx_trace_bbox_at if hovered position is used
+	if (p2fx_trace_bbox_use_hover.GetBool()) {
 
 		// find closest trace
 		int tick = -1;
@@ -854,12 +854,12 @@ ON_EVENT(RENDER) {
 
 		auto trace = playerTrace->GetTrace(trace_name);
 		if (trace) tick = tickInternalToUser(tick, *trace);
-		sar_trace_bbox_at.SetValue(tick);
+		p2fx_trace_bbox_at.SetValue(tick);
 	}
 
 	playerTrace->DrawInWorld();
 
-	int tick = sar_trace_bbox_at.GetInt();
+	int tick = p2fx_trace_bbox_at.GetInt();
 	if (tick != -1) {
 		playerTrace->DrawBboxAt(tick);
 		playerTrace->DrawPortalsAt(tick);
@@ -870,7 +870,7 @@ ON_EVENT(RENDER) {
 	for (auto &h : hovers) {
 		std::string hover_str;
 
-		int timeType = sar_trace_draw_time.GetInt();
+		int timeType = p2fx_trace_draw_time.GetInt();
 		if (timeType > 0) {
 			int tick = h.tick;
 			auto trace = playerTrace->GetTrace(h.trace_name);
@@ -885,31 +885,31 @@ ON_EVENT(RENDER) {
 		hover_str += Utils::ssprintf("pos: %.1f %.1f %.1f\n", h.pos.x, h.pos.y, h.pos.z);
 		hover_str += Utils::ssprintf("horiz. speed: %.2f\n", h.speed);
 
-		OverlayRender::addText(h.pos + hud_offset, hover_str, sar_trace_font_size.GetFloat(), true, true);
+		OverlayRender::addText(h.pos + hud_offset, hover_str, p2fx_trace_font_size.GetFloat(), true, true);
 	}
 
-	if (sar_trace_draw_speed_deltas.GetBool()) {
+	if (p2fx_trace_draw_speed_deltas.GetBool()) {
 		playerTrace->DrawSpeedDeltas();
 	}
 }
 
-CON_COMMAND(sar_trace_clear, "sar_trace_clear <name> - Clear player trace with a given name\n") {
+CON_COMMAND(p2fx_trace_clear, "p2fx_trace_clear <name> - Clear player trace with a given name\n") {
 	if (args.ArgC() != 2)
-		return console->Print(sar_trace_clear.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_trace_clear.ThisPtr()->m_pszHelpString);
 
 	const char *trace_name = args[1];
 	playerTrace->Clear(trace_name);
 }
 
-CON_COMMAND(sar_trace_clear_all, "sar_trace_clear_all - Clear all the traces\n") {
+CON_COMMAND(p2fx_trace_clear_all, "p2fx_trace_clear_all - Clear all the traces\n") {
 	playerTrace->ClearAll();
 }
 
-CON_COMMAND(sar_trace_teleport_at, "sar_trace_teleport_at <tick> [player slot] [trace name] - teleports the player at the given trace tick on the given trace ID (defaults to hovered one or the first one ever made) in the given slot (defaults to 0).\n") {
+CON_COMMAND(p2fx_trace_teleport_at, "p2fx_trace_teleport_at <tick> [player slot] [trace name] - teleports the player at the given trace tick on the given trace ID (defaults to hovered one or the first one ever made) in the given slot (defaults to 0).\n") {
 	if (!sv_cheats.GetBool()) return;
 
 	if (args.ArgC() < 2 || args.ArgC() > 4)
-		return console->Print(sar_trace_teleport_at.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_trace_teleport_at.ThisPtr()->m_pszHelpString);
 
 	std::string trace_name = (args.ArgC() == 4) ? args[3] : playerTrace->GetDefaultTraceName();
 	int slot = (args.ArgC()>=3 && engine->IsCoop()) ? std::atoi(args[2]) : 0;
@@ -921,11 +921,11 @@ CON_COMMAND(sar_trace_teleport_at, "sar_trace_teleport_at <tick> [player slot] [
 	playerTrace->TeleportAt(trace_name, slot, tick, false);
 }
 
-CON_COMMAND(sar_trace_teleport_eye, "sar_trace_teleport_eye <tick> [player slot] [trace name] - teleports the player to the eye position at the given trace tick on the given trace (defaults to hovered one or the first one ever made) in the given slot (defaults to 0).\n") {
+CON_COMMAND(p2fx_trace_teleport_eye, "p2fx_trace_teleport_eye <tick> [player slot] [trace name] - teleports the player to the eye position at the given trace tick on the given trace (defaults to hovered one or the first one ever made) in the given slot (defaults to 0).\n") {
 	if (!sv_cheats.GetBool()) return;
 
 	if (args.ArgC() < 2 || args.ArgC() > 4)
-		return console->Print(sar_trace_teleport_eye.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_trace_teleport_eye.ThisPtr()->m_pszHelpString);
 
 	std::string trace_name = (args.ArgC() == 4) ? args[3] : playerTrace->GetDefaultTraceName();
 	int slot = (args.ArgC()>=3 && engine->IsCoop()) ? std::atoi(args[2]) : 0;
@@ -937,9 +937,9 @@ CON_COMMAND(sar_trace_teleport_eye, "sar_trace_teleport_eye <tick> [player slot]
 	playerTrace->TeleportAt(trace_name, slot, tick, true);
 }
 
-CON_COMMAND(sar_trace_export, "sar_trace_export <filename> [trace name] - Export trace data into a csv file.\n") {
+CON_COMMAND(p2fx_trace_export, "p2fx_trace_export <filename> [trace name] - Export trace data into a csv file.\n") {
 	if (args.ArgC() < 2 || args.ArgC() > 3)
-		return console->Print(sar_trace_export.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_trace_export.ThisPtr()->m_pszHelpString);
 
 	std::string trace_name = (args.ArgC() == 3) ? args[2] : playerTrace->GetDefaultTraceName();
 

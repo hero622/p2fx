@@ -158,7 +158,7 @@ float AutoStrafeTool::GetMaxSpeed(const TasPlayerInfo &player, Vector wishDir, b
 
 
 float AutoStrafeTool::GetMaxAccel(const TasPlayerInfo &player, Vector wishDir) {
-	bool aircon2 = sar_aircontrol.GetInt() == 2 && server->AllowsMovementChanges();
+	bool aircon2 = p2fx_aircontrol.GetInt() == 2 && server->AllowsMovementChanges();
 	float accel = (player.grounded) ? sv_accelerate.GetFloat() : aircon2 ? sv_airaccelerate.GetFloat() : sv_paintairacceleration.GetFloat();
 	float realAccel = player.surfaceFriction * player.ticktime * GetMaxSpeed(player, wishDir, true) * accel;
 	return realAccel;
@@ -171,7 +171,7 @@ Vector AutoStrafeTool::CreateWishDir(const TasPlayerInfo &player, float forwardM
 		wishDir = wishDir.Normalize();
 	}
 
-	if (sar_aircontrol.GetInt() != 2 || !server->AllowsMovementChanges()) {
+	if (p2fx_aircontrol.GetInt() != 2 || !server->AllowsMovementChanges()) {
 		// forwardmove is affected by player pitch when in air
 		// but only with pitch outside of range from -30 to 30 deg (both exclusive)
 		if (!player.grounded) {
@@ -186,7 +186,7 @@ Vector AutoStrafeTool::CreateWishDir(const TasPlayerInfo &player, float forwardM
 	wishDir = Vector(sinOld(yaw) * wishDir.x + cosOld(yaw) * wishDir.y, -cosOld(yaw) * wishDir.x + sinOld(yaw) * wishDir.y);
 
 	// air control limit
-	float airConLimit = (sar_aircontrol.GetBool() && server->AllowsMovementChanges()) ? INFINITY : 300;
+	float airConLimit = (p2fx_aircontrol.GetBool() && server->AllowsMovementChanges()) ? INFINITY : 300;
 	if (!player.grounded && player.velocity.Length2D() > airConLimit) {
 		if (absOld(player.velocity.x) > airConLimit * 0.5 && player.velocity.x * wishDir.x < 0) {
 			wishDir.x = 0;
@@ -401,7 +401,7 @@ int AutoStrafeTool::GetTurningDirection(const TasPlayerInfo &pInfo, float desAng
 		// prevent losing acceleration speed from speedlock on newer versions
 		// also remember that speedlock exists only when midair in versions 5 or newer
 		// also remember that aircontrol removes speedlock in versions 7 or newer
-		float airConLimit = (sar_aircontrol.GetBool() && server->AllowsMovementChanges()) ? INFINITY : 300.0f;
+		float airConLimit = (p2fx_aircontrol.GetBool() && server->AllowsMovementChanges()) ? INFINITY : 300.0f;
 		if (params.antiSpeedLock && tasPlayer->GetScriptVersion(slot) >= 4 && (!pInfo.grounded || tasPlayer->GetScriptVersion(slot) < 5)) {
 			if (pInfo.velocity.Length2D() < params.strafeSpeed.speed && pInfo.velocity.Length2D() >= (tasPlayer->GetScriptVersion(slot) >= 7 ? airConLimit : 300.0f)) {
 

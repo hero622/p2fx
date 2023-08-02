@@ -12,8 +12,8 @@
 #include <sstream>
 #include <string>
 
-Variable sar_time_demo_dev("sar_time_demo_dev", "0", 0,
-                           "Printing mode when using sar_time_demo.\n"
+Variable p2fx_time_demo_dev("p2fx_time_demo_dev", "0", 0,
+                           "Printing mode when using p2fx_time_demo.\n"
                            "0 = Default,\n"
                            "1 = Console commands,\n"
                            "2 = Console commands & packets.\n");
@@ -292,7 +292,7 @@ bool DemoParser::Parse(std::string filePath, Demo *demo, bool ghostRequest, std:
 		file.close();
 	} catch (const std::exception &ex) {
 		console->Warning(
-			"SAR: Error occurred when trying to parse the demo file.\n"
+			"P2FX: Error occurred when trying to parse the demo file.\n"
 			"If you think this is an issue, report it at: https://github.com/p2sr/p2fx/issues\n"
 			"%s\n",
 			std::string(ex.what()));
@@ -303,10 +303,10 @@ bool DemoParser::Parse(std::string filePath, Demo *demo, bool ghostRequest, std:
 
 // Commands
 
-DECL_COMMAND_FILE_COMPLETION(sar_time_demo, ".dem", engine->GetGameDirectory(), 1);
-CON_COMMAND_F_COMPLETION(sar_time_demo, "sar_time_demo <demo_name> - parses a demo and prints some information about it\n", 0, AUTOCOMPLETION_FUNCTION(sar_time_demo)) {
+DECL_COMMAND_FILE_COMPLETION(p2fx_time_demo, ".dem", engine->GetGameDirectory(), 1);
+CON_COMMAND_F_COMPLETION(p2fx_time_demo, "p2fx_time_demo <demo_name> - parses a demo and prints some information about it\n", 0, AUTOCOMPLETION_FUNCTION(p2fx_time_demo)) {
 	if (args.ArgC() != 2) {
-		return console->Print(sar_time_demo.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_time_demo.ThisPtr()->m_pszHelpString);
 	}
 
 	std::string name;
@@ -321,7 +321,7 @@ CON_COMMAND_F_COMPLETION(sar_time_demo, "sar_time_demo <demo_name> - parses a de
 	}
 
 	DemoParser parser;
-	parser.outputMode = sar_time_demo_dev.GetInt();
+	parser.outputMode = p2fx_time_demo_dev.GetInt();
 
 	Demo demo;
 	auto dir = std::string(engine->GetGameDirectory()) + std::string("/") + name;
@@ -338,9 +338,9 @@ CON_COMMAND_F_COMPLETION(sar_time_demo, "sar_time_demo <demo_name> - parses a de
 	}
 }
 
-CON_COMMAND_F_COMPLETION(sar_time_demos, "sar_time_demos <demo_name> [demo_name2]... - parses multiple demos and prints the total sum of them\n", 0, AUTOCOMPLETION_FUNCTION(sar_time_demo)) {
+CON_COMMAND_F_COMPLETION(p2fx_time_demos, "p2fx_time_demos <demo_name> [demo_name2]... - parses multiple demos and prints the total sum of them\n", 0, AUTOCOMPLETION_FUNCTION(p2fx_time_demo)) {
 	if (args.ArgC() <= 1) {
-		return console->Print(sar_time_demos.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_time_demos.ThisPtr()->m_pszHelpString);
 	}
 
 	auto totalTicks = 0;
@@ -348,7 +348,7 @@ CON_COMMAND_F_COMPLETION(sar_time_demos, "sar_time_demos <demo_name> [demo_name2
 	auto printTotal = false;
 
 	DemoParser parser;
-	parser.outputMode = sar_time_demo_dev.GetInt();
+	parser.outputMode = p2fx_time_demo_dev.GetInt();
 
 	auto name = std::string();
 	auto dir = std::string(engine->GetGameDirectory()) + std::string("/");

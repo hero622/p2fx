@@ -119,7 +119,7 @@ void Teleporter::TeleportLocal(int slot, bool portals) {
 
 	auto &location = this->GetLocation(slot);
 	if (!location.isSet) {
-		const char msg[] = "Location not set! Use sar_teleport_setpos.";
+		const char msg[] = "Location not set! Use p2fx_teleport_setpos.";
 		char buf[sizeof msg + 1]; // 1 not 2 because null terminator
 		buf[0] = TP_OP_MSG;
 		buf[1] = slot;
@@ -188,7 +188,7 @@ void Teleporter::Teleport(int slot, bool portals) {
 
 // Commands
 
-CON_COMMAND(sar_teleport, "sar_teleport [noportals] - teleports the player to the last saved location\n") {
+CON_COMMAND(p2fx_teleport, "p2fx_teleport [noportals] - teleports the player to the last saved location\n") {
 	IGNORE_DEMO_PLAYER();
 
 	bool portals = true;
@@ -200,6 +200,6 @@ CON_COMMAND(sar_teleport, "sar_teleport [noportals] - teleports the player to th
 
 	teleporter->Teleport(GET_SLOT(), portals);
 }
-CON_COMMAND(sar_teleport_setpos, "sar_teleport_setpos - saves current location for teleportation\n") {
+CON_COMMAND(p2fx_teleport_setpos, "p2fx_teleport_setpos - saves current location for teleportation\n") {
 	teleporter->Save(GET_SLOT());
 }

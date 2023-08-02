@@ -135,7 +135,7 @@ DETOUR_T(bool, Server::CheckJumpButton) {
 	if (server->AllowsMovementChanges()) {
 		auto mv = *reinterpret_cast<CHLMoveData **>((uintptr_t)thisptr + Offsets::mv);
 
-		if (sar_autojump.GetBool() && !server->jumpedLastTime) {
+		if (p2fx_autojump.GetBool() && !server->jumpedLastTime) {
 			mv->m_nOldButtons &= ~IN_JUMP;
 		}
 
@@ -143,7 +143,7 @@ DETOUR_T(bool, Server::CheckJumpButton) {
 		server->savedVerticalVelocity = mv->m_vecVelocity[2];
 
 		server->callFromCheckJumpButton = true;
-		jumped = (sar_duckjump.isRegistered && sar_duckjump.GetBool())
+		jumped = (p2fx_duckjump.isRegistered && p2fx_duckjump.GetBool())
 			? Server::CheckJumpButtonBase(thisptr)
 			: Server::CheckJumpButton(thisptr);
 		server->callFromCheckJumpButton = false;
@@ -179,7 +179,7 @@ DETOUR(Server::PlayerMove) {
 
 	// Landed after a jump
 	if (stat->jumps->isTracing && m_fFlags & FL_ONGROUND && m_MoveType != MOVETYPE_NOCLIP) {
-		stat->jumps->EndTrace(server->GetAbsOrigin(player), sar_stats_jumps_xy.GetBool());
+		stat->jumps->EndTrace(server->GetAbsOrigin(player), p2fx_stats_jumps_xy.GetBool());
 	}
 
 	stepCounter->ReduceTimer(server->gpGlobals->frametime);
@@ -190,7 +190,7 @@ DETOUR(Server::PlayerMove) {
 		++stat->steps->total;
 	}
 
-	stat->velocity->Save(server->GetLocalVelocity(player), sar_stats_velocity_peak_xy.GetBool());
+	stat->velocity->Save(server->GetLocalVelocity(player), p2fx_stats_velocity_peak_xy.GetBool());
 	inspector->Record();
 
 	return Server::PlayerMove(thisptr);
@@ -202,7 +202,7 @@ DETOUR(Server::PlayerRunCommand, CUserCmd *cmd, void *moveHelper) {
 	int slot = server->GetSplitScreenPlayerSlot(thisptr);
 
 	if (!engine->IsGamePaused()) {
-		if (sar_tas_real_controller_debug.GetInt() == 3) {
+		if (p2fx_tas_real_controller_debug.GetInt() == 3) {
 			auto playerInfo = tasPlayer->GetPlayerInfo(slot, thisptr, cmd);
 			console->Print("Jump input state at tick %d: %s\n", playerInfo.tick, (cmd->buttons & IN_JUMP) ? "true" : "false");
 		}
@@ -246,7 +246,7 @@ Hook g_playerRunCommandHook(&Server::PlayerRunCommand_Hook);
 static bool (*UTIL_FindClosestPassableSpace)(const Vector &, const Vector &, const Vector &, unsigned, Vector &, int, FcpsTraceAdapter *);
 extern Hook UTIL_FindClosestPassableSpace_Hook;
 static bool UTIL_FindClosestPassableSpace_Detour(const Vector &center, const Vector &extents, const Vector &ind_push, unsigned iterations, Vector &center_out, int axis_restriction_flags, FcpsTraceAdapter *trace_adapter) {
-	if (sar_fcps_override.GetBool() && sv_cheats.GetBool()) {
+	if (p2fx_fcps_override.GetBool() && sv_cheats.GetBool()) {
 		return RecordFcps2(center, extents, ind_push, center_out, trace_adapter);
 	} else {
 		UTIL_FindClosestPassableSpace_Hook.Disable();
@@ -260,7 +260,7 @@ Hook UTIL_FindClosestPassableSpace_Hook(&UTIL_FindClosestPassableSpace_Detour);
 static bool (*FindClosestPassableSpace)(void *, const Vector &, int);
 extern Hook FindClosestPassableSpace_Hook;
 static bool FindClosestPassableSpace_Detour(void *entity, const Vector &ind_push, int mask) {
-	if (sar_fcps_override.GetBool() && sv_cheats.GetBool()) {
+	if (p2fx_fcps_override.GetBool() && sv_cheats.GetBool()) {
 		return RecordFcps1(entity, ind_push, mask);
 	} else {
 		FindClosestPassableSpace_Hook.Disable();
@@ -296,7 +296,7 @@ DETOUR(Server::ProcessMovement, void *player, CMoveData *move) {
 	playerTrace->TweakLatestEyeOffsetForPortalShot(move, slot, false);
 
 	// We edit pos after process movement to get accurate teleportation
-	// This is for sar_trace_teleport_at
+	// This is for p2fx_trace_teleport_at
 	if (g_playerTraceNeedsTeleport && slot == g_playerTraceTeleportSlot) {
 		move->m_vecAbsOrigin = g_playerTraceTeleportLocation;
 		g_playerTraceNeedsTeleport = false;
@@ -308,7 +308,7 @@ DETOUR(Server::ProcessMovement, void *player, CMoveData *move) {
 // CGameMovement::GetPlayerViewOffset
 DETOUR_T(Vector*, Server::GetPlayerViewOffset, bool ducked) {
 
-	if (sar_force_qc.GetBool() && sv_cheats.GetBool()) {
+	if (p2fx_force_qc.GetBool() && sv_cheats.GetBool()) {
 		bool holdingDuck = (inputHud.GetButtonBits(GET_SLOT()) & IN_DUCK);
 		if (holdingDuck) ducked = false;
 	}
@@ -316,11 +316,11 @@ DETOUR_T(Vector*, Server::GetPlayerViewOffset, bool ducked) {
 	return Server::GetPlayerViewOffset(thisptr,ducked);
 }
 
-Variable sar_always_transmit_heavy_ents("sar_always_transmit_heavy_ents", "0", "Always transmit large but seldom changing edicts to clients to prevent lag spikes.\n");
+Variable p2fx_always_transmit_heavy_ents("p2fx_always_transmit_heavy_ents", "0", "Always transmit large but seldom changing edicts to clients to prevent lag spikes.\n");
 
 extern Hook g_IsInPVS_Hook;
 DETOUR_T(bool, Server::IsInPVS, void *info) {
-	if (sar_always_transmit_heavy_ents.GetBool()) {
+	if (p2fx_always_transmit_heavy_ents.GetBool()) {
 		edict_t *m_pClientEnt = *(edict_t **)((uintptr_t)thisptr + 12);
 		if (m_pClientEnt->m_fStateFlags & FL_EDICT_FULL) {
 			ServerEnt *ent = (ServerEnt *)m_pClientEnt->m_pUnk;
@@ -396,7 +396,7 @@ Hook g_flagStartTouchHook(&Server::StartTouchChallengeNode_Hook);
 // CGameMovement::FinishGravity
 DETOUR(Server::FinishGravity) {
 	if (server->callFromCheckJumpButton) {
-		if (sar_duckjump.GetBool()) {
+		if (p2fx_duckjump.GetBool()) {
 			auto player = *reinterpret_cast<uintptr_t *>((uintptr_t)thisptr + Offsets::player);
 			auto mv = *reinterpret_cast<CHLMoveData **>((uintptr_t)thisptr + Offsets::mv);
 
@@ -414,7 +414,7 @@ DETOUR(Server::FinishGravity) {
 			}
 		}
 
-		if (sar_jumpboost.GetBool()) {
+		if (p2fx_jumpboost.GetBool()) {
 			auto player = *reinterpret_cast<uintptr_t *>((uintptr_t)thisptr + Offsets::player);
 			auto mv = *reinterpret_cast<CHLMoveData **>((uintptr_t)thisptr + Offsets::mv);
 
@@ -430,7 +430,7 @@ DETOUR(Server::FinishGravity) {
 			float flMaxSpeed = mv->m_flMaxSpeed + (mv->m_flMaxSpeed * flSpeedBoostPerc);
 			float flNewSpeed = flSpeedAddition + mv->m_vecVelocity.Length2D();
 
-			if (sar_jumpboost.GetInt() == 1) {
+			if (p2fx_jumpboost.GetInt() == 1) {
 				if (flNewSpeed > flMaxSpeed) {
 					flSpeedAddition -= flNewSpeed - flMaxSpeed;
 				}
@@ -449,7 +449,7 @@ DETOUR(Server::FinishGravity) {
 
 // CGameMovement::AirMove
 DETOUR_B(Server::AirMove) {
-	if (sar_aircontrol.GetInt() >= 2 && server->AllowsMovementChanges()) {
+	if (p2fx_aircontrol.GetInt() >= 2 && server->AllowsMovementChanges()) {
 		return Server::AirMoveBase(thisptr);
 	}
 
@@ -470,18 +470,18 @@ static void setPortalsThruPortals(bool val) {
 #ifdef _WIN32
 	*(uint8_t *)(tfp + 391) = val ? 0x00 : 0x0A;
 #else
-	if (sar.game->Is(SourceGame_EIPRelPIC)) {
+	if (p2fx.game->Is(SourceGame_EIPRelPIC)) {
 		*(uint8_t *)(tfp + 388) = val ? 0x82 : 0x85;
 	} else {
 		*(uint8_t *)(tfp + 462) = val ? 0xEB : 0x74;
 	}
 #endif
 }
-Variable sar_portals_thru_portals("sar_portals_thru_portals", "0", "Allow firing portals through portals.\n");
+Variable p2fx_portals_thru_portals("p2fx_portals_thru_portals", "0", "Allow firing portals through portals.\n");
 // cvar callbacks dont want to fucking work so we'll just do this bs
 ON_EVENT(PRE_TICK) {
-	setAircontrol(server->AllowsMovementChanges() ? sar_aircontrol.GetInt() : 0);
-	setPortalsThruPortals(sv_cheats.GetBool() && sar_portals_thru_portals.GetBool());
+	setAircontrol(server->AllowsMovementChanges() ? p2fx_aircontrol.GetInt() : 0);
+	setPortalsThruPortals(sv_cheats.GetBool() && p2fx_portals_thru_portals.GetBool());
 }
 
 extern Hook g_AcceptInputHook;
@@ -536,7 +536,7 @@ static void __cdecl AcceptInput_Hook(void *thisptr, const char *inputName, void 
 		free(data);
 	}
 
-	if (sar_show_entinp.GetBool() && sv_cheats.GetBool()) {
+	if (p2fx_show_entinp.GetBool() && sv_cheats.GetBool()) {
 		console->Print("%.4d %s.%s(%s)\n", session->GetTick(), server->GetEntityName(thisptr), inputName, parameter.ToString());
 	}
 
@@ -608,7 +608,7 @@ DETOUR(Server::GameFrame, bool simulating)
 	if (!g_IsCMFlagHookInitialized) InitCMFlagHook();
 	if (!g_IsPlayerRunCommandHookInitialized) InitPlayerRunCommandHook();
 
-	if (sar_tick_debug.GetInt() >= 3 || (sar_tick_debug.GetInt() >= 2 && simulating)) {
+	if (p2fx_tick_debug.GetInt() >= 3 || (p2fx_tick_debug.GetInt() >= 2 && simulating)) {
 		int host, server, client;
 		engine->GetTicks(host, server, client);
 		console->Print("CServerGameDLL::GameFrame %s (host=%d server=%d client=%d)\n", simulating ? "simulating" : "non-simulating", host, server, client);
@@ -656,7 +656,7 @@ DETOUR_T(void, Server::OnRemoveEntity, IHandleEntity *ent, CBaseHandle handle) {
 			g_ent_slot_serial[i].done = true;
 		}
 	}
-	if (!hasSerialChanged && sar_prevent_ehm.GetBool()) {
+	if (!hasSerialChanged && p2fx_prevent_ehm.GetBool()) {
 		// we're about to increment this entity's serial - if it's about to hit
 		// 0x4000, double-increment it so that can't happen
 		if (info->m_SerialNumber == 0x3FFF) {
@@ -734,13 +734,13 @@ bool Server::Init() {
 
 		uintptr_t airMove = (uintptr_t)AirMove;
 #ifdef _WIN32
-		if (sar.game->Is(SourceGame_Portal2)) {
+		if (p2fx.game->Is(SourceGame_Portal2)) {
 			this->aircontrol_fling_speed_addr = *(float **)(airMove + 791);
 		} else {
 			this->aircontrol_fling_speed_addr = *(float **)(airMove + 662);
 		}
 #else
-		if (sar.game->Is(SourceGame_EIPRelPIC)) {
+		if (p2fx.game->Is(SourceGame_EIPRelPIC)) {
 			this->aircontrol_fling_speed_addr = *(float **)(airMove + 641);
 		} else {
 			this->aircontrol_fling_speed_addr = *(float **)(airMove + 524);
@@ -753,7 +753,7 @@ bool Server::Init() {
 		auto GetIServerEntity = g_ServerTools->Original(Offsets::GetIServerEntity);
 		Memory::Deref(GetIServerEntity + Offsets::m_EntPtrArray, &this->m_EntPtrArray);
 #ifndef _WIN32
-		if (sar.game->Is(SourceGame_EIPRelPIC)) {
+		if (p2fx.game->Is(SourceGame_EIPRelPIC)) {
 			this->m_EntPtrArray = (CEntInfo *)((uintptr_t)this->m_EntPtrArray + 4);
 		}
 #endif
@@ -786,7 +786,7 @@ bool Server::Init() {
 	GlobalEntity_GetIndex = (int (*)(const char *))Memory::Scan(server->Name(), "55 8B EC 51 8B 45 08 50 8D 4D FC 51 B9 ? ? ? ? E8 ? ? ? ? 66 8B 55 FC B8 FF FF 00 00", 0);
 	GlobalEntity_SetFlags = (void (*)(int, int))Memory::Scan(server->Name(), "55 8B EC 80 3D ? ? ? ? 00 75 1F 8B 45 08 85 C0 78 18 3B 05 ? ? ? ? 7D 10 8B 4D 0C 8B 15 ? ? ? ? 8D 04 40 89 4C 82 08", 0);
 #else
-	if (sar.game->Is(SourceGame_EIPRelPIC)) {
+	if (p2fx.game->Is(SourceGame_EIPRelPIC)) {
 		GlobalEntity_GetIndex = (int (*)(const char *))Memory::Scan(server->Name(), "53 83 EC 18 8D 44 24 0E 83 EC 04 FF 74 24 24 68 ? ? ? ? 50 E8 ? ? ? ? 0F B7 4C 24 1A 83 C4 0C 66 83 F9 FF 74 35 8B 15 ? ? ? ? 89 D0", 0);
 		GlobalEntity_SetFlags = (void (*)(int, int))Memory::Scan(server->Name(), "80 3D ? ? ? ? 01 8B 44 24 04 74 1F 85 C0 78 1B 3B 05 ? ? ? ? 7D 13 8B 15 ? ? ? ? 8D 04 40", 0);
 	} else {
@@ -800,7 +800,7 @@ bool Server::Init() {
 #ifdef _WIN32
 	uintptr_t insn_addr = (uintptr_t)say_callback + 52;
 #else
-	uintptr_t insn_addr = (uintptr_t)say_callback + (sar.game->Is(SourceGame_EIPRelPIC) ? 55 : 88);
+	uintptr_t insn_addr = (uintptr_t)say_callback + (p2fx.game->Is(SourceGame_EIPRelPIC) ? 55 : 88);
 #endif
 	// This is the location of an ADDSD instruction which adds 0.66
 	// to the current time. If we instead *subtract* 0.66, we'll
@@ -816,7 +816,7 @@ bool Server::Init() {
 	FindPortal = (_FindPortal)Memory::Scan(server->Name(), "55 8B EC 0F B6 45 08 8D 0C 80 03 C9 53 8B 9C 09 ? ? ? ? 03 C9 56 57 85 DB 74 3C 8B B9 ? ? ? ? 33 C0 33 F6 EB 08", 0);
 	Memory::UnProtect((void *)((uintptr_t)TraceFirePortal + 391), 1); // see setPortalsThruPortals
 #else
-	if (sar.game->Is(SourceGame_EIPRelPIC)) {
+	if (p2fx.game->Is(SourceGame_EIPRelPIC)) {
 		TraceFirePortal = (_TraceFirePortal)Memory::Scan(server->Name(), "55 89 E5 57 56 8D B5 F4 F8 FF FF 53 81 EC 30 07 00 00 8B 45 14 6A 00 8B 5D 0C FF 75 08 56 89 85 D0 F8 FF FF", 0);
 		FindPortal = (_FindPortal)Memory::Scan(server->Name(), "55 57 56 53 83 EC 2C 8B 44 24 40 8B 74 24 48 8B 7C 24 44 89 44 24 14 0F B6 C0 8D 04 80 89 74 24 0C C1 E0 02", 0);
 		Memory::UnProtect((void *)((uintptr_t)TraceFirePortal + 388), 1); // see setPortalsThruPortals
@@ -830,7 +830,7 @@ bool Server::Init() {
 #ifdef _WIN32
 	ViewPunch = (decltype (ViewPunch))Memory::Scan(server->Name(), "55 8B EC A1 ? ? ? ? 83 EC 0C 83 78 30 00 56 8B F1 0F 85 ? ? ? ? 8B 16 8B 82 00 05 00 00 FF D0 84 C0 0F 85 ? ? ? ? 8B 45 08 F3 0F 10 1D ? ? ? ? F3 0F 10 00");
 #else
-	if (sar.game->Is(SourceGame_EIPRelPIC)) {
+	if (p2fx.game->Is(SourceGame_EIPRelPIC)) {
 		ViewPunch = (decltype (ViewPunch))Memory::Scan(server->Name(), "55 57 56 53 83 EC 1C A1 ? ? ? ? 8B 5C 24 30 8B 74 24 34 8B 40 30 85 C0 75 38 8B 03 8B 80 04 05 00 00 3D ? ? ? ? 75 36 8B 83 B8 0B 00 00 8B 0D ? ? ? ?");
 	} else {
 		ViewPunch = (decltype (ViewPunch))Memory::Scan(server->Name(), "55 89 E5 53 83 EC 24 A1 ? ? ? ? 8B 5D 08 8B 40 30 85 C0 74 0A 83 C4 24 5B 5D C3 8D 74 26 00 8B 03 89 1C 24 FF 90 04 05 00 00 84 C0 75 E7 8B 45 0C");
@@ -843,7 +843,7 @@ bool Server::Init() {
 	UTIL_FindClosestPassableSpace = (decltype (UTIL_FindClosestPassableSpace))Memory::Scan(server->Name(), "53 8B DC 83 EC 08 83 E4 F0 83 C4 04 55 8B 6B 04 89 6C 24 04 8B EC 81 EC 98 02 00 00 8B 43 0C 8B 48 08 F3 0F 10 48 04 F3 0F 10 00 F3 0F 10 3D ? ? ? ?");
 	FindClosestPassableSpace = (decltype (FindClosestPassableSpace))Memory::Scan(server->Name(), "53 8B DC 83 EC 08 83 E4 F0 83 C4 04 55 8B 6B 04 89 6C 24 04 8B EC A1 ? ? ? ? 81 EC 88 02 00 00 83 78 30 00 56 57 0F 84 ? ? ? ? 8B 73 08 8B 8E DC 00 00 00");
 #else
-	if (sar.game->Is(SourceGame_EIPRelPIC)) {
+	if (p2fx.game->Is(SourceGame_EIPRelPIC)) {
 		UTIL_FindClosestPassableSpace = (decltype (UTIL_FindClosestPassableSpace))Memory::Scan(server->Name(), "55 BA 00 01 00 00 66 0F EF ED 66 0F EF C0 57 56 53 81 EC CC 02 00 00 8B 0D ? ? ? ? 8B 84 24 E4 02 00 00 66 89 94 24 54 01 00 00 8B 3D ? ? ? ?");
 		FindClosestPassableSpace = (decltype (FindClosestPassableSpace))Memory::Scan(server->Name(), "A1 ? ? ? ? 57 56 53 8B 5C 24 10 8B 74 24 14 8B 50 30 8B 4C 24 18 85 D2 74 29 8B 83 E4 00 00 00 8B 3D ? ? ? ? 83 F8 FF 74 24 0F B7 D0 C1 E8 10");
 	} else {
@@ -860,7 +860,7 @@ bool Server::Init() {
 		uintptr_t code = Memory::Scan(this->Name(), "FF ? ? ? ? ? D9 5D F8 8B 56 04 8B 42 1C 8B ? ? ? ? ? 3B C3 75 04 33 C9 EB 08 8B C8 2B 4A 58 C1 F9 04 F3 0F 10 84 CE 70", 0);
 #else
 		uintptr_t code;
-		if (sar.game->Is(SourceGame_EIPRelPIC)) {
+		if (p2fx.game->Is(SourceGame_EIPRelPIC)) {
 			code = Memory::Scan(this->Name(), "E8 ? ? ? ? 8B 43 04 66 0F EF C0 DD 5C 24 08 F2 0F 5A 44 24 08 8B 40 24 85 C0 0F 84 CC 01 00 00 8B 15 ? ? ? ? 2B 42 58", 0);
 		} else {
 			code = Memory::Scan(this->Name(), "E8 ? ? ? ? 8B 43 04 DD 9D ? ? ? ? F2 0F 10 B5 ? ? ? ? 8B 50 24 66 0F 14 F6 66 0F 5A CE 85 D2", 0);
@@ -878,7 +878,7 @@ bool Server::Init() {
 		g_check_stuck_code = (void *)code;
 	}
 
-	if (sar.game->Is(SourceGame_Portal2)) {
+	if (p2fx.game->Is(SourceGame_Portal2)) {
 #ifdef _WIN32
 		Server::IsInPVS = (Server::_IsInPVS)Memory::Scan(this->Name(), "55 8B EC 51 53 8B 5D 08 56 57 33 FF 89 4D FC 66 39 79 1A 75 57 3B BB 10 20 00 00 0F 8D C0 00 00 00 8D B3 14 20 00 00");
 #else
@@ -905,16 +905,16 @@ bool Server::Init() {
 
 	return this->hasLoaded = this->g_GameMovement && this->g_ServerGameDLL;
 }
-CON_COMMAND(sar_coop_reset_progress, "sar_coop_reset_progress - resets all coop progress\n") {
+CON_COMMAND(p2fx_coop_reset_progress, "p2fx_coop_reset_progress - resets all coop progress\n") {
 	if (engine->IsCoop()) {
 		NetMessage::SendMsg(RESET_COOP_PROGRESS_MESSAGE_TYPE, nullptr, 0);
 		resetCoopProgress();
 		if (engine->IsSplitscreen()) Event::Trigger<Event::COOP_RESET_DONE>({});
 	}
 }
-CON_COMMAND(sar_give_fly, "sar_give_fly [n] - gives the player in slot n (0 by default) preserved crouchfly.\n") {
-	if (args.ArgC() > 2) return console->Print(sar_give_fly.ThisPtr()->m_pszHelpString);
-	if (!sv_cheats.GetBool()) return console->Print("sar_give_fly requires sv_cheats.\n");
+CON_COMMAND(p2fx_give_fly, "p2fx_give_fly [n] - gives the player in slot n (0 by default) preserved crouchfly.\n") {
+	if (args.ArgC() > 2) return console->Print(p2fx_give_fly.ThisPtr()->m_pszHelpString);
+	if (!sv_cheats.GetBool()) return console->Print("p2fx_give_fly requires sv_cheats.\n");
 	int slot = args.ArgC() == 2 ? atoi(args[1]) : 0;
 	void *player = server->GetPlayer(slot + 1);
 	if (player) {
@@ -922,9 +922,9 @@ CON_COMMAND(sar_give_fly, "sar_give_fly [n] - gives the player in slot n (0 by d
 		console->Print("Gave fly to player %d\n", slot);
 	}
 }
-CON_COMMAND(sar_give_betsrighter, "sar_give_betsrighter [n] - gives the player in slot n (0 by default) betsrighter.\n") {
-	if (args.ArgC() > 2) return console->Print(sar_give_betsrighter.ThisPtr()->m_pszHelpString);
-	if (!sv_cheats.GetBool()) return console->Print("sar_give_betsrighter requires sv_cheats.\n");
+CON_COMMAND(p2fx_give_betsrighter, "p2fx_give_betsrighter [n] - gives the player in slot n (0 by default) betsrighter.\n") {
+	if (args.ArgC() > 2) return console->Print(p2fx_give_betsrighter.ThisPtr()->m_pszHelpString);
+	if (!sv_cheats.GetBool()) return console->Print("p2fx_give_betsrighter requires sv_cheats.\n");
 	int slot = args.ArgC() == 2 ? atoi(args[1]) : 0;
 	ServerEnt *player = server->GetPlayer(slot + 1);
 	if (player) {
@@ -933,7 +933,7 @@ CON_COMMAND(sar_give_betsrighter, "sar_give_betsrighter [n] - gives the player i
 	}
 }
 DETOUR_COMMAND(Server::say) {
-	if (args.ArgC() != 2 || Utils::StartsWith(args[1], "!SAR:") || !networkManager.HandleGhostSay(args[1])) {
+	if (args.ArgC() != 2 || Utils::StartsWith(args[1], "!P2FX:") || !networkManager.HandleGhostSay(args[1])) {
 		Server::say_callback(args);
 	}
 }
@@ -949,9 +949,9 @@ void Server::Shutdown() {
 
 Server *server;
 
-CON_COMMAND(sar_paint_reseed, "sar_paint_reseed <seed> - re-seed all paint sprayers in the map to the given value (-9999 to 9999 inclusive)\n") {
+CON_COMMAND(p2fx_paint_reseed, "p2fx_paint_reseed <seed> - re-seed all paint sprayers in the map to the given value (-9999 to 9999 inclusive)\n") {
 	if (args.ArgC() != 2) {
-		console->Print(sar_paint_reseed.ThisPtr()->m_pszHelpString);
+		console->Print(p2fx_paint_reseed.ThisPtr()->m_pszHelpString);
 		return;
 	}
 
@@ -964,7 +964,7 @@ CON_COMMAND(sar_paint_reseed, "sar_paint_reseed <seed> - re-seed all paint spray
 	}
 
 	if (!sv_cheats.GetBool()) {
-		console->Print("sar_paint_reseed requires sv_cheats\n");
+		console->Print("p2fx_paint_reseed requires sv_cheats\n");
 		return;
 	}
 

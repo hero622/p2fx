@@ -3,7 +3,7 @@
 #include "Modules/Client.hpp"
 #include "Modules/Console.hpp"
 #include "Modules/Server.hpp"
-#include "SAR.hpp"
+#include "P2FX.hpp"
 #include "Utils/Memory.hpp"
 #include "Utils/SDK.hpp"
 
@@ -103,9 +103,9 @@ void DataMapDumper::Dump(bool dumpServer) {
 
 // Commands
 
-CON_COMMAND(sar_dump_server_datamap, "sar_dump_server_datamap - dumps server datamap to a file\n") {
+CON_COMMAND(p2fx_dump_server_datamap, "p2fx_dump_server_datamap - dumps server datamap to a file\n") {
 	dataMapDumper->Dump();
 }
-CON_COMMAND(sar_dump_client_datamap, "sar_dump_client_datamap - dumps client datmap to a file\n") {
+CON_COMMAND(p2fx_dump_client_datamap, "p2fx_dump_client_datamap - dumps client datmap to a file\n") {
 	dataMapDumper->Dump(false);
 }

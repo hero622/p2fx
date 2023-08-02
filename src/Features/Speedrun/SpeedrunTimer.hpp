@@ -38,23 +38,23 @@ namespace SpeedrunTimer {
 	void CategoryChanged();
 };  // namespace SpeedrunTimer
 
-extern Variable sar_speedrun_skip_cutscenes;
-extern Variable sar_speedrun_smartsplit;
-extern Variable sar_speedrun_time_pauses;
-extern Variable sar_speedrun_stop_in_menu;
-extern Variable sar_speedrun_start_on_load;
-extern Variable sar_speedrun_offset;
-extern Variable sar_speedrun_autostop;
+extern Variable p2fx_speedrun_skip_cutscenes;
+extern Variable p2fx_speedrun_smartsplit;
+extern Variable p2fx_speedrun_time_pauses;
+extern Variable p2fx_speedrun_stop_in_menu;
+extern Variable p2fx_speedrun_start_on_load;
+extern Variable p2fx_speedrun_offset;
+extern Variable p2fx_speedrun_autostop;
 
-extern Variable sar_mtrigger_legacy;
-extern Variable sar_mtrigger_legacy_format;
-extern Variable sar_mtrigger_legacy_textcolor;
+extern Variable p2fx_mtrigger_legacy;
+extern Variable p2fx_mtrigger_legacy_format;
+extern Variable p2fx_mtrigger_legacy_textcolor;
 
-extern Command sar_speedrun_start;
-extern Command sar_speedrun_stop;
-extern Command sar_speedrun_split;
-extern Command sar_speedrun_pause;
-extern Command sar_speedrun_resume;
-extern Command sar_speedrun_reset;
-extern Command sar_speedrun_result;
-extern Command sar_speedrun_export;
+extern Command p2fx_speedrun_start;
+extern Command p2fx_speedrun_stop;
+extern Command p2fx_speedrun_split;
+extern Command p2fx_speedrun_pause;
+extern Command p2fx_speedrun_resume;
+extern Command p2fx_speedrun_reset;
+extern Command p2fx_speedrun_result;
+extern Command p2fx_speedrun_export;

@@ -29,12 +29,12 @@ void DemoViewer::Think() {
 		for (const auto &state : camera->states) {
 			float dist = (camera->currentState.origin - state.second.origin).Length();
 			if (dist < 50.0f) {
-				engine->ExecuteCommand("sar_cam_path_remkf");
+				engine->ExecuteCommand("p2fx_cam_path_remkf");
 				return;
 			}
 		}
 
-		engine->ExecuteCommand("sar_cam_path_setkf");
+		engine->ExecuteCommand("p2fx_cam_path_setkf");
 	}
 
 	if (GetAsyncKeyState(VK_F2) & 1) {
@@ -42,7 +42,7 @@ void DemoViewer::Think() {
 	}
 
 	if (GetAsyncKeyState(VK_F3) & 1) {
-		engine->ExecuteCommand("incrementvar sar_cam_control 0 3 1");
+		engine->ExecuteCommand("incrementvar p2fx_cam_control 0 3 1");
 	}
 
 	if (GetAsyncKeyState(VK_SPACE) & 1) {
@@ -107,13 +107,13 @@ void DemoViewer::HandleGotoTick() {
 
 	int tick = engine->demoplayer->GetTick();
 
-	auto sar_demo_remove_broken = Variable("sar_demo_remove_broken");
-	static int remove_broken_value = sar_demo_remove_broken.GetInt();
+	auto p2fx_demo_remove_broken = Variable("p2fx_demo_remove_broken");
+	static int remove_broken_value = p2fx_demo_remove_broken.GetInt();
 
 	if (state == 0) {
 		if (tick > g_demoStart + 2) {
 			g_waitingForSession = true;
-			sar_demo_remove_broken.SetValue(0);
+			p2fx_demo_remove_broken.SetValue(0);
 			engine->ExecuteCommand(Utils::ssprintf("demo_gototick %d; demo_pause", gotoTick).c_str());
 			state = 1;
 		}
@@ -131,7 +131,7 @@ void DemoViewer::HandleGotoTick() {
 	} else if (state == 3) {
 		if (tick % 2 != g_demoStart % 2) {
 			engine->SendToCommandBuffer("sv_alternateticks 1; demo_pause", 0);
-			sar_demo_remove_broken.SetValue(remove_broken_value);
+			p2fx_demo_remove_broken.SetValue(remove_broken_value);
 			state = 0;
 			gotoTick = 0;
 		}

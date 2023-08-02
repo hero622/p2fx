@@ -26,5 +26,5 @@ public:
 
 extern Timer *timer;
 
-extern Variable sar_timer_always_running;
-extern Variable sar_timer_time_pauses;
+extern Variable p2fx_timer_always_running;
+extern Variable p2fx_timer_time_pauses;

@@ -18,7 +18,7 @@ const int g_TasControllerInGameButtons[] = {
 	IN_JUMP, IN_DUCK, IN_USE, IN_ZOOM, IN_ATTACK, IN_ATTACK2,
 };
 
-Variable sar_tas_real_controller_debug("sar_tas_real_controller_debug", "0", 0, 4, "Debugs controller.\n");
+Variable p2fx_tas_real_controller_debug("p2fx_tas_real_controller_debug", "0", 0, 4, "Debugs controller.\n");
 
 TasController *tasControllers[2];
 
@@ -113,8 +113,8 @@ void TasController::ControllerMove(int nSlot, float flFrametime, CUserCmd *cmd) 
 	if (cmd->tick_count == 0) return;
 
 	// doing some debugs to test the behaviour of the real controller
-	if (sar_tas_real_controller_debug.GetBool()) {
-		int debugType = sar_tas_real_controller_debug.GetInt();
+	if (p2fx_tas_real_controller_debug.GetBool()) {
+		int debugType = p2fx_tas_real_controller_debug.GetInt();
 		if (debugType == 1) {
 			console->Print("forwardmove: %.5f, sidemove: %.5f\n", cmd->forwardmove, cmd->sidemove);
 		}

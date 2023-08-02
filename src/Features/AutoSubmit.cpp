@@ -413,9 +413,9 @@ ON_INIT {
 	loadApiKey(false);
 }
 
-CON_COMMAND_F(sar_challenge_autosubmit_reload_api_key, "sar_challenge_autosubmit_reload_api_key - reload the board.portal2.sr API key from its file.\n", FCVAR_DONTRECORD) {
+CON_COMMAND_F(p2fx_challenge_autosubmit_reload_api_key, "p2fx_challenge_autosubmit_reload_api_key - reload the board.portal2.sr API key from its file.\n", FCVAR_DONTRECORD) {
 	if (args.ArgC() != 1) {
-		return console->Print(sar_challenge_autosubmit_reload_api_key.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_challenge_autosubmit_reload_api_key.ThisPtr()->m_pszHelpString);
 	}
 
 	loadApiKey(true);
@@ -447,6 +447,6 @@ void AutoSubmit::FinishRun(float final_time, const char *demopath, std::optional
 	g_worker = std::thread(submitTime, score, std::string(demopath), Utils::StartsWith(engine->GetCurrentMapName().c_str(), "mp_"), map_id, rename_if_pb, replay_append_if_pb);
 }
 
-ON_EVENT(SAR_UNLOAD) {
+ON_EVENT(P2FX_UNLOAD) {
 	if (g_worker.joinable()) g_worker.detach();
 }

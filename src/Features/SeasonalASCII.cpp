@@ -22,7 +22,7 @@
 static std::vector<SeasonalASCIIArt> g_seasonalAsciiArts = {
 
 // Pride month
-{{SAR_PRINT_COLOR, RED, BLACK, BROWN, ORANGE, AQUA, PINK, YELLOW, GREEN, BLUE, PURPLE, WHITE},
+{{P2FX_PRINT_COLOR, RED, BLACK, BROWN, ORANGE, AQUA, PINK, YELLOW, GREEN, BLUE, PURPLE, WHITE},
 "      \n"
 "     $c{1}########################################\n"
 "     $c{2}###$c{1}#####################################\n"

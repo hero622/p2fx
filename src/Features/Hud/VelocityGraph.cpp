@@ -10,11 +10,11 @@
 
 #include <deque>
 
-Variable sar_velocitygraph("sar_velocitygraph", "0", "Shows velocity graph.\n");
-Variable sar_velocitygraph_font_index("sar_velocitygraph_font_index", "21", 0, "Font index of velocity graph.\n"); // 21 looks pretty good
-Variable sar_velocitygraph_background("sar_velocitygraph_background", "0", "Background of velocity graph.\n"); // imo this should be off by default
-Variable sar_velocitygraph_show_speed_on_graph("sar_velocitygraph_show_speed_on_graph", "1", "Show speed between jumps.\n");
-Variable sar_velocitygraph_rainbow("sar_velocitygraph_rainbow", "0", "Rainbow mode of velocity graph text.\n");
+Variable p2fx_velocitygraph("p2fx_velocitygraph", "0", "Shows velocity graph.\n");
+Variable p2fx_velocitygraph_font_index("p2fx_velocitygraph_font_index", "21", 0, "Font index of velocity graph.\n"); // 21 looks pretty good
+Variable p2fx_velocitygraph_background("p2fx_velocitygraph_background", "0", "Background of velocity graph.\n"); // imo this should be off by default
+Variable p2fx_velocitygraph_show_speed_on_graph("p2fx_velocitygraph_show_speed_on_graph", "1", "Show speed between jumps.\n");
+Variable p2fx_velocitygraph_rainbow("p2fx_velocitygraph_rainbow", "0", "Rainbow mode of velocity graph text.\n");
 
 VelocityGraph velocityGraph;
 
@@ -29,7 +29,7 @@ VelocityGraph::VelocityGraph()
 	: Hud(HudType_InGame | HudType_Paused | HudType_Menu, true) {
 }
 bool VelocityGraph::ShouldDraw() {
-	return sar_velocitygraph.GetBool() && Hud::ShouldDraw();
+	return p2fx_velocitygraph.GetBool() && Hud::ShouldDraw();
 }
 void VelocityGraph::GatherData(int slot) {
 	auto player = client->GetPlayer(slot + 1);
@@ -94,7 +94,7 @@ void VelocityGraph::Paint(int slot) {
 		y - 175
 	};
 
-	if (sar_velocitygraph_background.GetBool())
+	if (p2fx_velocitygraph_background.GetBool())
 		surface->DrawRect({ 0, 0, 0, 192 }, graph_pos[0] - 500 - 5, graph_pos[1] - 150 - 5, graph_pos[0] + 5, graph_pos[1] + 5);
 
 	for (auto i = 0ul; i < data[slot].size() - 1; i++) {
@@ -108,7 +108,7 @@ void VelocityGraph::Paint(int slot) {
 		int next_speed = (clamped_next_speed * 75 / 320);
 
 		if (current.on_ground != next.on_ground && !current.on_ground) {
-			if (sar_velocitygraph_show_speed_on_graph.GetBool()) {
+			if (p2fx_velocitygraph_show_speed_on_graph.GetBool()) {
 				auto height = 15;
 
 				surface->DrawTxt(scheme->GetFontByID(2), graph_pos[0] - i, graph_pos[1] - next_speed - height, Color(255, 255, 255), std::to_string(next.speed).c_str());
@@ -147,10 +147,10 @@ void VelocityGraph::Paint(int slot) {
 
 	bool should_draw_takeoff = !on_ground || take_off_display_timeout[slot] > engine->GetClientTime();
 
-	Color c = sar_velocitygraph_rainbow.GetBool() ? Utils::HSVToRGB(speed, 100, 100) : speed == last_vel[slot] ? Color(255, 199, 89) : speed < last_vel[slot] ? Color(255, 119, 119) : Color(30, 255, 109);
+	Color c = p2fx_velocitygraph_rainbow.GetBool() ? Utils::HSVToRGB(speed, 100, 100) : speed == last_vel[slot] ? Color(255, 199, 89) : speed < last_vel[slot] ? Color(255, 119, 119) : Color(30, 255, 109);
 
 
-	auto font = scheme->GetFontByID(sar_velocitygraph_font_index.GetInt());
+	auto font = scheme->GetFontByID(p2fx_velocitygraph_font_index.GetInt());
 	auto length = surface->GetFontLength(font, should_draw_takeoff ? "%i (%i)\n" : "%i", speed, take_off[slot]);
 
 	surface->DrawTxt(font, x / 2 - length / 2, y - 150, c, should_draw_takeoff ? "%i (%i)\n" : "%i", speed, take_off[slot]);

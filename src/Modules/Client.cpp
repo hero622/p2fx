@@ -45,8 +45,8 @@ Variable r_portaltestents;
 Variable r_portalsopenall;
 Variable r_drawviewmodel;
 
-Variable sar_disable_coop_score_hud("sar_disable_coop_score_hud", "0", "Disables the coop score HUD which appears in demo playback.\n");
-Variable sar_disable_save_status_hud("sar_disable_save_status_hud", "0", "Disables the saving/saved HUD which appears when you make a save.\n");
+Variable p2fx_disable_coop_score_hud("p2fx_disable_coop_score_hud", "0", "Disables the coop score HUD which appears in demo playback.\n");
+Variable p2fx_disable_save_status_hud("p2fx_disable_save_status_hud", "0", "Disables the saving/saved HUD which appears when you make a save.\n");
 
 REDECL(Client::LevelInitPreEntity);
 REDECL(Client::CreateMove);
@@ -208,7 +208,7 @@ DETOUR(Client::CreateMove, float flInputSampleTime, CUserCmd *cmd) {
 		Stitcher::OverrideMovement(cmd);
 	}
 
-	if (sar_strafesync.GetBool()) {
+	if (p2fx_strafesync.GetBool()) {
 		synchro->UpdateSync(engine->IsOrange() ? 1 : 0, cmd);
 	}
 
@@ -231,7 +231,7 @@ DETOUR(Client::CreateMove2, float flInputSampleTime, CUserCmd *cmd) {
 		inputHud.SetInputInfo(1, cmd->buttons, {cmd->sidemove, cmd->forwardmove, cmd->upmove});
 	}
 
-	if (sar_strafesync.GetBool()) {
+	if (p2fx_strafesync.GetBool()) {
 		synchro->UpdateSync(1, cmd);
 	}
 
@@ -250,13 +250,13 @@ DETOUR(Client::CreateMove2, float flInputSampleTime, CUserCmd *cmd) {
 
 // CHud::GetName
 DETOUR_T(const char *, Client::GetName) {
-	if (sar_disable_challenge_stats_hud.GetBool()) return "";
+	if (p2fx_disable_challenge_stats_hud.GetBool()) return "";
 	return Client::GetName(thisptr);
 }
 
 // CHudMultiplayerBasicInfo::ShouldDraw
 DETOUR_T(bool, Client::ShouldDraw_BasicInfo) {
-	if (sar_disable_coop_score_hud.GetBool()) {
+	if (p2fx_disable_coop_score_hud.GetBool()) {
 		return false;
 	}
 
@@ -265,7 +265,7 @@ DETOUR_T(bool, Client::ShouldDraw_BasicInfo) {
 
 // CHudSaveStatus::ShouldDraw
 DETOUR_T(bool, Client::ShouldDraw_SaveStatus) {
-	if (sar_disable_save_status_hud.GetBool()) {
+	if (p2fx_disable_save_status_hud.GetBool()) {
 		return false;
 	}
 
@@ -361,7 +361,7 @@ DETOUR(Client::DecodeUserCmdFromBuffer, int nSlot, int buf, signed int sequence_
 		inputHud.SetInputInfo(1, cmd->buttons, cmdMove);
 	}
 
-	if (sar_strafesync.GetBool()) {
+	if (p2fx_strafesync.GetBool()) {
 		synchro->UpdateSync(nSlot, cmd);
 	}
 
@@ -458,7 +458,7 @@ DETOUR(Client::ProcessMovement, void *player, CMoveData *move) {
 	return result;
 }
 
-CON_COMMAND(sar_chat, "sar_chat - open the chat HUD\n") {
+CON_COMMAND(p2fx_chat, "p2fx_chat - open the chat HUD\n") {
 	client->OpenChat();
 }
 
@@ -484,7 +484,7 @@ Hook g_DrawOpaqueRenderablesHook(&Client::DrawOpaqueRenderables_Hook);
 
 extern Hook g_CalcViewModelLagHook;
 DETOUR_T(void, Client::CalcViewModelLag, Vector &origin, QAngle &angles, QAngle &original_angles) {
-	if (sar_disable_weapon_sway.GetBool()) {
+	if (p2fx_disable_weapon_sway.GetBool()) {
 		return;
 	}
 
@@ -535,7 +535,7 @@ bool Client::Init() {
 			if (this->g_HudChat = Interface::Create(CHudChat)) {
 				this->ChatPrintf = g_HudChat->Original<_ChatPrintf>(Offsets::ChatPrintf);
 				this->StartMessageMode = g_HudChat->Original<_StartMessageMode>(Offsets::ChatPrintf + 1);
-				if (sar.game->Is(SourceGame_Portal2)) {
+				if (p2fx.game->Is(SourceGame_Portal2)) {
 					this->g_HudChat->Hook(Client::MsgFunc_SayText2_Hook, Client::MsgFunc_SayText2, Offsets::MsgFunc_SayText2);
 					this->g_HudChat->Hook(Client::GetTextColorForClient_Hook, Client::GetTextColorForClient, Offsets::GetTextColorForClient);
 				}
@@ -597,7 +597,7 @@ bool Client::Init() {
 	Client::DrawTranslucentRenderables = (decltype(Client::DrawTranslucentRenderables))Memory::Scan(client->Name(), "55 8B EC 81 EC 80 00 00 00 53 56 8B F1 8B 0D ? ? ? ? 8B 01 8B 90 C4 01 00 00 57 89 75 F0 FF D2 8B F8");
 	Client::DrawOpaqueRenderables = (decltype(Client::DrawOpaqueRenderables))Memory::Scan(client->Name(), "55 8B EC 83 EC 54 83 7D 0C 00 A1 ? ? ? ? 53 56 0F 9F 45 EC 83 78 30 00 57 8B F1 0F 84 BA 03 00 00");
 #else
-	if (sar.game->Is(SourceGame_EIPRelPIC)) {
+	if (p2fx.game->Is(SourceGame_EIPRelPIC)) {
 		Client::DrawTranslucentRenderables = (decltype(Client::DrawTranslucentRenderables))Memory::Scan(client->Name(), "55 89 E5 57 56 53 81 EC B8 00 00 00 8B 45 10 8B 5D 0C 89 85 60 FF FF FF 88 45 A7 A1 ? ? ? ?");
 		Client::DrawOpaqueRenderables = (decltype(Client::DrawOpaqueRenderables))Memory::Scan(client->Name(), "55 89 E5 57 56 53 83 EC 7C A1 ? ? ? ? 8B 5D 08 89 45 90 85 C0 0F 85 34 04 00 00 A1 ? ? ? ? 8B 40 30 85 C0");
 	} else {
@@ -609,7 +609,7 @@ bool Client::Init() {
 	g_DrawTranslucentRenderablesHook.SetFunc(Client::DrawTranslucentRenderables);
 	g_DrawOpaqueRenderablesHook.SetFunc(Client::DrawOpaqueRenderables);
 
-	if (sar.game->Is(SourceGame_Portal2)) {
+	if (p2fx.game->Is(SourceGame_Portal2)) {
 #ifdef _WIN32
 		Client::CalcViewModelLag = (decltype(Client::CalcViewModelLag))Memory::Scan(client->Name(), "53 8B DC 83 EC 08 83 E4 F0 83 C4 04 55 8B 6B 04 89 6C 24 04 8B EC 83 EC 1C 56 6A 00 6A 00 8D 45 F4 8B F1 8B 4B 0C 50 51 E8 ? ? ? ?");
 #else
@@ -626,7 +626,7 @@ bool Client::Init() {
 		// OpenRadialMenuCommand is inlined
 		this->gamerules = *(void ***)(cbk + 2);
 #else
-		if (sar.game->Is(SourceGame_EIPRelPIC)) {
+		if (p2fx.game->Is(SourceGame_EIPRelPIC)) {
 			cbk = (uintptr_t)Memory::Read(cbk + 9);  // openradialmenu -> OpenRadialMenuCommand
 			this->gamerules = *(void ***)(cbk + 1);
 		} else {

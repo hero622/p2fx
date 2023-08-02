@@ -92,12 +92,12 @@ ON_EVENT(RENDER) {
 
 static float g_last_step_time;
 
-Variable sar_fcps_override("sar_fcps_override", "0", "Override FCPS for tracing results.\n");
-Variable sar_fcps_autostep("sar_fcps_autostep", "0", 0, "Time between automatic steps of FCPS animation. 0 to disable automatic stepping.\n");
+Variable p2fx_fcps_override("p2fx_fcps_override", "0", "Override FCPS for tracing results.\n");
+Variable p2fx_fcps_autostep("p2fx_fcps_autostep", "0", 0, "Time between automatic steps of FCPS animation. 0 to disable automatic stepping.\n");
 
-CON_COMMAND(sar_fcps_anim_start, "sar_fcps_anim_start <id> - start animating the ID'th FCPS call.\n") {
+CON_COMMAND(p2fx_fcps_anim_start, "p2fx_fcps_anim_start <id> - start animating the ID'th FCPS call.\n") {
 	if (args.ArgC() != 2) {
-		console->Print(sar_fcps_anim_start.ThisPtr()->m_pszHelpString);
+		console->Print(p2fx_fcps_anim_start.ThisPtr()->m_pszHelpString);
 		return;
 	}
 
@@ -116,25 +116,25 @@ CON_COMMAND(sar_fcps_anim_start, "sar_fcps_anim_start <id> - start animating the
 	g_anim_state.idx = idx;
 }
 
-CON_COMMAND(sar_fcps_anim_step, "sar_fcps_anim_step - step the FCPS animation forward.\n") {
+CON_COMMAND(p2fx_fcps_anim_step, "p2fx_fcps_anim_step - step the FCPS animation forward.\n") {
 	g_last_step_time = engine->GetHostTime();
 	stepAnim();
 }
 
-CON_COMMAND(sar_fcps_clear, "sar_fcps_clear - clear the FCPS event history.\n") {
+CON_COMMAND(p2fx_fcps_clear, "p2fx_fcps_clear - clear the FCPS event history.\n") {
 	g_anim_state.stage = AnimStage::NONE;
 	g_events.clear();
 }
 
 ON_EVENT(FRAME) {
 	float time = engine->GetHostTime();
-	if (sar_fcps_autostep.GetFloat() == 0.0f) {
+	if (p2fx_fcps_autostep.GetFloat() == 0.0f) {
 		g_last_step_time = time;
 	} else {
 		float delta = time - g_last_step_time;
-		if (delta >= sar_fcps_autostep.GetFloat()) {
+		if (delta >= p2fx_fcps_autostep.GetFloat()) {
 			stepAnim();
-			g_last_step_time = sar_fcps_autostep.GetFloat();
+			g_last_step_time = p2fx_fcps_autostep.GetFloat();
 		}
 	}
 }

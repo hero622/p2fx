@@ -3,7 +3,7 @@
 #include "Game.hpp"
 #include "Interface.hpp"
 #include "Offsets.hpp"
-#include "SAR.hpp"
+#include "P2FX.hpp"
 #include "Utils.hpp"
 #include "Event.hpp"
 
@@ -13,28 +13,28 @@ struct ConFilterRule {
 	std::string end;
 };
 
-static Variable sar_con_filter("sar_con_filter", "0", "Enable the console filter\n");
-static Variable sar_con_filter_default("sar_con_filter_default", "0", "Whether to allow text through the console filter by default\n");
-static Variable sar_con_filter_suppress_blank_lines("sar_con_filter_suppress_blank_lines", "0", "Whether to suppress blank lines in console\n");
+static Variable p2fx_con_filter("p2fx_con_filter", "0", "Enable the console filter\n");
+static Variable p2fx_con_filter_default("p2fx_con_filter_default", "0", "Whether to allow text through the console filter by default\n");
+static Variable p2fx_con_filter_suppress_blank_lines("p2fx_con_filter_suppress_blank_lines", "0", "Whether to suppress blank lines in console\n");
 static std::vector<ConFilterRule> g_con_filter_rules;
 
-CON_COMMAND(sar_con_filter_allow, "sar_con_filter_allow <string> [end] - add an allow rule to the console filter, allowing until 'end' is matched\n") {
+CON_COMMAND(p2fx_con_filter_allow, "p2fx_con_filter_allow <string> [end] - add an allow rule to the console filter, allowing until 'end' is matched\n") {
 	if (args.ArgC() != 2 && args.ArgC() != 3) {
-		return console->Print(sar_con_filter_allow.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_con_filter_allow.ThisPtr()->m_pszHelpString);
 	}
 	g_con_filter_rules.push_back({true, args[1], args.ArgC() == 3 ? args[2] : ""});
 }
 
-CON_COMMAND(sar_con_filter_block, "sar_con_filter_block <string> [end] - add a disallow rule to the console filter, blocking until 'end' is matched\n") {
+CON_COMMAND(p2fx_con_filter_block, "p2fx_con_filter_block <string> [end] - add a disallow rule to the console filter, blocking until 'end' is matched\n") {
 	if (args.ArgC() != 2 && args.ArgC() != 3) {
-		return console->Print(sar_con_filter_block.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_con_filter_block.ThisPtr()->m_pszHelpString);
 	}
 	g_con_filter_rules.push_back({false, args[1], args.ArgC() == 3 ? args[2] : ""});
 }
 
-CON_COMMAND(sar_con_filter_reset, "sar_con_filter_reset - clear the console filter rule list\n") {
+CON_COMMAND(p2fx_con_filter_reset, "p2fx_con_filter_reset - clear the console filter rule list\n") {
 	if (args.ArgC() != 1) {
-		return console->Print(sar_con_filter_reset.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_con_filter_reset.ThisPtr()->m_pszHelpString);
 	}
 	g_con_filter_rules.clear();
 }
@@ -99,7 +99,7 @@ public:
 		}
 
 		if (MatchesFilters(str.c_str())) {
-			if (!IsNewline(str.c_str()) || !this->last_was_newline || !sar_con_filter_suppress_blank_lines.GetBool()) {
+			if (!IsNewline(str.c_str()) || !this->last_was_newline || !p2fx_con_filter_suppress_blank_lines.GetBool()) {
 				for (auto &b : this->buf) {
 					switch (b.type) {
 					case BufferedPart::Type::COL_PRINT:
@@ -127,7 +127,7 @@ private:
 	}
 
 	bool MatchesFilters(const char *msg) {
-		if (!sar_con_filter.isRegistered || !sar_con_filter.GetBool()) return true;
+		if (!p2fx_con_filter.isRegistered || !p2fx_con_filter.GetBool()) return true;
 
 		if (this->do_until_end) {
 			bool match = *this->do_until_end;
@@ -148,7 +148,7 @@ private:
 			}
 		}
 
-		return sar_con_filter_default.GetBool();
+		return p2fx_con_filter_default.GetBool();
 	}
 
 	bool MatchesPattern(const char *str, const std::string &pat) {

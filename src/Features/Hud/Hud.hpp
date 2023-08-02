@@ -107,67 +107,67 @@ public:
 
 // First screen
 #define HUD_ELEMENT_NO_DISABLE(name, type)                                                     \
-	void sar_hud_element_##name##_callback(HudContext *ctx);                                      \
-	HudElement sar_hud_element_##name("sar_hud_" #name, sar_hud_element_##name##_callback, type); \
-	void sar_hud_element_##name##_callback(HudContext *ctx)
+	void p2fx_hud_element_##name##_callback(HudContext *ctx);                                      \
+	HudElement p2fx_hud_element_##name("p2fx_hud_" #name, p2fx_hud_element_##name##_callback, type); \
+	void p2fx_hud_element_##name##_callback(HudContext *ctx)
 #define HUD_ELEMENT(name, value, desc, type)                                                  \
-	Variable sar_hud_##name("sar_hud_" #name, value, desc, FCVAR_DONTRECORD);                    \
-	void sar_hud_element_##name##_callback(HudContext *ctx);                                     \
-	HudElement sar_hud_element_##name(&sar_hud_##name, sar_hud_element_##name##_callback, type); \
-	void sar_hud_element_##name##_callback(HudContext *ctx)
+	Variable p2fx_hud_##name("p2fx_hud_" #name, value, desc, FCVAR_DONTRECORD);                    \
+	void p2fx_hud_element_##name##_callback(HudContext *ctx);                                     \
+	HudElement p2fx_hud_element_##name(&p2fx_hud_##name, p2fx_hud_element_##name##_callback, type); \
+	void p2fx_hud_element_##name##_callback(HudContext *ctx)
 #define HUD_ELEMENT_STRING(name, value, desc, type)                                                 \
-	Variable sar_hud_##name("sar_hud_" #name, value, desc, FCVAR_DONTRECORD);                          \
-	void sar_hud_element_##name##_callback(HudContext *ctx, const char *text);                         \
-	HudStringElement sar_hud_element_##name(&sar_hud_##name, sar_hud_element_##name##_callback, type); \
-	void sar_hud_element_##name##_callback(HudContext *ctx, const char *text)
+	Variable p2fx_hud_##name("p2fx_hud_" #name, value, desc, FCVAR_DONTRECORD);                          \
+	void p2fx_hud_element_##name##_callback(HudContext *ctx, const char *text);                         \
+	HudStringElement p2fx_hud_element_##name(&p2fx_hud_##name, p2fx_hud_element_##name##_callback, type); \
+	void p2fx_hud_element_##name##_callback(HudContext *ctx, const char *text)
 #define HUD_ELEMENT_MODE(name, value, min, max, desc, type)                                       \
-	Variable sar_hud_##name("sar_hud_" #name, value, min, max, desc, FCVAR_DONTRECORD);              \
-	void sar_hud_element_##name##_callback(HudContext *ctx, int mode);                               \
-	HudModeElement sar_hud_element_##name(&sar_hud_##name, sar_hud_element_##name##_callback, type); \
-	void sar_hud_element_##name##_callback(HudContext *ctx, int mode)
+	Variable p2fx_hud_##name("p2fx_hud_" #name, value, min, max, desc, FCVAR_DONTRECORD);              \
+	void p2fx_hud_element_##name##_callback(HudContext *ctx, int mode);                               \
+	HudModeElement p2fx_hud_element_##name(&p2fx_hud_##name, p2fx_hud_element_##name##_callback, type); \
+	void p2fx_hud_element_##name##_callback(HudContext *ctx, int mode)
 // First+second screen
 #define HUD_ELEMENT2_NO_DISABLE(name, type)                                                          \
-	void sar_hud_element_##name##_callback(HudContext *ctx);                                            \
-	HudElement sar_hud_element_##name("sar_hud_" #name, sar_hud_element_##name##_callback, type, true); \
-	void sar_hud_element_##name##_callback(HudContext *ctx)
+	void p2fx_hud_element_##name##_callback(HudContext *ctx);                                            \
+	HudElement p2fx_hud_element_##name("p2fx_hud_" #name, p2fx_hud_element_##name##_callback, type, true); \
+	void p2fx_hud_element_##name##_callback(HudContext *ctx)
 #define HUD_ELEMENT2(name, value, desc, type)                                                       \
-	Variable sar_hud_##name("sar_hud_" #name, value, desc, FCVAR_DONTRECORD);                          \
-	void sar_hud_element_##name##_callback(HudContext *ctx);                                           \
-	HudElement sar_hud_element_##name(&sar_hud_##name, sar_hud_element_##name##_callback, type, true); \
-	void sar_hud_element_##name##_callback(HudContext *ctx)
+	Variable p2fx_hud_##name("p2fx_hud_" #name, value, desc, FCVAR_DONTRECORD);                          \
+	void p2fx_hud_element_##name##_callback(HudContext *ctx);                                           \
+	HudElement p2fx_hud_element_##name(&p2fx_hud_##name, p2fx_hud_element_##name##_callback, type, true); \
+	void p2fx_hud_element_##name##_callback(HudContext *ctx)
 #define HUD_ELEMENT_STRING2(name, value, desc, type)                                                      \
-	Variable sar_hud_##name("sar_hud_" #name, value, desc, FCVAR_DONTRECORD);                                \
-	void sar_hud_element_##name##_callback(HudContext *ctx, const char *text);                               \
-	HudStringElement sar_hud_element_##name(&sar_hud_##name, sar_hud_element_##name##_callback, type, true); \
-	void sar_hud_element_##name##_callback(HudContext *ctx, const char *text)
+	Variable p2fx_hud_##name("p2fx_hud_" #name, value, desc, FCVAR_DONTRECORD);                                \
+	void p2fx_hud_element_##name##_callback(HudContext *ctx, const char *text);                               \
+	HudStringElement p2fx_hud_element_##name(&p2fx_hud_##name, p2fx_hud_element_##name##_callback, type, true); \
+	void p2fx_hud_element_##name##_callback(HudContext *ctx, const char *text)
 #define HUD_ELEMENT_MODE2(name, value, min, max, desc, type)                                            \
-	Variable sar_hud_##name("sar_hud_" #name, value, min, max, desc, FCVAR_DONTRECORD);                    \
-	void sar_hud_element_##name##_callback(HudContext *ctx, int mode);                                     \
-	HudModeElement sar_hud_element_##name(&sar_hud_##name, sar_hud_element_##name##_callback, type, true); \
-	void sar_hud_element_##name##_callback(HudContext *ctx, int mode)
+	Variable p2fx_hud_##name("p2fx_hud_" #name, value, min, max, desc, FCVAR_DONTRECORD);                    \
+	void p2fx_hud_element_##name##_callback(HudContext *ctx, int mode);                                     \
+	HudModeElement p2fx_hud_element_##name(&p2fx_hud_##name, p2fx_hud_element_##name##_callback, type, true); \
+	void p2fx_hud_element_##name##_callback(HudContext *ctx, int mode)
 // Specify game version
 #define HUD_ELEMENT3(name, value, desc, type, showOnSecondScreen, version)                                                 \
-	Variable sar_hud_##name("sar_hud_" #name, value, desc, FCVAR_DONTRECORD);                                                 \
-	void sar_hud_element_##name##_callback(HudContext *ctx);                                                                  \
-	HudElement sar_hud_element_##name(&sar_hud_##name, sar_hud_element_##name##_callback, type, showOnSecondScreen, version); \
-	void sar_hud_element_##name##_callback(HudContext *ctx)
+	Variable p2fx_hud_##name("p2fx_hud_" #name, value, desc, FCVAR_DONTRECORD);                                                 \
+	void p2fx_hud_element_##name##_callback(HudContext *ctx);                                                                  \
+	HudElement p2fx_hud_element_##name(&p2fx_hud_##name, p2fx_hud_element_##name##_callback, type, showOnSecondScreen, version); \
+	void p2fx_hud_element_##name##_callback(HudContext *ctx)
 #define HUD_ELEMENT_STRING3(name, value, desc, type, showOnSecondScreen, version)                                                \
-	Variable sar_hud_##name("sar_hud_" #name, value, desc, FCVAR_DONTRECORD);                                                       \
-	void sar_hud_element_##name##_callback(HudContext *ctx, const char *text);                                                      \
-	HudStringElement sar_hud_element_##name(&sar_hud_##name, sar_hud_element_##name##_callback, type, showOnSecondScreen, version); \
-	void sar_hud_element_##name##_callback(HudContext *ctx, const char *text)
+	Variable p2fx_hud_##name("p2fx_hud_" #name, value, desc, FCVAR_DONTRECORD);                                                       \
+	void p2fx_hud_element_##name##_callback(HudContext *ctx, const char *text);                                                      \
+	HudStringElement p2fx_hud_element_##name(&p2fx_hud_##name, p2fx_hud_element_##name##_callback, type, showOnSecondScreen, version); \
+	void p2fx_hud_element_##name##_callback(HudContext *ctx, const char *text)
 #define HUD_ELEMENT_MODE3(name, value, min, max, desc, type, showOnSecondScreen, version)                                      \
-	Variable sar_hud_##name("sar_hud_" #name, value, min, max, desc, FCVAR_DONTRECORD);                                           \
-	void sar_hud_element_##name##_callback(HudContext *ctx, int mode);                                                            \
-	HudModeElement sar_hud_element_##name(&sar_hud_##name, sar_hud_element_##name##_callback, type, showOnSecondScreen, version); \
-	void sar_hud_element_##name##_callback(HudContext *ctx, int mode)
+	Variable p2fx_hud_##name("p2fx_hud_" #name, value, min, max, desc, FCVAR_DONTRECORD);                                           \
+	void p2fx_hud_element_##name##_callback(HudContext *ctx, int mode);                                                            \
+	HudModeElement p2fx_hud_element_##name(&p2fx_hud_##name, p2fx_hud_element_##name##_callback, type, showOnSecondScreen, version); \
+	void p2fx_hud_element_##name##_callback(HudContext *ctx, int mode)
 
-extern Variable sar_hud_spacing;
-extern Variable sar_hud_x;
-extern Variable sar_hud_y;
-extern Variable sar_hud_font_index;
-extern Variable sar_hud_font_color;
-extern Variable sar_hud_precision;
+extern Variable p2fx_hud_spacing;
+extern Variable p2fx_hud_x;
+extern Variable p2fx_hud_y;
+extern Variable p2fx_hud_font_index;
+extern Variable p2fx_hud_font_color;
+extern Variable p2fx_hud_precision;
 extern QAngle g_bluePortalAngles[2];
 extern QAngle g_orangePortalAngles[2];
 

@@ -19,14 +19,14 @@ jobs:
       - name: Build
         env:
           RELEASE_BUILD: 1
-          DEMO_SIGN_PUBKEY: ${{ secrets.SAR_DEMO_SIGN_PUBKEY }}
-          DEMO_SIGN_PRIVKEY: ${{ secrets.SAR_DEMO_SIGN_PRIVKEY }}
+          DEMO_SIGN_PUBKEY: ${{ secrets.P2FX_DEMO_SIGN_PUBKEY }}
+          DEMO_SIGN_PRIVKEY: ${{ secrets.P2FX_DEMO_SIGN_PRIVKEY }}
         run: make -j$(nproc)
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: sar-linux
-          path: sar.so
+          name: p2fx-linux
+          path: p2fx.so
           if-no-files-found: error
   build-win:
     name: Windows Build
@@ -42,20 +42,20 @@ jobs:
       - name: Build
         env:
           RELEASE_BUILD: 1
-          DEMO_SIGN_PUBKEY: ${{ secrets.SAR_DEMO_SIGN_PUBKEY }}
-          DEMO_SIGN_PRIVKEY: ${{ secrets.SAR_DEMO_SIGN_PRIVKEY }}
+          DEMO_SIGN_PUBKEY: ${{ secrets.P2FX_DEMO_SIGN_PUBKEY }}
+          DEMO_SIGN_PRIVKEY: ${{ secrets.P2FX_DEMO_SIGN_PRIVKEY }}
         run: msbuild -m -t:p2fx -p:"Configuration=Release;Platform=x86" p2fx.sln
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: sar-windows
-          path: bin\sar.dll
+          name: p2fx-windows
+          path: bin\p2fx.dll
           if-no-files-found: error
       - name: Upload PDB Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: sar-windows-pdb
-          path: bin\sar.pdb
+          name: p2fx-windows-pdb
+          path: bin\p2fx.pdb
           if-no-files-found: error
   release:
     name: Release
@@ -69,15 +69,15 @@ jobs:
       - name: Download Linux Build
         uses: actions/download-artifact@v3
         with:
-          name: sar-linux
+          name: p2fx-linux
       - name: Download Windows Build
         uses: actions/download-artifact@v3
         with:
-          name: sar-windows
+          name: p2fx-windows
       - name: Download Windows PDB
         uses: actions/download-artifact@v3
         with:
-          name: sar-windows-pdb
+          name: p2fx-windows-pdb
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
@@ -86,18 +86,18 @@ jobs:
 
             **Installation**
             - Download:
-              - [Windows](https://github.com/p2sr/p2fx/releases/download/${{ steps.get_release.outputs.version }}/sar.dll)
-              - [Linux](https://github.com/p2sr/p2fx/releases/download/${{ steps.get_release.outputs.version }}/sar.so)
+              - [Windows](https://github.com/p2sr/p2fx/releases/download/${{ steps.get_release.outputs.version }}/p2fx.dll)
+              - [Linux](https://github.com/p2sr/p2fx/releases/download/${{ steps.get_release.outputs.version }}/p2fx.so)
             - Place the binary into the game folder e.g. `Portal 2`
-            - Open developer console and enter `plugin_load sar`
+            - Open developer console and enter `plugin_load p2fx`
 
             ---
 
             **Changelog**
             TODO
           files: |
-            sar.so
-            sar.dll
-            sar.pdb
+            p2fx.so
+            p2fx.dll
+            p2fx.pdb
           prerelease: ${{ contains(github.ref, '-pre') }}
           fail_on_unmatched_files: true

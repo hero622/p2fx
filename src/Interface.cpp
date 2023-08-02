@@ -76,7 +76,7 @@ void Interface::Delete(Interface *ptr) {
 void *Interface::GetPtr(const char *filename, const char *interfaceSymbol) {
 	auto handle = Memory::GetModuleHandleByName(filename);
 	if (!handle) {
-		console->DevWarning("SAR: Failed to open module %s!\n", filename);
+		console->DevWarning("P2FX: Failed to open module %s!\n", filename);
 		return nullptr;
 	}
 
@@ -84,7 +84,7 @@ void *Interface::GetPtr(const char *filename, const char *interfaceSymbol) {
 	Memory::CloseModuleHandle(handle);
 
 	if (!CreateInterface) {
-		console->DevWarning("SAR: Failed to find symbol CreateInterface for %s!\n", filename);
+		console->DevWarning("P2FX: Failed to find symbol CreateInterface for %s!\n", filename);
 		return nullptr;
 	}
 
@@ -92,7 +92,7 @@ void *Interface::GetPtr(const char *filename, const char *interfaceSymbol) {
 	void *fn = CreateInterface(interfaceSymbol, &ret);
 
 	if (ret) {
-		console->DevWarning("SAR: Failed to find interface with symbol %s in %s!\n", interfaceSymbol, filename);
+		console->DevWarning("P2FX: Failed to find interface with symbol %s in %s!\n", interfaceSymbol, filename);
 		return nullptr;
 	}
 	return fn;

@@ -6,13 +6,13 @@
 #include "Modules/Surface.hpp"
 #include "Variable.hpp"
 
-Variable sar_ei_hud("sar_ei_hud", "0", 0, "Draws entity inspection data.\n");
-Variable sar_ei_hud_x("sar_ei_hud_x", "0", 0, "X offset of entity inspection HUD.\n");
-Variable sar_ei_hud_y("sar_ei_hud_y", "0", 0, "Y offset of entity inspection HUD.\n");
-Variable sar_ei_hud_z("sar_ei_hud_z", "0", 0, "Z offset of entity inspection HUD.\n");
-Variable sar_ei_hud_font_color("sar_ei_hud_font_color", "255 255 255 255", "RGBA font color of entity inspection HUD when not recording.\n", 0);
-Variable sar_ei_hud_font_color2("sar_ei_hud_font_color2", "153 23 9 255", "RGBA font color of entity inspection HUD when recording.\n", 0);
-Variable sar_ei_hud_font_index("sar_ei_hud_font_index", "1", 0, "Font index of entity inspection HUD.\n");
+Variable p2fx_ei_hud("p2fx_ei_hud", "0", 0, "Draws entity inspection data.\n");
+Variable p2fx_ei_hud_x("p2fx_ei_hud_x", "0", 0, "X offset of entity inspection HUD.\n");
+Variable p2fx_ei_hud_y("p2fx_ei_hud_y", "0", 0, "Y offset of entity inspection HUD.\n");
+Variable p2fx_ei_hud_z("p2fx_ei_hud_z", "0", 0, "Z offset of entity inspection HUD.\n");
+Variable p2fx_ei_hud_font_color("p2fx_ei_hud_font_color", "255 255 255 255", "RGBA font color of entity inspection HUD when not recording.\n", 0);
+Variable p2fx_ei_hud_font_color2("p2fx_ei_hud_font_color2", "153 23 9 255", "RGBA font color of entity inspection HUD when recording.\n", 0);
+Variable p2fx_ei_hud_font_index("p2fx_ei_hud_font_index", "1", 0, "Font index of entity inspection HUD.\n");
 
 InspectionHud inspectionHud;
 
@@ -20,24 +20,24 @@ InspectionHud::InspectionHud()
 	: Hud(HudType_InGame | HudType_Paused) {
 }
 bool InspectionHud::ShouldDraw() {
-	return sar_ei_hud.GetBool() && Hud::ShouldDraw();
+	return p2fx_ei_hud.GetBool() && Hud::ShouldDraw();
 }
 void InspectionHud::Paint(int slot) {
-	auto mode = sar_ei_hud.GetInt();
+	auto mode = p2fx_ei_hud.GetInt();
 
-	auto font = scheme->GetFontByID(sar_ei_hud_font_index.GetInt());
+	auto font = scheme->GetFontByID(p2fx_ei_hud_font_index.GetInt());
 
 	auto fontColorStr = !inspector->IsRunning()
-		? sar_ei_hud_font_color.GetString()
-		: sar_ei_hud_font_color2.GetString();
+		? p2fx_ei_hud_font_color.GetString()
+		: p2fx_ei_hud_font_color2.GetString();
 	auto fontColor = Utils::GetColor(fontColorStr,false).value_or(Color(255,255,255,255));
 
 	auto data = inspector->GetData();
 
 	auto offset = Vector{
-		(float)sar_ei_hud_x.GetInt(),
-		(float)sar_ei_hud_y.GetInt(),
-		(float)sar_ei_hud_z.GetInt()};
+		(float)p2fx_ei_hud_x.GetInt(),
+		(float)p2fx_ei_hud_y.GetInt(),
+		(float)p2fx_ei_hud_z.GetInt()};
 
 	auto screen = Vector();
 	engine->PointToScreen(data.origin + offset, screen);

@@ -7,7 +7,7 @@
 #include "Features/Session.hpp"
 #include "Features/Camera.hpp"
 #include "Offsets.hpp"
-#include "SAR.hpp"
+#include "P2FX.hpp"
 
 #include <algorithm>
 #include <cstring>
@@ -139,7 +139,7 @@ CEntInfo *EntityList::QuerySelector(const char *selector) {
 
 // Commands
 
-CON_COMMAND(sar_list_ents, "sar_list_ents - lists entities\n") {
+CON_COMMAND(p2fx_list_ents, "p2fx_list_ents - lists entities\n") {
 	console->Print("[index] (SERIAL) address | m_iClassName | m_iName\n");
 
 	auto pages = Offsets::NUM_ENT_ENTRIES / 512;
@@ -227,7 +227,7 @@ static void dumpEntInfo(void *entity) {
 	console->Msg("0x%08X\n", coll->GetCollisionGroup());
 }
 
-CON_COMMAND(sar_ent_info, "sar_ent_info [selector] - show info about the entity under the crosshair or with the given name\n") {
+CON_COMMAND(p2fx_ent_info, "p2fx_ent_info [selector] - show info about the entity under the crosshair or with the given name\n") {
 	if (!session->isRunning) return;
 
 	if (args.ArgC() == 2) {
@@ -250,9 +250,9 @@ CON_COMMAND(sar_ent_info, "sar_ent_info [selector] - show info about the entity 
 	console->Print("No entity found!\n");
 }
 
-CON_COMMAND(sar_find_ents, "sar_find_ents <selector> - finds entities in the entity list by class name\n") {
+CON_COMMAND(p2fx_find_ents, "p2fx_find_ents <selector> - finds entities in the entity list by class name\n") {
 	if (args.ArgC() != 2) {
-		return console->Print(sar_find_ents.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_find_ents.ThisPtr()->m_pszHelpString);
 	}
 
 	console->Print("Results for %s\n", args[1]);
@@ -279,10 +279,10 @@ CON_COMMAND(sar_find_ents, "sar_find_ents <selector> - finds entities in the ent
 }
 
 std::deque<EntitySlotSerial> g_ent_slot_serial;
-CON_COMMAND(sar_ent_slot_serial, "sar_ent_slot_serial <id> [value] - prints entity slot serial number, or sets it if additional parameter is specified.\nBanned in most categories, check with the rules before use!\n") {
+CON_COMMAND(p2fx_ent_slot_serial, "p2fx_ent_slot_serial <id> [value] - prints entity slot serial number, or sets it if additional parameter is specified.\nBanned in most categories, check with the rules before use!\n") {
 	if (client->GetChallengeStatus() == CMStatus::CHALLENGE && !sv_cheats.GetBool()) return console->Print("This is cheating! If you really want to do it, set sv_cheats 1\n");
 
-	if (args.ArgC() < 2 || args.ArgC() > 3) return console->Print(sar_ent_slot_serial.ThisPtr()->m_pszHelpString);
+	if (args.ArgC() < 2 || args.ArgC() > 3) return console->Print(p2fx_ent_slot_serial.ThisPtr()->m_pszHelpString);
 
 	int id = std::atoi(args[1]);
 	if (id < 0 || id > Offsets::NUM_ENT_ENTRIES) {

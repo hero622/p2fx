@@ -18,6 +18,6 @@ public:
 
 extern WorkshopList *workshop;
 
-extern Command sar_workshop;
-extern Command sar_workshop_update;
-extern Command sar_workshop_list;
+extern Command p2fx_workshop;
+extern Command p2fx_workshop_update;
+extern Command p2fx_workshop_list;

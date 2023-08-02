@@ -37,7 +37,7 @@ static int *g_snd_vol;
 static MovieInfo_t *g_movieInfo;
 
 // The demoplayer tick this segment ends on (we'll stop recording at
-// this tick if sar_render_autostop is set)
+// this tick if p2fx_render_autostop is set)
 int Renderer::segmentEndTick = -1;
 
 // Whether a demo is loading; used to detect whether we should autostart
@@ -53,21 +53,21 @@ static Variable snd_surround_speakers;
 
 // h264, hevc, vp8, vp9, dnxhd
 // aac, ac3, vorbis, opus, flac
-static Variable sar_render_vbitrate("sar_render_vbitrate", "40000", 1, "Video bitrate used in renders (kbit/s)\n");
-static Variable sar_render_abitrate("sar_render_abitrate", "160", 1, "Audio bitrate used in renders (kbit/s)\n");
-static Variable sar_render_vcodec("sar_render_vcodec", "h264", "Video codec used in renders (h264, hevc, vp8, vp9, dnxhd)\n", 0);
-static Variable sar_render_acodec("sar_render_acodec", "aac", "Audio codec used in renders (aac, ac3, vorbis, opus, flac)\n", 0);
-static Variable sar_render_quality("sar_render_quality", "35", 0, 50, "Render output quality, higher is better (50=lossless)\n");
-static Variable sar_render_fps("sar_render_fps", "60", 1, "Render output FPS\n");
-static Variable sar_render_sample_rate("sar_render_sample_rate", "44100", 1000, "Audio output sample rate\n");
-static Variable sar_render_blend("sar_render_blend", "0", 0, "How many frames to blend for each output frame; 1 = do not blend, 0 = automatically determine based on host_framerate\n");
-static Variable sar_render_blend_mode("sar_render_blend_mode", "1", 0, 1, "What type of frameblending to use. 0 = linear, 1 = Gaussian\n");
-static Variable sar_render_autostart("sar_render_autostart", "0", "Whether to automatically start when demo playback begins\n");
-static Variable sar_render_autostart_extension("sar_render_autostart_extension", "mp4", "The file extension (and hence container format) to use for automatically started renders.\n", 0);
-static Variable sar_render_autostop("sar_render_autostop", "1", "Whether to automatically stop when __END__ is seen in demo playback\n");
-static Variable sar_render_shutter_angle("sar_render_shutter_angle", "360", 30, 360, "The shutter angle to use for rendering in degrees.\n");
-static Variable sar_render_merge("sar_render_merge", "0", "When set, merge all the renders until sar_render_finish is entered\n");
-static Variable sar_render_skip_coop_videos("sar_render_skip_coop_videos", "1", "When set, don't include coop loading time in renders\n");
+static Variable p2fx_render_vbitrate("p2fx_render_vbitrate", "40000", 1, "Video bitrate used in renders (kbit/s)\n");
+static Variable p2fx_render_abitrate("p2fx_render_abitrate", "160", 1, "Audio bitrate used in renders (kbit/s)\n");
+static Variable p2fx_render_vcodec("p2fx_render_vcodec", "h264", "Video codec used in renders (h264, hevc, vp8, vp9, dnxhd)\n", 0);
+static Variable p2fx_render_acodec("p2fx_render_acodec", "aac", "Audio codec used in renders (aac, ac3, vorbis, opus, flac)\n", 0);
+static Variable p2fx_render_quality("p2fx_render_quality", "35", 0, 50, "Render output quality, higher is better (50=lossless)\n");
+static Variable p2fx_render_fps("p2fx_render_fps", "60", 1, "Render output FPS\n");
+static Variable p2fx_render_sample_rate("p2fx_render_sample_rate", "44100", 1000, "Audio output sample rate\n");
+static Variable p2fx_render_blend("p2fx_render_blend", "0", 0, "How many frames to blend for each output frame; 1 = do not blend, 0 = automatically determine based on host_framerate\n");
+static Variable p2fx_render_blend_mode("p2fx_render_blend_mode", "1", 0, 1, "What type of frameblending to use. 0 = linear, 1 = Gaussian\n");
+static Variable p2fx_render_autostart("p2fx_render_autostart", "0", "Whether to automatically start when demo playback begins\n");
+static Variable p2fx_render_autostart_extension("p2fx_render_autostart_extension", "mp4", "The file extension (and hence container format) to use for automatically started renders.\n", 0);
+static Variable p2fx_render_autostop("p2fx_render_autostop", "1", "Whether to automatically stop when __END__ is seen in demo playback\n");
+static Variable p2fx_render_shutter_angle("p2fx_render_shutter_angle", "360", 30, 360, "The shutter angle to use for rendering in degrees.\n");
+static Variable p2fx_render_merge("p2fx_render_merge", "0", "When set, merge all the renders until p2fx_render_finish is entered\n");
+static Variable p2fx_render_skip_coop_videos("p2fx_render_skip_coop_videos", "1", "When set, don't include coop loading time in renders\n");
 
 // g_videomode VMT wrappers {{{
 
@@ -144,7 +144,7 @@ static struct
 	std::atomic<bool> workerFailedToStart;
 } g_render;
 
-ON_EVENT(SAR_UNLOAD) {
+ON_EVENT(P2FX_UNLOAD) {
 	if (g_render.worker.joinable()) g_render.worker.detach();
 }
 
@@ -175,7 +175,7 @@ static AVCodecID audioCodecFromName(const char *name) {
 }
 
 static uint16_t calcFrameWeight(double position) {
-	int mode = sar_render_blend_mode.GetInt();
+	int mode = p2fx_render_blend_mode.GetInt();
 	if (mode == 0) {
 		// Linear
 		return 1;
@@ -202,7 +202,7 @@ static uint16_t calcFrameWeight(double position) {
 
 // Movie command hooks {{{
 
-// We want to stop use of the normal movie system while a SAR render is
+// We want to stop use of the normal movie system while a P2FX render is
 // active. This is because we exploit g_movieInfo to make the game think
 // it's recording a movie, so if both were running at the same time,
 // they'd interact in weird and undefined ways.
@@ -211,14 +211,14 @@ static _CommandCallback startmovie_origCbk;
 static _CommandCallback endmovie_origCbk;
 static void startmovie_cbk(const CCommand &args) {
 	if (g_render.isRendering.load()) {
-		console->Print("Cannot startmovie while a SAR render is active! Stop the render with sar_render_finish.\n");
+		console->Print("Cannot startmovie while a P2FX render is active! Stop the render with p2fx_render_finish.\n");
 		return;
 	}
 	startmovie_origCbk(args);
 }
 static void endmovie_cbk(const CCommand &args) {
 	if (g_render.isRendering.load()) {
-		console->Print("Cannot endmovie while a SAR render is active! Did you mean sar_render_finish?\n");
+		console->Print("Cannot endmovie while a P2FX render is active! Did you mean p2fx_render_finish?\n");
 		return;
 	}
 	endmovie_origCbk(args);
@@ -857,30 +857,30 @@ static void startRender() {
 		return;
 	}
 
-	g_render.samplerate = sar_render_sample_rate.GetInt();
-	g_render.fps = sar_render_fps.GetInt();
+	g_render.samplerate = p2fx_render_sample_rate.GetInt();
+	g_render.fps = p2fx_render_fps.GetInt();
 
-	if (sar_render_blend.GetInt() == 0 && host_framerate.GetInt() == 0) {
-		console->Print("host_framerate or sar_render_blend must be nonzero\n");
+	if (p2fx_render_blend.GetInt() == 0 && host_framerate.GetInt() == 0) {
+		console->Print("host_framerate or p2fx_render_blend must be nonzero\n");
 		return;
-	} else if (sar_render_blend.GetInt() != 0) {
-		g_render.toBlend = sar_render_blend.GetInt();
+	} else if (p2fx_render_blend.GetInt() != 0) {
+		g_render.toBlend = p2fx_render_blend.GetInt();
 		int framerate = g_render.toBlend * g_render.fps;
 		if (host_framerate.GetInt() != 0 && host_framerate.GetInt() != framerate) {
-			console->Print("Warning: overriding host_framerate to %d based on sar_render_fps and sar_render_blend\n", framerate);
+			console->Print("Warning: overriding host_framerate to %d based on p2fx_render_fps and p2fx_render_blend\n", framerate);
 		}
 		host_framerate.SetValue(framerate);
 	} else {  // host_framerate nonzero
 		int framerate = host_framerate.GetInt();
 		if (framerate % g_render.fps != 0) {
-			console->Print("host_framerate must be a multiple of sar_render_fps\n");
+			console->Print("host_framerate must be a multiple of p2fx_render_fps\n");
 			return;
 		}
 		g_render.toBlend = framerate / g_render.fps;
 	}
 
 	{
-		float shutter = (float)sar_render_shutter_angle.GetInt() / 360.0f;
+		float shutter = (float)p2fx_render_shutter_angle.GetInt() / 360.0f;
 		int toExclude = (int)round(g_render.toBlend * (1 - shutter) / 2);
 		if (toExclude * 2 >= g_render.toBlend) {
 			toExclude = g_render.toBlend / 2 - 1;
@@ -894,23 +894,23 @@ static void startRender() {
 		snd_surround_speakers.SetValue(2);
 	}
 
-	AVCodecID videoCodec = videoCodecFromName(sar_render_vcodec.GetString());
-	AVCodecID audioCodec = audioCodecFromName(sar_render_acodec.GetString());
+	AVCodecID videoCodec = videoCodecFromName(p2fx_render_vcodec.GetString());
+	AVCodecID audioCodec = audioCodecFromName(p2fx_render_acodec.GetString());
 
 	if (videoCodec == AV_CODEC_ID_NONE) {
-		console->Print("Unknown video codec '%s'\n", sar_render_vcodec.GetString());
+		console->Print("Unknown video codec '%s'\n", p2fx_render_vcodec.GetString());
 		return;
 	}
 
 	if (audioCodec == AV_CODEC_ID_NONE) {
-		console->Print("Unknown audio codec '%s'\n", sar_render_acodec.GetString());
+		console->Print("Unknown audio codec '%s'\n", p2fx_render_acodec.GetString());
 		return;
 	}
 
-	float videoBitrate = sar_render_vbitrate.GetFloat();
-	float audioBitrate = sar_render_abitrate.GetFloat();
+	float videoBitrate = p2fx_render_vbitrate.GetFloat();
+	float audioBitrate = p2fx_render_abitrate.GetFloat();
 
-	int quality = sar_render_quality.GetInt();
+	int quality = p2fx_render_quality.GetInt();
 	if (quality < 0) quality = 0;
 	if (quality > 50) quality = 50;
 
@@ -1030,10 +1030,10 @@ static void SND_RecordBuffer_Hook() {
 // Video output {{{
 
 void Renderer::Frame() {
-	if (Renderer::isDemoLoading && sar_render_autostart.GetBool()) {
+	if (Renderer::isDemoLoading && p2fx_render_autostart.GetBool()) {
 		bool start = engine->demoplayer->IsPlaybackFixReady();
 		start &= session->isRunning;
-		if (engine->GetMaxClients() >= 2 && sar_render_skip_coop_videos.GetBool()) {
+		if (engine->GetMaxClients() >= 2 && p2fx_render_skip_coop_videos.GetBool()) {
 			start &= engine->startedTransitionFadeout;
 		}
 		g_render.isPaused.store(!start);
@@ -1042,7 +1042,7 @@ void Renderer::Frame() {
 		Renderer::isDemoLoading = false;
 
 		if (!g_render.isRendering.load()) {
-			g_render.filename = std::string(engine->GetGameDirectory()) + "/" + std::string(engine->demoplayer->DemoName) + "." + sar_render_autostart_extension.GetString();
+			g_render.filename = std::string(engine->GetGameDirectory()) + "/" + std::string(engine->demoplayer->DemoName) + "." + p2fx_render_autostart_extension.GetString();
 			startRender();
 		}
 	} else {
@@ -1051,7 +1051,7 @@ void Renderer::Frame() {
 
 	if (!g_render.isRendering.load()) return;
 
-	if (engine->GetMaxClients() >= 2 && sar_render_skip_coop_videos.GetBool() && engine->isLevelTransition) {
+	if (engine->GetMaxClients() >= 2 && p2fx_render_skip_coop_videos.GetBool() && engine->isLevelTransition) {
 		// The transition video has begun, pause the render
 		g_render.isPaused.store(true);
 		return;
@@ -1061,8 +1061,8 @@ void Renderer::Frame() {
 	// rendering
 
 
-	if (sar_render_autostop.GetBool() && Renderer::segmentEndTick != -1 && engine->demoplayer->IsPlaying() && engine->demoplayer->GetTick() > Renderer::segmentEndTick) {
-		if (!sar_render_merge.GetBool())
+	if (p2fx_render_autostop.GetBool() && Renderer::segmentEndTick != -1 && engine->demoplayer->IsPlaying() && engine->demoplayer->GetTick() > Renderer::segmentEndTick) {
+		if (!p2fx_render_merge.GetBool())
 			msgStopRender(false);
 		else
 			g_render.isPaused.store(true);
@@ -1124,7 +1124,7 @@ void Renderer::Frame() {
 // }}}
 
 ON_EVENT(DEMO_STOP) {
-	if (g_render.isRendering.load() && sar_render_autostop.GetBool() && !sar_render_merge.GetBool()) {
+	if (g_render.isRendering.load() && p2fx_render_autostop.GetBool() && !p2fx_render_merge.GetBool()) {
 		msgStopRender(false);
 	}
 }
@@ -1140,17 +1140,17 @@ void Renderer::Init(void **videomode) {
 	SND_RecordBuffer = (void (*)())Memory::Scan(engine->Name(), "55 8B EC 80 3D ? ? ? ? 00 53 56 57 0F 84 15 01 00 00 E8 ? ? ? ? 84 C0 0F 85 08 01 00 00 A1 ? ? ? ? 3B 05");
 	g_movieInfo = *(MovieInfo_t **)((uintptr_t)SND_RecordBuffer + 5);
 #else
-	if (sar.game->Is(SourceGame_Portal2)) {
+	if (p2fx.game->Is(SourceGame_Portal2)) {
 		SND_RecordBuffer = (void (*)())Memory::Scan(engine->Name(), "80 3D ? ? ? ? 00 75 07 C3 ? ? ? ? ? ? 55 89 E5 57 56 53 83 EC 1C E8 ? ? ? ? 84 C0 0F 85 ? ? ? ?");
-	} else if (sar.game->Is(SourceGame_PortalReloaded) || sar.game->Is(SourceGame_PortalStoriesMel)) {
+	} else if (p2fx.game->Is(SourceGame_PortalReloaded) || p2fx.game->Is(SourceGame_PortalStoriesMel)) {
 		SND_RecordBuffer = (void (*)())Memory::Scan(engine->Name(), "55 89 E5 57 56 53 83 EC 3C 65 A1 ? ? ? ? 89 45 E4 31 C0 E8 ? ? ? ? 84 C0 75 1B");
 	} else {  // Pre-update engine
 		SND_RecordBuffer = (void (*)())Memory::Scan(engine->Name(), "55 89 E5 57 56 53 83 EC 2C E8 ? ? ? ? 84 C0 75 0E 8D 65 F4 5B 5E 5F 5D C3");
 	}
 
-	if (sar.game->Is(SourceGame_Portal2)) {
+	if (p2fx.game->Is(SourceGame_Portal2)) {
 		g_movieInfo = *(MovieInfo_t **)((uintptr_t)SND_RecordBuffer + 2);
-	} else if (sar.game->Is(SourceGame_PortalReloaded) || sar.game->Is(SourceGame_PortalStoriesMel)) {
+	} else if (p2fx.game->Is(SourceGame_PortalReloaded) || p2fx.game->Is(SourceGame_PortalStoriesMel)) {
 		uintptr_t SND_IsRecording = Memory::Read((uintptr_t)SND_RecordBuffer + 21);
 		g_movieInfo = *(MovieInfo_t **)(SND_IsRecording + 2);
 	} else {  // Pre-update engine
@@ -1162,7 +1162,7 @@ void Renderer::Init(void **videomode) {
 	g_RecordBufferHook.SetFunc(SND_RecordBuffer);
 
 #ifndef _WIN32
-	if (sar.game->Is(SourceGame_Portal2)) {
+	if (p2fx.game->Is(SourceGame_Portal2)) {
 		uint32_t fn = (uint32_t)SND_RecordBuffer;
 		uint32_t base = fn + 11 + *(uint32_t *)(fn + 13);
 		g_snd_linear_count = (int *)(base + *(uint32_t *)(fn + 49));
@@ -1190,9 +1190,9 @@ void Renderer::Cleanup() {
 
 // Commands {{{
 
-CON_COMMAND(sar_render_start, "sar_render_start <file> - start rendering frames to the given video file\n") {
+CON_COMMAND(p2fx_render_start, "p2fx_render_start <file> - start rendering frames to the given video file\n") {
 	if (args.ArgC() != 2) {
-		console->Print(sar_render_start.ThisPtr()->m_pszHelpString);
+		console->Print(p2fx_render_start.ThisPtr()->m_pszHelpString);
 		return;
 	}
 
@@ -1201,9 +1201,9 @@ CON_COMMAND(sar_render_start, "sar_render_start <file> - start rendering frames 
 	startRender();
 }
 
-CON_COMMAND(sar_render_finish, "sar_render_finish - stop rendering frames\n") {
+CON_COMMAND(p2fx_render_finish, "p2fx_render_finish - stop rendering frames\n") {
 	if (args.ArgC() != 1) {
-		console->Print(sar_render_finish.ThisPtr()->m_pszHelpString);
+		console->Print(p2fx_render_finish.ThisPtr()->m_pszHelpString);
 		return;
 	}
 

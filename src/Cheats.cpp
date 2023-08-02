@@ -24,28 +24,28 @@
 
 #include <cstring>
 
-Variable sar_autorecord("sar_autorecord", "0", -1, 1, "Enables or disables automatic demo recording.\n");
-Variable sar_autojump("sar_autojump", "0", "Enables automatic jumping on the server.\n");
-Variable sar_autostrafe("sar_autostrafe", "0", "Automatically strafes in your current wishdir.\n");
-Variable sar_jumpboost("sar_jumpboost", "0", 0,
+Variable p2fx_autorecord("p2fx_autorecord", "0", -1, 1, "Enables or disables automatic demo recording.\n");
+Variable p2fx_autojump("p2fx_autojump", "0", "Enables automatic jumping on the server.\n");
+Variable p2fx_autostrafe("p2fx_autostrafe", "0", "Automatically strafes in your current wishdir.\n");
+Variable p2fx_jumpboost("p2fx_jumpboost", "0", 0,
                        "Enables special game movement on the server.\n"
                        "0 = Default,\n"
                        "1 = Orange Box Engine,\n"
                        "2 = Pre-OBE.\n");
-Variable sar_aircontrol("sar_aircontrol", "0", 0, 2, "Enables more air-control on the server.\n");
-Variable sar_duckjump("sar_duckjump", "0", "Allows duck-jumping even when fully crouched, similar to prevent_crouch_jump.\n");
-Variable sar_disable_challenge_stats_hud("sar_disable_challenge_stats_hud", "0", "Disables opening the challenge mode stats HUD.\n");
-Variable sar_disable_steam_pause("sar_disable_steam_pause", "0", "Prevents pauses from steam overlay.\n");
-Variable sar_disable_no_focus_sleep("sar_disable_no_focus_sleep", "0", "Does not yield the CPU when game is not focused.\n");
-Variable sar_disable_progress_bar_update("sar_disable_progress_bar_update", "0", 0, 2, "Disables excessive usage of progress bar.\n");
-Variable sar_prevent_mat_snapshot_recompute("sar_prevent_mat_snapshot_recompute", "0", "Shortens loading times by preventing state snapshot recomputation.\n");
-Variable sar_challenge_autostop("sar_challenge_autostop", "0", 0, 3, "Automatically stops recording demos when the leaderboard opens after a CM run. If 2, automatically appends the run time to the demo name.\n");
-Variable sar_show_entinp("sar_show_entinp", "0", "Print all entity inputs to console.\n");
-Variable sar_force_qc("sar_force_qc", "0", 0, 1, "When ducking, forces view offset to always be at standing height. Requires sv_cheats to work.\n");
-Variable sar_patch_bhop("sar_patch_bhop", "0", 0, 1, "Patches bhop by limiting wish direction if your velocity is too high.\n");
-Variable sar_patch_cfg("sar_patch_cfg", "0", 0, 1, "Patches Crouch Flying Glitch.\n");
-Variable sar_prevent_ehm("sar_prevent_ehm", "0", 0, 1, "Prevents Entity Handle Misinterpretation (EHM) from happening.\n");
-Variable sar_disable_weapon_sway("sar_disable_weapon_sway", "0", 0, 1, "Disables the viewmodel lagging behind.\n");
+Variable p2fx_aircontrol("p2fx_aircontrol", "0", 0, 2, "Enables more air-control on the server.\n");
+Variable p2fx_duckjump("p2fx_duckjump", "0", "Allows duck-jumping even when fully crouched, similar to prevent_crouch_jump.\n");
+Variable p2fx_disable_challenge_stats_hud("p2fx_disable_challenge_stats_hud", "0", "Disables opening the challenge mode stats HUD.\n");
+Variable p2fx_disable_steam_pause("p2fx_disable_steam_pause", "0", "Prevents pauses from steam overlay.\n");
+Variable p2fx_disable_no_focus_sleep("p2fx_disable_no_focus_sleep", "0", "Does not yield the CPU when game is not focused.\n");
+Variable p2fx_disable_progress_bar_update("p2fx_disable_progress_bar_update", "0", 0, 2, "Disables excessive usage of progress bar.\n");
+Variable p2fx_prevent_mat_snapshot_recompute("p2fx_prevent_mat_snapshot_recompute", "0", "Shortens loading times by preventing state snapshot recomputation.\n");
+Variable p2fx_challenge_autostop("p2fx_challenge_autostop", "0", 0, 3, "Automatically stops recording demos when the leaderboard opens after a CM run. If 2, automatically appends the run time to the demo name.\n");
+Variable p2fx_show_entinp("p2fx_show_entinp", "0", "Print all entity inputs to console.\n");
+Variable p2fx_force_qc("p2fx_force_qc", "0", 0, 1, "When ducking, forces view offset to always be at standing height. Requires sv_cheats to work.\n");
+Variable p2fx_patch_bhop("p2fx_patch_bhop", "0", 0, 1, "Patches bhop by limiting wish direction if your velocity is too high.\n");
+Variable p2fx_patch_cfg("p2fx_patch_cfg", "0", 0, 1, "Patches Crouch Flying Glitch.\n");
+Variable p2fx_prevent_ehm("p2fx_prevent_ehm", "0", 0, 1, "Prevents Entity Handle Misinterpretation (EHM) from happening.\n");
+Variable p2fx_disable_weapon_sway("p2fx_disable_weapon_sway", "0", 0, 1, "Disables the viewmodel lagging behind.\n");
 
 Variable sv_laser_cube_autoaim;
 Variable ui_loadingscreen_transition_time;
@@ -58,7 +58,7 @@ Variable cl_viewmodelfov;
 Variable r_flashlightbrightness;
 
 // P2 only
-CON_COMMAND(sar_togglewait, "sar_togglewait - enables or disables \"wait\" for the command buffer\n") {
+CON_COMMAND(p2fx_togglewait, "p2fx_togglewait - enables or disables \"wait\" for the command buffer\n") {
 	auto state = !*engine->m_bWaitEnabled;
 	*engine->m_bWaitEnabled = *engine->m_bWaitEnabled2 = state;
 	console->Print("%s wait!\n", (state) ? "Enabled" : "Disabled");
@@ -74,7 +74,7 @@ CON_COMMAND(sar_togglewait, "sar_togglewait - enables or disables \"wait\" for t
 #	define TRACE_SHUTDOWN_OFFSET1 11
 #	define TRACE_SHUTDOWN_OFFSET2 10
 #endif
-CON_COMMAND(sar_delete_alias_cmds, "sar_delete_alias_cmds - deletes all alias commands\n") {
+CON_COMMAND(p2fx_delete_alias_cmds, "p2fx_delete_alias_cmds - deletes all alias commands\n") {
 	using _Cmd_Shutdown = int (*)();
 	static _Cmd_Shutdown Cmd_Shutdown = nullptr;
 
@@ -97,10 +97,10 @@ CON_COMMAND(sar_delete_alias_cmds, "sar_delete_alias_cmds - deletes all alias co
 	}
 }
 
-DECL_AUTO_COMMAND_COMPLETION(sar_fast_load_preset, ({"none", "sla", "normal", "full"}))
-CON_COMMAND_F_COMPLETION(sar_fast_load_preset, "sar_fast_load_preset <preset> - sets all loading fixes to preset values\n", FCVAR_DONTRECORD, AUTOCOMPLETION_FUNCTION(sar_fast_load_preset)) {
+DECL_AUTO_COMMAND_COMPLETION(p2fx_fast_load_preset, ({"none", "sla", "normal", "full"}))
+CON_COMMAND_F_COMPLETION(p2fx_fast_load_preset, "p2fx_fast_load_preset <preset> - sets all loading fixes to preset values\n", FCVAR_DONTRECORD, AUTOCOMPLETION_FUNCTION(p2fx_fast_load_preset)) {
 	if (args.ArgC() != 2) {
-		console->Print(sar_fast_load_preset.ThisPtr()->m_pszHelpString);
+		console->Print(p2fx_fast_load_preset.ThisPtr()->m_pszHelpString);
 		return;
 	}
 
@@ -113,48 +113,48 @@ CON_COMMAND_F_COMPLETION(sar_fast_load_preset, "sar_fast_load_preset <preset> - 
 			CMD("ui_loadingscreen_fadein_time 1.0");
 			CMD("ui_loadingscreen_mintransition_time 0.5");
 		}
-		CMD("sar_disable_progress_bar_update 0");
-		CMD("sar_prevent_mat_snapshot_recompute 0");
-		CMD("sar_loads_uncap 0");
-		CMD("sar_loads_norender 0");
+		CMD("p2fx_disable_progress_bar_update 0");
+		CMD("p2fx_prevent_mat_snapshot_recompute 0");
+		CMD("p2fx_loads_uncap 0");
+		CMD("p2fx_loads_norender 0");
 	} else if (!strcmp(preset, "sla")) {
 		if (!Game::IsSpeedrunMod()) {
 			CMD("ui_loadingscreen_transition_time 0.0");
 			CMD("ui_loadingscreen_fadein_time 0.0");
 			CMD("ui_loadingscreen_mintransition_time 0.0");
 		}
-		CMD("sar_disable_progress_bar_update 1");
-		CMD("sar_prevent_mat_snapshot_recompute 1");
-		CMD("sar_loads_uncap 0");
-		CMD("sar_loads_norender 0");
+		CMD("p2fx_disable_progress_bar_update 1");
+		CMD("p2fx_prevent_mat_snapshot_recompute 1");
+		CMD("p2fx_loads_uncap 0");
+		CMD("p2fx_loads_norender 0");
 	} else if (!strcmp(preset, "normal")) {
 		if (!Game::IsSpeedrunMod()) {
 			CMD("ui_loadingscreen_transition_time 0.0");
 			CMD("ui_loadingscreen_fadein_time 0.0");
 			CMD("ui_loadingscreen_mintransition_time 0.0");
 		}
-		CMD("sar_disable_progress_bar_update 1");
-		CMD("sar_prevent_mat_snapshot_recompute 1");
-		CMD("sar_loads_uncap 1");
-		CMD("sar_loads_norender 0");
+		CMD("p2fx_disable_progress_bar_update 1");
+		CMD("p2fx_prevent_mat_snapshot_recompute 1");
+		CMD("p2fx_loads_uncap 1");
+		CMD("p2fx_loads_norender 0");
 	} else if (!strcmp(preset, "full")) {
 		if (!Game::IsSpeedrunMod()) {
 			CMD("ui_loadingscreen_transition_time 0.0");
 			CMD("ui_loadingscreen_fadein_time 0.0");
 			CMD("ui_loadingscreen_mintransition_time 0.0");
 		}
-		CMD("sar_disable_progress_bar_update 2");
-		CMD("sar_prevent_mat_snapshot_recompute 1");
-		CMD("sar_loads_uncap 1");
-		CMD("sar_loads_norender 1");
+		CMD("p2fx_disable_progress_bar_update 2");
+		CMD("p2fx_prevent_mat_snapshot_recompute 1");
+		CMD("p2fx_loads_uncap 1");
+		CMD("p2fx_loads_norender 1");
 	} else {
 		console->Print("Unknown preset %s!\n", preset);
-		console->Print(sar_fast_load_preset.ThisPtr()->m_pszHelpString);
+		console->Print(p2fx_fast_load_preset.ThisPtr()->m_pszHelpString);
 	}
 #undef CMD
 }
 
-CON_COMMAND(sar_clear_lines, "sar_clear_lines - clears all active drawline overlays\n") {
+CON_COMMAND(p2fx_clear_lines, "p2fx_clear_lines - clears all active drawline overlays\n") {
 	// So, hooking this would be really annoying, however Valve's code
 	// is dumb and bad and only allows 20 lines (after which it'll start
 	// overwriting old ones), so let's just draw 20 zero-length lines!
@@ -169,9 +169,9 @@ struct DrawLineInfo {
 };
 static std::vector<DrawLineInfo> g_drawlines;
 
-CON_COMMAND(sar_drawline, "sar_drawline <x> <y> <z> <x> <y> <z> [r] [g] [b] - overlay a line in the world\n") {
+CON_COMMAND(p2fx_drawline, "p2fx_drawline <x> <y> <z> <x> <y> <z> [r] [g] [b] - overlay a line in the world\n") {
 	if (args.ArgC() != 7 && args.ArgC() != 10) {
-		return console->Print(sar_drawline.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_drawline.ThisPtr()->m_pszHelpString);
 	}
 
 	float x0 = atof(args[1]);
@@ -199,7 +199,7 @@ CON_COMMAND(sar_drawline, "sar_drawline <x> <y> <z> <x> <y> <z> [r] [g] [b] - ov
 }
 
 
-CON_COMMAND(sar_drawline_clear, "sar_drawline_clear - clear all active sar_drawlines\n") {
+CON_COMMAND(p2fx_drawline_clear, "p2fx_drawline_clear - clear all active p2fx_drawlines\n") {
 	g_drawlines.clear();
 }
 
@@ -217,9 +217,9 @@ ON_EVENT(RENDER) {
 	}
 }
 
-CON_COMMAND(sar_getpos, "sar_getpos [slot] [server|client] - get the absolute origin and angles of a particular player from either the server or client. Defaults to slot 0 and server.\n") {
+CON_COMMAND(p2fx_getpos, "p2fx_getpos [slot] [server|client] - get the absolute origin and angles of a particular player from either the server or client. Defaults to slot 0 and server.\n") {
 	if (args.ArgC() > 3) {
-		return console->Print(sar_getpos.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_getpos.ThisPtr()->m_pszHelpString);
 	}
 
 	bool use_serv = true;
@@ -228,7 +228,7 @@ CON_COMMAND(sar_getpos, "sar_getpos [slot] [server|client] - get the absolute or
 		if (!strcmp(args[2], "client")) {
 			use_serv = false;
 		} else if (strcmp(args[2], "server")) {
-			return console->Print(sar_getpos.ThisPtr()->m_pszHelpString);
+			return console->Print(p2fx_getpos.ThisPtr()->m_pszHelpString);
 		}
 	}
 
@@ -255,9 +255,9 @@ CON_COMMAND(sar_getpos, "sar_getpos [slot] [server|client] - get the absolute or
 	console->Print("angles: %.6f %.6f %.6f\n", angles.x, angles.y, angles.z);
 }
 
-CON_COMMAND(sar_geteyepos, "sar_geteyepos [slot] - get the view position (portal shooting origin) and view angles of a certain player.\n") {
+CON_COMMAND(p2fx_geteyepos, "p2fx_geteyepos [slot] - get the view position (portal shooting origin) and view angles of a certain player.\n") {
 	if (args.ArgC() > 2) {
-		return console->Print(sar_geteyepos.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_geteyepos.ThisPtr()->m_pszHelpString);
 	}
 
 	int slot = args.ArgC() >= 2 ? atoi(args[1]) : 0;
@@ -287,15 +287,15 @@ void Cheats::Init() {
 	cl_viewmodelfov = Variable("cl_viewmodelfov");
 	r_flashlightbrightness = Variable("r_flashlightbrightness");
 
-	sar_disable_challenge_stats_hud.UniqueFor(SourceGame_Portal2);
+	p2fx_disable_challenge_stats_hud.UniqueFor(SourceGame_Portal2);
 
-	sar_disable_weapon_sway.UniqueFor(SourceGame_Portal2);
+	p2fx_disable_weapon_sway.UniqueFor(SourceGame_Portal2);
 
-	sar_workshop.UniqueFor(SourceGame_Portal2 | SourceGame_ApertureTag);
-	sar_workshop_update.UniqueFor(SourceGame_Portal2 | SourceGame_ApertureTag);
-	sar_workshop_list.UniqueFor(SourceGame_Portal2 | SourceGame_ApertureTag);
+	p2fx_workshop.UniqueFor(SourceGame_Portal2 | SourceGame_ApertureTag);
+	p2fx_workshop_update.UniqueFor(SourceGame_Portal2 | SourceGame_ApertureTag);
+	p2fx_workshop_list.UniqueFor(SourceGame_Portal2 | SourceGame_ApertureTag);
 
-	sar_fix_reloaded_cheats.UniqueFor(SourceGame_PortalReloaded);
+	p2fx_fix_reloaded_cheats.UniqueFor(SourceGame_PortalReloaded);
 
 	cvars->Unlock();
 
@@ -317,7 +317,7 @@ ON_EVENT(FRAME) {
 // FUN PATCHES :))))))
 
 void Cheats::PatchBhop(int slot, void *player, CUserCmd *cmd) {
-	if (!server->AllowsMovementChanges() || !sar_patch_bhop.GetBool()) return;
+	if (!server->AllowsMovementChanges() || !p2fx_patch_bhop.GetBool()) return;
 
 	TasPlayerInfo info = tasPlayer->GetPlayerInfo(slot, player, cmd);
 
@@ -337,7 +337,7 @@ void Cheats::PatchBhop(int slot, void *player, CUserCmd *cmd) {
 }
 
 ON_EVENT(PROCESS_MOVEMENT) {
-	if (!server->AllowsMovementChanges() || !sar_patch_cfg.GetBool()) return;
+	if (!server->AllowsMovementChanges() || !p2fx_patch_cfg.GetBool()) return;
 
 	auto player = server->GetPlayer(event.slot + 1);
 	if (player == nullptr) return;
@@ -358,7 +358,7 @@ ON_EVENT(PROCESS_MOVEMENT) {
 }
 
 void Cheats::AutoStrafe(int slot, void *player, CUserCmd *cmd) {
-	if (!server->AllowsMovementChanges() || !sar_autostrafe.GetBool()) return;
+	if (!server->AllowsMovementChanges() || !p2fx_autostrafe.GetBool()) return;
 
 	if (cmd->forwardmove == 0 && cmd->sidemove == 0) return;
 
@@ -372,7 +372,7 @@ void Cheats::AutoStrafe(int slot, void *player, CUserCmd *cmd) {
 
 	TasFramebulk fb;
 	tasPlayer->playbackInfo.slots[slot].header.version = MAX_SCRIPT_VERSION;
-	autoJumpTool[info.slot].SetParams(autoJumpTool[info.slot].ParseParams(std::vector<std::string>{sar_autojump.GetBool() && (cmd->buttons & IN_JUMP) ? "on" : "off"}));
+	autoJumpTool[info.slot].SetParams(autoJumpTool[info.slot].ParseParams(std::vector<std::string>{p2fx_autojump.GetBool() && (cmd->buttons & IN_JUMP) ? "on" : "off"}));
 	autoStrafeTool[info.slot].SetParams(autoStrafeTool[info.slot].ParseParams(std::vector<std::string> {"vec", "max", std::to_string(angle) + "deg"}));
 	autoStrafeTool[info.slot].Apply(fb, info);
 

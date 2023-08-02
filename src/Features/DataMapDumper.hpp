@@ -19,5 +19,5 @@ public:
 
 extern DataMapDumper *dataMapDumper;
 
-extern Command sar_dump_server_datamap;
-extern Command sar_dump_client_datamap;
+extern Command p2fx_dump_server_datamap;
+extern Command p2fx_dump_client_datamap;

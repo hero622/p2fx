@@ -29,4 +29,4 @@ namespace SpeedrunTimer {
 	std::string GetCategoryName();
 };  // namespace SpeedrunTimer
 
-extern Command sar_speedrun_category;
+extern Command p2fx_speedrun_category;

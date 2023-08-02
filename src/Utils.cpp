@@ -55,17 +55,17 @@ uint8_t Utils::ConvertFromSrgb(uint8_t s) {
 	double l = s_ <= 0.04045 ? s_ / 12.92 : pow((s_ + 0.055) / 1.055, 2.4);
 	return (uint8_t)(l * 255);
 }
-std::string Utils::GetSARPath() {
+std::string Utils::GetP2FXPath() {
 #ifdef _WIN32
 	SymInitialize(GetCurrentProcess(), 0, true);
-	DWORD module = SymGetModuleBase(GetCurrentProcess(), (DWORD)&Utils::GetSARPath);
+	DWORD module = SymGetModuleBase(GetCurrentProcess(), (DWORD)&Utils::GetP2FXPath);
 	char filename[MAX_PATH + 1];
 	GetModuleFileNameA((HMODULE)module, filename, MAX_PATH);
 	SymCleanup(GetCurrentProcess());
 	return std::string(filename);
 #else
 	Dl_info info;
-	dladdr((void *)&Utils::GetSARPath, &info);
+	dladdr((void *)&Utils::GetP2FXPath, &info);
 	return std::string(info.dli_fname);
 #endif
 }

@@ -185,9 +185,9 @@ void RngManip::viewPunch(QAngle *offset) {
 	g_recorded_view_punches.push_back(*offset);
 }
 
-CON_COMMAND(sar_rng_save, "sar_rng_save <filename> - save RNG seed data to the specified file\n") {
+CON_COMMAND(p2fx_rng_save, "p2fx_rng_save <filename> - save RNG seed data to the specified file\n") {
 	if (args.ArgC() != 2) {
-		console->Print(sar_rng_save.ThisPtr()->m_pszHelpString);
+		console->Print(p2fx_rng_save.ThisPtr()->m_pszHelpString);
 		return;
 	}
 
@@ -195,9 +195,9 @@ CON_COMMAND(sar_rng_save, "sar_rng_save <filename> - save RNG seed data to the s
 	RngManip::saveData(filename.c_str());
 }
 
-CON_COMMAND(sar_rng_load, "sar_rng_load <filename> - load RNG seed data on next session start\n") {
+CON_COMMAND(p2fx_rng_load, "p2fx_rng_load <filename> - load RNG seed data on next session start\n") {
 	if (args.ArgC() != 2) {
-		console->Print(sar_rng_load.ThisPtr()->m_pszHelpString);
+		console->Print(p2fx_rng_load.ThisPtr()->m_pszHelpString);
 		return;
 	}
 

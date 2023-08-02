@@ -12,8 +12,8 @@ public:
 
 extern StrafeSyncHud strafeSyncHud;
 
-extern Variable sar_hud_strafesync_offset_x;
-extern Variable sar_hud_strafesync_offset_y;
-extern Variable sar_hud_strafesync_split_offset_y;
-extern Variable sar_hud_strafesync_color;
-extern Variable sar_hud_strafesync_font_index;
+extern Variable p2fx_hud_strafesync_offset_x;
+extern Variable p2fx_hud_strafesync_offset_y;
+extern Variable p2fx_hud_strafesync_split_offset_y;
+extern Variable p2fx_hud_strafesync_color;
+extern Variable p2fx_hud_strafesync_font_index;

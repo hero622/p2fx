@@ -12,7 +12,7 @@
 #include <numeric>
 #include <sstream>
 
-Variable sar_statcounter_filePath("sar_statcounter_filePath", "Stats/phunkpaiDWPS.csv", "Path to the statcounter .csv file.\n", 0);
+Variable p2fx_statcounter_filePath("p2fx_statcounter_filePath", "Stats/phunkpaiDWPS.csv", "Path to the statcounter .csv file.\n", 0);
 
 StatsCounter *statsCounter;
 
@@ -38,7 +38,7 @@ void StatsCounter::IncrementRunFinished(const float time) {
 }
 
 void StatsCounter::Init() {
-	if (this->LoadFromFile(sar_statcounter_filePath.GetString())) {
+	if (this->LoadFromFile(p2fx_statcounter_filePath.GetString())) {
 		console->Print("Data has been successfully loaded.\n");
 	}
 }
@@ -64,12 +64,12 @@ bool StatsCounter::LoadFromFile(const std::string &path) {
 	std::getline(file, header);  //Skip "sep=,"
 	std::getline(file, header);
 
-	if (header != SAR_MAP_COUNTER_EXPORT_HEADER) {
+	if (header != P2FX_MAP_COUNTER_EXPORT_HEADER) {
 		return false;
 	}
 
 	while (std::getline(file, line)) {
-		if (line == SAR_CM_COUNTER_EXPORT_HEADER) {
+		if (line == P2FX_CM_COUNTER_EXPORT_HEADER) {
 			break;
 		}
 
@@ -97,7 +97,7 @@ bool StatsCounter::LoadFromFile(const std::string &path) {
 	std::getline(file, line);
 
 
-	if (line == SAR_FULLGAME_COUNTER_EXPORT_HEADER) {
+	if (line == P2FX_FULLGAME_COUNTER_EXPORT_HEADER) {
 		if (std::getline(file, line)) {
 			stats.clear();
 			std::stringstream s(line);
@@ -115,7 +115,7 @@ bool StatsCounter::LoadFromFile(const std::string &path) {
 	}
 
 	std::getline(file, header);
-	if (header != SAR_TOTAL_COUNTER_EXPORT_HEADER) {
+	if (header != P2FX_TOTAL_COUNTER_EXPORT_HEADER) {
 		return false;
 	}
 	if (std::getline(file, line)) {
@@ -145,7 +145,7 @@ bool StatsCounter::ExportToFile(const std::string &path) {
 	}
 
 	file << MICROSOFT_PLEASE_FIX_YOUR_SOFTWARE_SMHMYHEAD << std::endl;
-	file << SAR_MAP_COUNTER_EXPORT_HEADER << std::endl;
+	file << P2FX_MAP_COUNTER_EXPORT_HEADER << std::endl;
 
 	for(auto &map : this->mapStats) {
 		file << map.first
@@ -159,7 +159,7 @@ bool StatsCounter::ExportToFile(const std::string &path) {
 	auto CMRetries = std::accumulate(std::begin(this->mapStats), std::end(this->mapStats), 0, [](int retries, auto &map) { return retries + map.second.CMretries; });
 	auto CMTime = std::accumulate(std::begin(this->mapStats), std::end(this->mapStats), 0.f, [](float time, auto &map) { return time + map.second.CMTotalTime; });
 
-	file << SAR_CM_COUNTER_EXPORT_HEADER << std::endl;
+	file << P2FX_CM_COUNTER_EXPORT_HEADER << std::endl;
 
 	file << CMRetries << CSV_SEPARATOR << SpeedrunTimer::SimpleFormat(CMTime) << std::endl;
 
@@ -172,7 +172,7 @@ bool StatsCounter::ExportToFile(const std::string &path) {
 		else return time;
 	});
 
-	file << SAR_FULLGAME_COUNTER_EXPORT_HEADER << std::endl;
+	file << P2FX_FULLGAME_COUNTER_EXPORT_HEADER << std::endl;
 
 	file << this->completedRuns
 						<< CSV_SEPARATOR << SpeedrunTimer::SimpleFormat(this->avgResetTime).c_str()
@@ -182,7 +182,7 @@ bool StatsCounter::ExportToFile(const std::string &path) {
 						<< CSV_SEPARATOR << this->portalCount
 						<< std::endl;
 
-	file << SAR_TOTAL_COUNTER_EXPORT_HEADER << std::endl;
+	file << P2FX_TOTAL_COUNTER_EXPORT_HEADER << std::endl;
 
 	file << SpeedrunTimer::SimpleFormat(this->totalTimeInGame);
 

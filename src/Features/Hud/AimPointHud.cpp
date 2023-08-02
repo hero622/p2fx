@@ -12,14 +12,14 @@
 
 #define TRACE_LENGTH 2500
 
-Variable sar_aim_point_hud("sar_aim_point_hud", "0", "Overlays a marker with coordinates at the point you're aiming at\n");
+Variable p2fx_aim_point_hud("p2fx_aim_point_hud", "0", "Overlays a marker with coordinates at the point you're aiming at\n");
 
 static bool g_last_trace_valid;
 static CGameTrace g_last_trace;
 
 std::vector<CGameTrace> g_frozen;
 
-CON_COMMAND(sar_aim_point_add, "sar_aim_point_add - add frozen aimpoint at current position\n") {
+CON_COMMAND(p2fx_aim_point_add, "p2fx_aim_point_add - add frozen aimpoint at current position\n") {
 	if (!g_last_trace_valid) {
 		console->Print("Cannot freeze aimpoint; no point\n");
 		return;
@@ -28,7 +28,7 @@ CON_COMMAND(sar_aim_point_add, "sar_aim_point_add - add frozen aimpoint at curre
 	g_frozen.push_back(g_last_trace);
 }
 
-CON_COMMAND(sar_aim_point_clear, "sar_aim_point_clear - clear all frozen aimpoints\n") {
+CON_COMMAND(p2fx_aim_point_clear, "p2fx_aim_point_clear - clear all frozen aimpoints\n") {
 	console->Print("Unfreezing all aimpoints\n");
 	g_frozen.clear();
 }
@@ -40,7 +40,7 @@ ON_EVENT(SESSION_START) {
 
 static bool shouldDraw() {
 	if (!sv_cheats.GetBool()) return false;
-	if (!sar_aim_point_hud.GetBool()) return false;
+	if (!p2fx_aim_point_hud.GetBool()) return false;
 	return true;
 }
 

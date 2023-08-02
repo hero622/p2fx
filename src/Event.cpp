@@ -2,18 +2,18 @@
 
 #include <map>
 
-SarInitHandler::SarInitHandler(std::function<void()> cb)
+P2fxInitHandler::P2fxInitHandler(std::function<void()> cb)
 	: cb(cb) {
-		SarInitHandler::GetHandlers().push_back(this);
+		P2fxInitHandler::GetHandlers().push_back(this);
 }
 
-void SarInitHandler::RunAll() {
-	for (auto h : SarInitHandler::GetHandlers()) {
+void P2fxInitHandler::RunAll() {
+	for (auto h : P2fxInitHandler::GetHandlers()) {
 		h->cb();
 	}
 }
 
-std::vector<SarInitHandler *> &SarInitHandler::GetHandlers() {
-	static std::vector<SarInitHandler *> handlers;
+std::vector<P2fxInitHandler *> &P2fxInitHandler::GetHandlers() {
+	static std::vector<P2fxInitHandler *> handlers;
 	return handlers;
 }

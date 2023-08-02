@@ -10,7 +10,7 @@
 
 #include <cstring>
 
-Variable sar_debug_listener("sar_debug_listener", "0", "Prints event data of registered listener.\n");
+Variable p2fx_debug_listener("p2fx_debug_listener", "0", "Prints event data of registered listener.\n");
 
 static const char *EVENTS[] = {
 	"player_spawn_blue",
@@ -31,9 +31,9 @@ void Listener::Init() {
 			this->m_bRegisteredForEvents = engine->AddListener(engine->s_GameEventManager->ThisPtr(), this, event, true);
 
 			if (this->m_bRegisteredForEvents) {
-				//console->DevMsg("SAR: Added event listener for %s!\n", event);
+				//console->DevMsg("P2FX: Added event listener for %s!\n", event);
 			} else {
-				console->DevWarning("SAR: Failed to add event listener for %s!\n", event);
+				console->DevWarning("P2FX: Failed to add event listener for %s!\n", event);
 				break;
 			}
 		}
@@ -63,7 +63,7 @@ void Listener::FireGameEvent(IGameEvent *ev) {
 		return;
 	}
 
-	if (sar_debug_listener.GetBool()) {
+	if (p2fx_debug_listener.GetBool()) {
 		console->Print("[%i] Event fired: %s\n", session->GetTick(), ev->GetName());
 		if (engine->ConPrintEvent) {
 			engine->ConPrintEvent(engine->s_GameEventManager->ThisPtr(), ev);
@@ -87,7 +87,7 @@ void Listener::OnCheatsChanged(IConVar *pVar, const char *pOldString, float flOl
 
 // Commands
 
-CON_COMMAND(sar_dump_events, "sar_dump_events - dumps all registered game events of the game event manager\n") {
+CON_COMMAND(p2fx_dump_events, "p2fx_dump_events - dumps all registered game events of the game event manager\n") {
 	if (!engine->s_GameEventManager) {
 		return;
 	}

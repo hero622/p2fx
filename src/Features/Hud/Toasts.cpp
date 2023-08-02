@@ -54,16 +54,16 @@ static int g_slideOff;
 #define STR(s) #s
 #define EXP_STR(s) STR(s)
 
-Variable sar_toast_disable("sar_toast_disable", "0", "Disable all toasts from showing.\n", FCVAR_NEVER_AS_STRING | FCVAR_DONTRECORD);
-Variable sar_toast_font("sar_toast_font", "6", 0, "The font index to use for toasts.\n", FCVAR_NEVER_AS_STRING | FCVAR_DONTRECORD);
-Variable sar_toast_width("sar_toast_width", "250", 2 * SIDE_PAD + 10, "The maximum width for toasts.\n", FCVAR_NEVER_AS_STRING | FCVAR_DONTRECORD);
-Variable sar_toast_x("sar_toast_x", EXP_STR(TOAST_GAP), 0, "The horizontal position of the toasts HUD.\n", FCVAR_NEVER_AS_STRING | FCVAR_DONTRECORD);
-Variable sar_toast_y("sar_toast_y", EXP_STR(TOAST_GAP), 0, "The vertical position of the toasts HUD.\n", FCVAR_NEVER_AS_STRING | FCVAR_DONTRECORD);
-Variable sar_toast_align("sar_toast_align", "0", 0, 2, "The side to align toasts to horizontally. 0 = left, 1 = center, 2 = right.\n", FCVAR_NEVER_AS_STRING | FCVAR_DONTRECORD);
-Variable sar_toast_anchor("sar_toast_anchor", "1", 0, 1, "Where to put new toasts. 0 = bottom, 1 = top.\n", FCVAR_NEVER_AS_STRING | FCVAR_DONTRECORD);
-Variable sar_toast_compact("sar_toast_compact", "0", "Enables a compact form of the toasts HUD.\n", FCVAR_NEVER_AS_STRING | FCVAR_DONTRECORD);
-Variable sar_toast_background("sar_toast_background", "1", 0, 2, "Sets the background highlight for toasts. 0 = no background, 1 = text width only, 2 = full width.\n", FCVAR_NEVER_AS_STRING | FCVAR_DONTRECORD);
-Variable sar_toast_net_disable("sar_toast_net_disable", "0", "Disable network toasts.\n", FCVAR_NEVER_AS_STRING | FCVAR_DONTRECORD);
+Variable p2fx_toast_disable("p2fx_toast_disable", "0", "Disable all toasts from showing.\n", FCVAR_NEVER_AS_STRING | FCVAR_DONTRECORD);
+Variable p2fx_toast_font("p2fx_toast_font", "6", 0, "The font index to use for toasts.\n", FCVAR_NEVER_AS_STRING | FCVAR_DONTRECORD);
+Variable p2fx_toast_width("p2fx_toast_width", "250", 2 * SIDE_PAD + 10, "The maximum width for toasts.\n", FCVAR_NEVER_AS_STRING | FCVAR_DONTRECORD);
+Variable p2fx_toast_x("p2fx_toast_x", EXP_STR(TOAST_GAP), 0, "The horizontal position of the toasts HUD.\n", FCVAR_NEVER_AS_STRING | FCVAR_DONTRECORD);
+Variable p2fx_toast_y("p2fx_toast_y", EXP_STR(TOAST_GAP), 0, "The vertical position of the toasts HUD.\n", FCVAR_NEVER_AS_STRING | FCVAR_DONTRECORD);
+Variable p2fx_toast_align("p2fx_toast_align", "0", 0, 2, "The side to align toasts to horizontally. 0 = left, 1 = center, 2 = right.\n", FCVAR_NEVER_AS_STRING | FCVAR_DONTRECORD);
+Variable p2fx_toast_anchor("p2fx_toast_anchor", "1", 0, 1, "Where to put new toasts. 0 = bottom, 1 = top.\n", FCVAR_NEVER_AS_STRING | FCVAR_DONTRECORD);
+Variable p2fx_toast_compact("p2fx_toast_compact", "0", "Enables a compact form of the toasts HUD.\n", FCVAR_NEVER_AS_STRING | FCVAR_DONTRECORD);
+Variable p2fx_toast_background("p2fx_toast_background", "1", 0, 2, "Sets the background highlight for toasts. 0 = no background, 1 = text width only, 2 = full width.\n", FCVAR_NEVER_AS_STRING | FCVAR_DONTRECORD);
+Variable p2fx_toast_net_disable("p2fx_toast_net_disable", "0", "Disable network toasts.\n", FCVAR_NEVER_AS_STRING | FCVAR_DONTRECORD);
 
 struct TagInfo {
 	uint8_t r, g, b;
@@ -87,9 +87,9 @@ static TagInfo getTagInfo(std::string tag) {
 	};
 }
 
-CON_COMMAND_F(sar_toast_tag_set_color, "sar_toast_tag_set_color <tag> <color> - set the color of the specified toast tag to an sRGB color\n", FCVAR_DONTRECORD) {
+CON_COMMAND_F(p2fx_toast_tag_set_color, "p2fx_toast_tag_set_color <tag> <color> - set the color of the specified toast tag to an sRGB color\n", FCVAR_DONTRECORD) {
 	if (args.ArgC() != 3 && args.ArgC() != 5) {
-		return console->Print(sar_toast_tag_set_color.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_toast_tag_set_color.ThisPtr()->m_pszHelpString);
 	}
 
 	std::string tag(args[1]);
@@ -132,9 +132,9 @@ CON_COMMAND_F(sar_toast_tag_set_color, "sar_toast_tag_set_color <tag> <color> - 
 	g_tags[tag] = info;
 }
 
-CON_COMMAND_F(sar_toast_tag_set_duration, "sar_toast_tag_set_duration <tag> <duration> - set the duration of the specified toast tag in seconds. The duration may be given as 'forever'\n", FCVAR_DONTRECORD) {
+CON_COMMAND_F(p2fx_toast_tag_set_duration, "p2fx_toast_tag_set_duration <tag> <duration> - set the duration of the specified toast tag in seconds. The duration may be given as 'forever'\n", FCVAR_DONTRECORD) {
 	if (args.ArgC() != 3) {
-		return console->Print(sar_toast_tag_set_duration.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_toast_tag_set_duration.ThisPtr()->m_pszHelpString);
 	}
 
 	std::string tag(args[1]);
@@ -157,9 +157,9 @@ CON_COMMAND_F(sar_toast_tag_set_duration, "sar_toast_tag_set_duration <tag> <dur
 	g_tags[tag] = info;
 }
 
-CON_COMMAND_F(sar_toast_tag_dismiss_all, "sar_toast_tag_dismiss_all <tag> - dismiss all active toasts with the given tag\n", FCVAR_DONTRECORD) {
+CON_COMMAND_F(p2fx_toast_tag_dismiss_all, "p2fx_toast_tag_dismiss_all <tag> - dismiss all active toasts with the given tag\n", FCVAR_DONTRECORD) {
 	if (args.ArgC() != 2) {
-		return console->Print(sar_toast_tag_dismiss_all.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_toast_tag_dismiss_all.ThisPtr()->m_pszHelpString);
 	}
 
 	std::string tag(args[1]);
@@ -174,36 +174,36 @@ CON_COMMAND_F(sar_toast_tag_dismiss_all, "sar_toast_tag_dismiss_all <tag> - dism
 		g_toasts.end());
 }
 
-CON_COMMAND_F(sar_toast_setpos, "sar_toast_setpos <bottom|top> <left|center|right> - set the position of the toasts HUD\n", FCVAR_DONTRECORD) {
+CON_COMMAND_F(p2fx_toast_setpos, "p2fx_toast_setpos <bottom|top> <left|center|right> - set the position of the toasts HUD\n", FCVAR_DONTRECORD) {
 	if (args.ArgC() != 3) {
-		return console->Print(sar_toast_setpos.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_toast_setpos.ThisPtr()->m_pszHelpString);
 	}
 
 	int screenWidth, screenHeight;
 	engine->GetScreenSize(nullptr, screenWidth, screenHeight);
 
 	if (!strcmp(args[1], "bottom")) {
-		sar_toast_anchor.SetValue(0);
-		sar_toast_y.SetValue(screenHeight - TOAST_GAP);
+		p2fx_toast_anchor.SetValue(0);
+		p2fx_toast_y.SetValue(screenHeight - TOAST_GAP);
 	} else {
-		sar_toast_anchor.SetValue(1);
-		sar_toast_y.SetValue(TOAST_GAP);
+		p2fx_toast_anchor.SetValue(1);
+		p2fx_toast_y.SetValue(TOAST_GAP);
 	}
 
 	if (!strcmp(args[2], "left")) {
-		sar_toast_align.SetValue(0);
-		sar_toast_x.SetValue(TOAST_GAP);
+		p2fx_toast_align.SetValue(0);
+		p2fx_toast_x.SetValue(TOAST_GAP);
 	} else if (!strcmp(args[2], "center")) {
-		sar_toast_align.SetValue(1);
-		sar_toast_x.SetValue((screenWidth - sar_toast_width.GetInt()) / 2);
+		p2fx_toast_align.SetValue(1);
+		p2fx_toast_x.SetValue((screenWidth - p2fx_toast_width.GetInt()) / 2);
 	} else {
-		sar_toast_align.SetValue(2);
-		sar_toast_x.SetValue(screenWidth - sar_toast_width.GetInt() - TOAST_GAP);
+		p2fx_toast_align.SetValue(2);
+		p2fx_toast_x.SetValue(screenWidth - p2fx_toast_width.GetInt() - TOAST_GAP);
 	}
 }
 
 static void toastMessage(const void *data, size_t size) {
-	if (sar_toast_net_disable.GetBool()) return;
+	if (p2fx_toast_net_disable.GetBool()) return;
 	const char *tag = (char *)data;
 	size_t tagLen = strnlen(tag, size);
 	if (tagLen >= size - 1) return;
@@ -221,7 +221,7 @@ void ToastHud::InitMessageHandler() {
 }
 
 bool ToastHud::ShouldDraw() {
-	return Hud::ShouldDraw() && !sar_toast_disable.GetBool();
+	return Hud::ShouldDraw() && !p2fx_toast_disable.GetBool();
 }
 
 bool ToastHud::GetCurrentSize(int &xSize, int &ySize) {
@@ -302,16 +302,16 @@ void ToastHud::AddToast(std::string tag, std::string text, bool doConsole) {
 		255,
 	});
 
-	Surface::HFont font = scheme->GetFontByID(sar_toast_font.GetInt());
+	Surface::HFont font = scheme->GetFontByID(p2fx_toast_font.GetInt());
 
-	bool compact = sar_toast_compact.GetBool();
+	bool compact = p2fx_toast_compact.GetBool();
 	int linePadding = compact ? 0 : LINE_PAD;
 	int gap = compact ? 0 : TOAST_GAP;
 	int toastPadding = compact ? COMPACT_TOAST_PAD : 0;
 	int sidePadding = compact ? COMPACT_SIDE_PAD : SIDE_PAD;
 
 	int lineHeight = surface->GetFontHeight(font) + linePadding;
-	int maxWidth = sar_toast_width.GetInt();
+	int maxWidth = p2fx_toast_width.GetInt();
 
 	auto lines = splitIntoLines(font, text, maxWidth - 2 * sidePadding);
 
@@ -372,18 +372,18 @@ void ToastHud::Paint(int slot) {
 
 	Update();
 
-	Surface::HFont font = scheme->GetFontByID(sar_toast_font.GetInt());
+	Surface::HFont font = scheme->GetFontByID(p2fx_toast_font.GetInt());
 
-	int maxWidth = sar_toast_width.GetInt();
+	int maxWidth = p2fx_toast_width.GetInt();
 
-	Alignment align = (Alignment)sar_toast_align.GetInt();
-	bool againstTop = sar_toast_anchor.GetBool();
+	Alignment align = (Alignment)p2fx_toast_align.GetInt();
+	bool againstTop = p2fx_toast_anchor.GetBool();
 
-	int mainX = sar_toast_x.GetInt();
+	int mainX = p2fx_toast_x.GetInt();
 
-	int yOffset = sar_toast_y.GetInt() + (againstTop ? -1 : 1) * g_slideOff;
+	int yOffset = p2fx_toast_y.GetInt() + (againstTop ? -1 : 1) * g_slideOff;
 
-	bool compact = sar_toast_compact.GetBool();
+	bool compact = p2fx_toast_compact.GetBool();
 	int linePadding = compact ? 0 : LINE_PAD;
 	int gap = compact ? 0 : TOAST_GAP;
 	int toastPadding = compact ? COMPACT_TOAST_PAD : 0;
@@ -391,7 +391,7 @@ void ToastHud::Paint(int slot) {
 
 	int lineHeight = surface->GetFontHeight(font) + linePadding;
 
-	Background bg = (Background)sar_toast_background.GetInt();
+	Background bg = (Background)p2fx_toast_background.GetInt();
 
 	for (auto iter = g_toasts.rbegin(); iter != g_toasts.rend(); ++iter) {
 		auto toast = *iter;
@@ -450,9 +450,9 @@ void ToastHud::Paint(int slot) {
 	}
 }
 
-CON_COMMAND_F(sar_toast_create, "sar_toast_create <tag> <text> - create a toast\n", FCVAR_DONTRECORD) {
+CON_COMMAND_F(p2fx_toast_create, "p2fx_toast_create <tag> <text> - create a toast\n", FCVAR_DONTRECORD) {
 	if (args.ArgC() < 3) {
-		console->Print(sar_toast_create.ThisPtr()->m_pszHelpString);
+		console->Print(p2fx_toast_create.ThisPtr()->m_pszHelpString);
 		return;
 	}
 	
@@ -461,9 +461,9 @@ CON_COMMAND_F(sar_toast_create, "sar_toast_create <tag> <text> - create a toast\
 	toastHud.AddToast(args[1], txt);
 }
 
-CON_COMMAND_F(sar_toast_net_create, "sar_toast_net_create <tag> <text> - create a toast, also sending it to your coop partner\n", FCVAR_DONTRECORD) {
+CON_COMMAND_F(p2fx_toast_net_create, "p2fx_toast_net_create <tag> <text> - create a toast, also sending it to your coop partner\n", FCVAR_DONTRECORD) {
 	if (args.ArgC() < 3) {
-		console->Print(sar_toast_net_create.ThisPtr()->m_pszHelpString);
+		console->Print(p2fx_toast_net_create.ThisPtr()->m_pszHelpString);
 		return;
 	}
 
@@ -483,7 +483,7 @@ CON_COMMAND_F(sar_toast_net_create, "sar_toast_net_create <tag> <text> - create 
 	toastHud.AddToast(tag, toast);
 }
 
-CON_COMMAND_F(sar_toast_dismiss_all, "sar_toast_dismiss_all - dismiss all active toasts\n", FCVAR_DONTRECORD) {
+CON_COMMAND_F(p2fx_toast_dismiss_all, "p2fx_toast_dismiss_all - dismiss all active toasts\n", FCVAR_DONTRECORD) {
 	g_toasts.clear();
 }
 

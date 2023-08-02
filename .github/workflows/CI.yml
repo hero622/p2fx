@@ -31,14 +31,14 @@ jobs:
           sudo apt-get install -y g++-10-multilib
       - name: Build
         env:
-          DEMO_SIGN_PUBKEY: ${{ secrets.SAR_DEMO_SIGN_PUBKEY }}
-          DEMO_SIGN_PRIVKEY: ${{ secrets.SAR_DEMO_SIGN_PRIVKEY }}
+          DEMO_SIGN_PUBKEY: ${{ secrets.P2FX_DEMO_SIGN_PUBKEY }}
+          DEMO_SIGN_PRIVKEY: ${{ secrets.P2FX_DEMO_SIGN_PRIVKEY }}
         run: make -j$(nproc)
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: sar-linux
-          path: sar.so
+          name: p2fx-linux
+          path: p2fx.so
           if-no-files-found: error
   build-win:
     name: Windows Build
@@ -53,14 +53,14 @@ jobs:
         uses: microsoft/setup-msbuild@v1.1
       - name: Build
         env:
-          DEMO_SIGN_PUBKEY: ${{ secrets.SAR_DEMO_SIGN_PUBKEY }}
-          DEMO_SIGN_PRIVKEY: ${{ secrets.SAR_DEMO_SIGN_PRIVKEY }}
+          DEMO_SIGN_PUBKEY: ${{ secrets.P2FX_DEMO_SIGN_PUBKEY }}
+          DEMO_SIGN_PRIVKEY: ${{ secrets.P2FX_DEMO_SIGN_PRIVKEY }}
         run: msbuild -m -t:p2fx -p:"Configuration=Release;Platform=x86" p2fx.sln
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: sar-windows
+          name: p2fx-windows
           path: |
-            bin\sar.dll
-            bin\sar.pdb
+            bin\p2fx.dll
+            bin\p2fx.pdb
           if-no-files-found: error

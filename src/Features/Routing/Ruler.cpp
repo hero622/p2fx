@@ -15,8 +15,8 @@
 #include "Variable.hpp"
 #include "Features/Hud/Hud.hpp"
 
-Variable sar_ruler_grid_align("sar_ruler_grid_align", "1", 0, 1024, "Aligns ruler creation point to the grid of specified size.\n");
-Variable sar_ruler_draw("sar_ruler_draw", "1", 0, 4, 
+Variable p2fx_ruler_grid_align("p2fx_ruler_grid_align", "1", 0, 1024, "Aligns ruler creation point to the grid of specified size.\n");
+Variable p2fx_ruler_draw("p2fx_ruler_draw", "1", 0, 4, 
     "Sets the drawing mode of the ruler\n"
     "0 = rulers are not drawn\n"
     "1 = lines, length and angles are drawn (default)\n"
@@ -24,8 +24,8 @@ Variable sar_ruler_draw("sar_ruler_draw", "1", 0, 4,
     "3 = only lines are drawn\n"
     "4 = lines, deltas, angles and point origins are drawn\n"
 );
-Variable sar_ruler_max_trace_dist("sar_ruler_max_trace_dist", "16384", 0, 16384, "Sets maximum trace distance for placing ruler points.\n");
-Variable sar_ruler_creator("sar_ruler_creator", "0", 0, 2, 
+Variable p2fx_ruler_max_trace_dist("p2fx_ruler_max_trace_dist", "16384", 0, 16384, "Sets maximum trace distance for placing ruler points.\n");
+Variable p2fx_ruler_creator("p2fx_ruler_creator", "0", 0, 2, 
 	"Enables or disables ruler creator\n"
 	"0 = Ruler creator disabled\n"
 	"1 = Point-to-point ruler creator\n"
@@ -84,7 +84,7 @@ void RulerManager::UpdateCreator() {
 
 	Vector dir;
 	Math::AngleVectors(cam_ang, &dir);
-	dir *= sar_ruler_max_trace_dist.GetFloat();
+	dir *= p2fx_ruler_max_trace_dist.GetFloat();
 
 	CGameTrace tr;
 
@@ -109,7 +109,7 @@ void RulerManager::UpdateCreator() {
 	}
 
 	// rounding trace point to the nearest grid point
-	float grid = fmaxf(sar_ruler_grid_align.GetFloat(), 0.03125);
+	float grid = fmaxf(p2fx_ruler_grid_align.GetFloat(), 0.03125);
 	creatorTracePoint = {
 		roundf(creatorTracePoint.x / grid) * grid,
 		roundf(creatorTracePoint.y / grid) * grid,
@@ -135,9 +135,9 @@ void drawPoint(Vector pos, bool text, Color c) {
 	}
 }
 
-// drawing ruler depending on sar_ruler_draw cvar
+// drawing ruler depending on p2fx_ruler_draw cvar
 void Ruler::draw() {
-	int drawMode = sar_ruler_draw.GetInt();
+	int drawMode = p2fx_ruler_draw.GetInt();
 	if (drawMode==0) return;
 	// drawing line
 	MeshId mesh = OverlayRender::createMesh(RenderCallback::none, RenderCallback::constant({ 0, 100, 200, 255 }, true));
@@ -209,7 +209,7 @@ void RulerManager::ProgressCreationStage() {
 	creationStage++;
 	bool saveRuler = false;
 
-	if (sar_ruler_creator.GetInt() == 2) {
+	if (p2fx_ruler_creator.GetInt() == 2) {
 		creatorRuler.start = camera->GetPosition(GET_SLOT());
 		creatorRuler.end = creatorTracePoint;
 		saveRuler = true;
@@ -236,27 +236,27 @@ void RulerManager::ProgressCreationStage() {
 }
 
 bool RulerManager::IsCreating() {
-	return sar_ruler_creator.GetBool();
+	return p2fx_ruler_creator.GetBool();
 }
 
 
 
 
-CON_COMMAND(sar_ruler_clear, "sar_ruler_clear - clear all created rulers\n") {
+CON_COMMAND(p2fx_ruler_clear, "p2fx_ruler_clear - clear all created rulers\n") {
 	console->Print("Removing all rulers\n");
 	rulerManager.RemoveAllRulers();
 }
 
-CON_COMMAND(sar_ruler_creator_set, "sar_ruler_creator_set - sets the point, progressing the ruler creation process.\n") {
+CON_COMMAND(p2fx_ruler_creator_set, "p2fx_ruler_creator_set - sets the point, progressing the ruler creation process.\n") {
 	if (!rulerManager.IsCreating()) {
-		return console->Print("sar_ruler_creator has to be enabled in order to use this command.\n");
+		return console->Print("p2fx_ruler_creator has to be enabled in order to use this command.\n");
 	}
 	rulerManager.ProgressCreationStage();
 }
 
-CON_COMMAND(sar_ruler_add, "sar_ruler_add <x> <y> <z> <x> <y> <z> - adds a ruler to a set of currently drawn rulers.\n") {
+CON_COMMAND(p2fx_ruler_add, "p2fx_ruler_add <x> <y> <z> <x> <y> <z> - adds a ruler to a set of currently drawn rulers.\n") {
 	if (args.ArgC() != 7) {
-		return console->Print(sar_ruler_add.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_ruler_add.ThisPtr()->m_pszHelpString);
 	}
 
 	float x0 = atof(args[1]);

@@ -4,7 +4,7 @@
 #include "Modules/Console.hpp"
 #include "Modules/Engine.hpp"
 #include "Modules/Server.hpp"
-#include "SAR.hpp"
+#include "P2FX.hpp"
 #include "Utils/SDK.hpp"
 
 #include <cstring>
@@ -135,25 +135,25 @@ void ClassDumper::DumpRecvTable(std::ofstream &file, RecvTable *table) {
 
 // Commands
 
-CON_COMMAND(sar_dump_server_classes, "sar_dump_server_classes - dumps all server classes to a file\n") {
+CON_COMMAND(p2fx_dump_server_classes, "p2fx_dump_server_classes - dumps all server classes to a file\n") {
 	classDumper->Dump();
 }
-CON_COMMAND(sar_dump_client_classes, "sar_dump_client_classes - dumps all client classes to a file\n") {
+CON_COMMAND(p2fx_dump_client_classes, "p2fx_dump_client_classes - dumps all client classes to a file\n") {
 	classDumper->Dump(false);
 }
-CON_COMMAND(sar_list_server_classes, "sar_list_server_classes - lists all server classes\n") {
+CON_COMMAND(p2fx_list_server_classes, "p2fx_list_server_classes - lists all server classes\n") {
 	for (auto sclass = server->GetAllServerClasses(); sclass; sclass = sclass->m_pNext) {
 		console->Print("%s\n", sclass->m_pNetworkName);
 	}
 }
-CON_COMMAND(sar_list_client_classes, "sar_list_client_classes - lists all client classes\n") {
+CON_COMMAND(p2fx_list_client_classes, "p2fx_list_client_classes - lists all client classes\n") {
 	for (auto cclass = client->GetAllClasses(); cclass; cclass = cclass->m_pNext) {
 		console->Print("%s\n", cclass->m_pNetworkName);
 	}
 }
-CON_COMMAND(sar_find_server_class, "sar_find_server_class <class_name> - finds specific server class tables and props with their offset\n") {
+CON_COMMAND(p2fx_find_server_class, "p2fx_find_server_class <class_name> - finds specific server class tables and props with their offset\n") {
 	if (args.ArgC() != 2) {
-		return console->Print(sar_find_server_class.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_find_server_class.ThisPtr()->m_pszHelpString);
 	}
 
 	std::function<void(SendTable * table, int &level)> DumpTable;
@@ -188,9 +188,9 @@ CON_COMMAND(sar_find_server_class, "sar_find_server_class <class_name> - finds s
 		}
 	}
 }
-CON_COMMAND(sar_find_client_class, "sar_find_client_class <class_name> - finds specific client class tables and props with their offset\n") {
+CON_COMMAND(p2fx_find_client_class, "p2fx_find_client_class <class_name> - finds specific client class tables and props with their offset\n") {
 	if (args.ArgC() != 2) {
-		return console->Print(sar_find_client_class.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_find_client_class.ThisPtr()->m_pszHelpString);
 	}
 
 	std::function<void(RecvTable * table, int &level)> DumpTable;

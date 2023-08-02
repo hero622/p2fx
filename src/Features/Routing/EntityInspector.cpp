@@ -15,7 +15,7 @@
 #include <iomanip>
 #include <iostream>
 
-Variable sar_inspection_save_every_tick("sar_inspection_save_every_tick", "0", "Saves inspection data even when session tick does not increment.\n");
+Variable p2fx_inspection_save_every_tick("p2fx_inspection_save_every_tick", "0", "Saves inspection data even when session tick does not increment.\n");
 
 EntityInspector *inspector;
 
@@ -49,7 +49,7 @@ void EntityInspector::Record() {
 	}
 
 	if (this->isRunning) {
-		if (sessionTick != this->lastSession || sar_inspection_save_every_tick.GetBool()) {
+		if (sessionTick != this->lastSession || p2fx_inspection_save_every_tick.GetBool()) {
 			this->data.push_back(this->latest);
 			this->lastSession = sessionTick;
 		}
@@ -85,7 +85,7 @@ bool EntityInspector::ExportData(std::string filePath) {
 		return false;
 	}
 
-	file << SAR_INSPECTION_EXPORT_HEADER << std::endl;
+	file << P2FX_INSPECTION_EXPORT_HEADER << std::endl;
 
 	auto current = 1;
 	for (const auto &item : data) {
@@ -109,20 +109,20 @@ bool EntityInspector::ExportData(std::string filePath) {
 
 // Commands
 
-CON_COMMAND(sar_inspection_start, "sar_inspection_start - starts recording entity data\n") {
+CON_COMMAND(p2fx_inspection_start, "p2fx_inspection_start - starts recording entity data\n") {
 	inspector->Start();
 	console->Print("Started recording data at tick %i!\n", session->GetTick());
 }
-CON_COMMAND(sar_inspection_stop, "sar_inspection_stop - stops recording entity data\n") {
+CON_COMMAND(p2fx_inspection_stop, "p2fx_inspection_stop - stops recording entity data\n") {
 	inspector->Stop();
 	console->Print("Stopped recording data at tick %i!\n", session->GetTick());
 }
-CON_COMMAND(sar_inspection_print, "sar_inspection_print - prints recorded entity data\n") {
+CON_COMMAND(p2fx_inspection_print, "p2fx_inspection_print - prints recorded entity data\n") {
 	inspector->PrintData();
 }
-CON_COMMAND(sar_inspection_export, "sar_inspection_export <file_name> - saves recorded entity data to a csv file\n") {
+CON_COMMAND(p2fx_inspection_export, "p2fx_inspection_export <file_name> - saves recorded entity data to a csv file\n") {
 	if (args.ArgC() != 2) {
-		return console->Print(sar_inspection_export.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_inspection_export.ThisPtr()->m_pszHelpString);
 	}
 
 	auto filePath = std::string(engine->GetGameDirectory()) + std::string("/") + std::string(args[1]);
@@ -135,7 +135,7 @@ CON_COMMAND(sar_inspection_export, "sar_inspection_export <file_name> - saves re
 		console->Warning("Failed to export data!\n");
 	}
 }
-CON_COMMAND(sar_inspection_index, "sar_inspection_index - sets entity index for inspection\n") {
+CON_COMMAND(p2fx_inspection_index, "p2fx_inspection_index - sets entity index for inspection\n") {
 	if (args.ArgC() != 2) {
 		return console->Print("Current index: %i\n", inspector->entityIndex);
 	}

@@ -246,63 +246,63 @@ void OverlayRender::initMaterials() {
 
 	kv = new KeyValues("unlitgeneric");
 	kv->SetInt("$vertexcolor", 1);
-	g_mat_solid_opaque = createMaterial(kv, "_SAR_UnlitSolidOpaque");
+	g_mat_solid_opaque = createMaterial(kv, "_P2FX_UnlitSolidOpaque");
 
 	kv = new KeyValues("unlitgeneric");
 	kv->SetInt("$vertexcolor", 1);
 	kv->SetInt("$ignorez", 1);
-	g_mat_solid_opaque_noz = createMaterial(kv, "_SAR_UnlitSolidOpaqueNoDepth");
+	g_mat_solid_opaque_noz = createMaterial(kv, "_P2FX_UnlitSolidOpaqueNoDepth");
 
 	kv = new KeyValues("unlitgeneric");
 	kv->SetInt("$vertexcolor", 1);
 	kv->SetInt("$vertexalpha", 1);
-	g_mat_solid_alpha = createMaterial(kv, "_SAR_UnlitSolidAlpha");
+	g_mat_solid_alpha = createMaterial(kv, "_P2FX_UnlitSolidAlpha");
 
 	kv = new KeyValues("unlitgeneric");
 	kv->SetInt("$vertexcolor", 1);
 	kv->SetInt("$vertexalpha", 1);
 	kv->SetInt("$ignorez", 1);
-	g_mat_solid_alpha_noz = createMaterial(kv, "_SAR_UnlitSolidAlphaNoDepth");
+	g_mat_solid_alpha_noz = createMaterial(kv, "_P2FX_UnlitSolidAlphaNoDepth");
 
 	kv = new KeyValues("wireframe");
 	kv->SetInt("$vertexcolor", 1);
-	g_mat_wireframe_opaque = createMaterial(kv, "_SAR_UnlitWireframeOpaque");
+	g_mat_wireframe_opaque = createMaterial(kv, "_P2FX_UnlitWireframeOpaque");
 
 	kv = new KeyValues("wireframe");
 	kv->SetInt("$vertexcolor", 1);
 	kv->SetInt("$ignorez", 1);
-	g_mat_wireframe_opaque_noz = createMaterial(kv, "_SAR_UnlitWireframeOpaqueNoDepth");
+	g_mat_wireframe_opaque_noz = createMaterial(kv, "_P2FX_UnlitWireframeOpaqueNoDepth");
 
 	kv = new KeyValues("wireframe");
 	kv->SetInt("$vertexcolor", 1);
 	kv->SetInt("$vertexalpha", 1);
-	g_mat_wireframe_alpha = createMaterial(kv, "_SAR_UnlitWireframeAlpha");
+	g_mat_wireframe_alpha = createMaterial(kv, "_P2FX_UnlitWireframeAlpha");
 
 	kv = new KeyValues("wireframe");
 	kv->SetInt("$vertexcolor", 1);
 	kv->SetInt("$vertexalpha", 1);
 	kv->SetInt("$ignorez", 1);
-	g_mat_wireframe_alpha_noz = createMaterial(kv, "_SAR_UnlitWireframeAlphaNoDepth");
+	g_mat_wireframe_alpha_noz = createMaterial(kv, "_P2FX_UnlitWireframeAlphaNoDepth");
 
-	materialSystem->CreateTexture("_SAR_FontAtlasTex", FONT_ATLAS_WIDTH, FONT_ATLAS_HEIGHT, FONT_ATLAS_DATA);
+	materialSystem->CreateTexture("_P2FX_FontAtlasTex", FONT_ATLAS_WIDTH, FONT_ATLAS_HEIGHT, FONT_ATLAS_DATA);
 
 	kv = new KeyValues("unlitgeneric");
 	kv->SetInt("$vertexcolor", 1);
 	kv->SetInt("$vertexalpha", 1);
 	kv->SetInt("$translucent", 1);
-	kv->SetString("$basetexture", "_SAR_FontAtlasTex");
-	g_mat_font = createMaterial(kv, "_SAR_FontAtlas");
+	kv->SetString("$basetexture", "_P2FX_FontAtlasTex");
+	g_mat_font = createMaterial(kv, "_P2FX_FontAtlas");
 
 	kv = new KeyValues("unlitgeneric");
 	kv->SetInt("$vertexcolor", 1);
 	kv->SetInt("$vertexalpha", 1);
 	kv->SetInt("$translucent", 1);
 	kv->SetInt("$ignorez", 1);
-	kv->SetString("$basetexture", "_SAR_FontAtlasTex");
-	g_mat_font_noz = createMaterial(kv, "_SAR_FontAtlasNoDepth");
+	kv->SetString("$basetexture", "_P2FX_FontAtlasTex");
+	g_mat_font_noz = createMaterial(kv, "_P2FX_FontAtlasNoDepth");
 }
 
-ON_EVENT(SAR_UNLOAD) {
+ON_EVENT(P2FX_UNLOAD) {
 	destroyMaterial(g_mat_solid_opaque);
 	destroyMaterial(g_mat_solid_opaque_noz);
 	destroyMaterial(g_mat_solid_alpha);

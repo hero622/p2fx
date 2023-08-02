@@ -199,7 +199,7 @@
     <ClCompile Include="Plugin.cpp">
       <Filter>p2fx</Filter>
     </ClCompile>
-    <ClCompile Include="SAR.cpp">
+    <ClCompile Include="P2FX.cpp">
       <Filter>p2fx</Filter>
     </ClCompile>
     <ClCompile Include="Variable.cpp">
@@ -705,7 +705,7 @@
     <ClInclude Include="Plugin.hpp">
       <Filter>p2fx</Filter>
     </ClInclude>
-    <ClInclude Include="SAR.hpp">
+    <ClInclude Include="P2FX.hpp">
       <Filter>p2fx</Filter>
     </ClInclude>
     <ClInclude Include="Utils.hpp">

@@ -44,6 +44,6 @@ public:
 
 extern Stats *stats;
 
-extern Variable sar_stats_jumps_xy;
-extern Variable sar_stats_velocity_peak_xy;
-extern Variable sar_stats_auto_reset;
+extern Variable p2fx_stats_jumps_xy;
+extern Variable p2fx_stats_velocity_peak_xy;
+extern Variable p2fx_stats_auto_reset;

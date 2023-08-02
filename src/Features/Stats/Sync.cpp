@@ -7,11 +7,11 @@
 
 #include <algorithm>
 
-Variable sar_strafesync("sar_strafesync", "0", "Shows strafe sync stats.\n");
-Variable sar_strafesync_session_time("sar_strafesync_session_time", "0", 0,
+Variable p2fx_strafesync("p2fx_strafesync", "0", "Shows strafe sync stats.\n");
+Variable p2fx_strafesync_session_time("p2fx_strafesync_session_time", "0", 0,
                                      "In seconds. How much time should pass until session is reset.\n"
                                      "If 0, you'll have to reset the session manually.\n");
-Variable sar_strafesync_noground("sar_strafesync_noground", "1",
+Variable p2fx_strafesync_noground("p2fx_strafesync_noground", "1",
                                  "0: Always run.\n"
                                  "1: Do not run when on ground.\n");
 
@@ -33,14 +33,14 @@ void Sync::UpdateSync(int slot, const CUserCmd *cmd) {
 
 	auto player = client->GetPlayer(slot + 1);
 
-	if (sar_strafesync_noground.GetBool()) {
+	if (p2fx_strafesync_noground.GetBool()) {
 		if (player->ground_entity()) {
 			return;
 		}
 	}
 
-	if (sar_strafesync_session_time.GetInt() > 0) {
-		if (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - this->start).count() >= sar_strafesync_session_time.GetInt()) {
+	if (p2fx_strafesync_session_time.GetInt() > 0) {
+		if (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - this->start).count() >= p2fx_strafesync_session_time.GetInt()) {
 			this->ResetSyncSession();
 			this->start = std::chrono::steady_clock::now();
 		}
@@ -93,18 +93,18 @@ float Sync::GetStrafeSync(int slot) {
 
 // Commands
 
-CON_COMMAND(sar_strafesync_pause, "sar_strafesync_pause - pause strafe sync session\n") {
+CON_COMMAND(p2fx_strafesync_pause, "p2fx_strafesync_pause - pause strafe sync session\n") {
 	synchro->PauseSyncSession();
 }
 
-CON_COMMAND(sar_strafesync_resume, "sar_strafesync_resume - resume strafe sync session\n") {
+CON_COMMAND(p2fx_strafesync_resume, "p2fx_strafesync_resume - resume strafe sync session\n") {
 	synchro->ResumeSyncSession();
 }
 
-CON_COMMAND(sar_strafesync_reset, "sar_strafesync_reset - reset strafe sync session\n") {
+CON_COMMAND(p2fx_strafesync_reset, "p2fx_strafesync_reset - reset strafe sync session\n") {
 	synchro->ResetSyncSession();
 }
 
-CON_COMMAND(sar_strafesync_split, "sar_strafesync_split - makes a new split\n") {
+CON_COMMAND(p2fx_strafesync_split, "p2fx_strafesync_split - makes a new split\n") {
 	synchro->SplitSyncSession();
 }

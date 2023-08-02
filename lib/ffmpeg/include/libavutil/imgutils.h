@@ -233,14 +233,14 @@ int av_image_check_size2(unsigned int w, unsigned int h, int64_t max_pixels, enu
  *
  * It is considered invalid if the denominator is 0 or if applying the ratio
  * to the image size would make the smaller dimension less than 1. If the
- * sar numerator is 0, it is considered unknown and will return as valid.
+ * p2fx numerator is 0, it is considered unknown and will return as valid.
  *
  * @param w width of the image
  * @param h height of the image
- * @param sar sample aspect ratio of the image
+ * @param p2fx sample aspect ratio of the image
  * @return 0 if valid, a negative AVERROR code otherwise
  */
-int av_image_check_sar(unsigned int w, unsigned int h, AVRational sar);
+int av_image_check_sar(unsigned int w, unsigned int h, AVRational p2fx);
 
 /**
  * Overwrite the image data with black. This is suitable for filling a

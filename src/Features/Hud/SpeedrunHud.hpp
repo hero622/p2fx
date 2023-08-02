@@ -12,8 +12,8 @@ public:
 
 extern SpeedrunHud speedrunHud;
 
-extern Variable sar_sr_hud;
-extern Variable sar_sr_hud_x;
-extern Variable sar_sr_hud_y;
-extern Variable sar_sr_hud_font_color;
-extern Variable sar_sr_hud_font_index;
+extern Variable p2fx_sr_hud;
+extern Variable p2fx_sr_hud_x;
+extern Variable p2fx_sr_hud_y;
+extern Variable p2fx_sr_hud_font_color;
+extern Variable p2fx_sr_hud_font_index;

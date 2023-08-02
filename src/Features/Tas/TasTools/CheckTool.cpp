@@ -4,8 +4,8 @@
 
 #include <cmath>
 
-Variable sar_tas_check_max_replays("sar_tas_check_max_replays", "15", 0, "Maximum replays for the 'check' TAS tool until it gives up.\n");
-Variable sar_tas_check_disable("sar_tas_check_disable", "0", "Globally disable the 'check' TAS tool.\n");
+Variable p2fx_tas_check_max_replays("p2fx_tas_check_max_replays", "15", 0, "Maximum replays for the 'check' TAS tool until it gives up.\n");
+Variable p2fx_tas_check_disable("p2fx_tas_check_disable", "0", "Globally disable the 'check' TAS tool.\n");
 
 CheckTool tasCheckTool[2] = {{0}, {1}};
 
@@ -13,7 +13,7 @@ CheckTool tasCheckTool[2] = {{0}, {1}};
 void CheckTool::Apply(TasFramebulk &fb, const TasPlayerInfo &info) {
 	if (!params.enabled) return;
 
-	if (sar_tas_check_disable.GetBool()) {
+	if (p2fx_tas_check_disable.GetBool()) {
 		params.enabled = false;
 		return;
 	}
@@ -40,7 +40,7 @@ void CheckTool::Apply(TasFramebulk &fb, const TasPlayerInfo &info) {
 
 	if (shouldReplay) {
 		int replays = tasPlayer->playbackInfo.autoReplayCount;
-		if (replays < sar_tas_check_max_replays.GetInt()) {
+		if (replays < p2fx_tas_check_max_replays.GetInt()) {
 			console->Print("Replaying TAS (attempt %d)\n", replays);
 			tasPlayer->Replay(true);
 		} else {

@@ -12,10 +12,10 @@ public:
 
 extern InspectionHud inspectionHud;
 
-extern Variable sar_ei_hud;
-extern Variable sar_ei_hud_x;
-extern Variable sar_ei_hud_y;
-extern Variable sar_ei_hud_z;
-extern Variable sar_ei_hud_font_color;
-extern Variable sar_ei_hud_font_color2;
-extern Variable sar_ei_hud_font_index;
+extern Variable p2fx_ei_hud;
+extern Variable p2fx_ei_hud_x;
+extern Variable p2fx_ei_hud_y;
+extern Variable p2fx_ei_hud_z;
+extern Variable p2fx_ei_hud_font_color;
+extern Variable p2fx_ei_hud_font_color2;
+extern Variable p2fx_ei_hud_font_index;

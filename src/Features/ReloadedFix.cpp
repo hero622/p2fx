@@ -5,10 +5,10 @@
 #include "Modules/Client.hpp"
 #include "Event.hpp"
 #include "Utils/SDK.hpp"
-#include "SAR.hpp"
+#include "P2FX.hpp"
 
-Variable sar_fix_reloaded_cheats(
-	"sar_fix_reloaded_cheats", "1", 0, 1,
+Variable p2fx_fix_reloaded_cheats(
+	"p2fx_fix_reloaded_cheats", "1", 0, 1,
 	"Overrides map execution of specific console commands in Reloaded in order to separate map usage from player usage for these commands.\n"
 );
 
@@ -21,9 +21,9 @@ ReloadedFix::ReloadedFix() {
 // Cancels execution of certain event calls in Reloaded and replaces it with custom behaviour
 void ReloadedFix::OverrideInput(const char *className, const char *inputName, variant_t *parameter) {
 	// only apply input override for Reloaded
-	if (!sar.game->Is(SourceGame_PortalReloaded)) return;
+	if (!p2fx.game->Is(SourceGame_PortalReloaded)) return;
 
-	if (!sar_fix_reloaded_cheats.GetBool()) return;
+	if (!p2fx_fix_reloaded_cheats.GetBool()) return;
 
 	std::string paramStr = parameter->ToString();
 

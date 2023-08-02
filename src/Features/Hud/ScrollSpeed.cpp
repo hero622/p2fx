@@ -9,7 +9,7 @@
 #define CONSECUTIVE_END 5
 #define TOTAL_THRESHOLD 5
 
-Variable sar_scrollspeed("sar_scrollspeed", "0", "Show a HUD indicating your scroll speed.\n");
+Variable p2fx_scrollspeed("p2fx_scrollspeed", "0", "Show a HUD indicating your scroll speed.\n");
 
 int g_total[2];
 int g_scrolls[2];
@@ -18,7 +18,7 @@ int g_lastScroll[2];
 float g_lastSps[2];
 
 bool ScrollSpeedHud::ShouldDraw() {
-	return sar_scrollspeed.GetBool();
+	return p2fx_scrollspeed.GetBool();
 }
 
 void ScrollSpeedHud::Paint(int slot) {

@@ -138,7 +138,7 @@ DECL_DECLARE_AUTOCOMPLETION_FUNCTION(svar_get) {
 	return CompleteSvars(partial, commands, false);
 }
 
-CON_COMMAND_F_COMPLETION(svar_set, "svar_set <variable> <value> - set a svar (SAR variable) to a given value\n", FCVAR_DONTRECORD, AUTOCOMPLETION_FUNCTION(svar_set)) {
+CON_COMMAND_F_COMPLETION(svar_set, "svar_set <variable> <value> - set a svar (P2FX variable) to a given value\n", FCVAR_DONTRECORD, AUTOCOMPLETION_FUNCTION(svar_set)) {
 	if (args.ArgC() < 3) {
 		return console->Print(svar_set.ThisPtr()->m_pszHelpString);
 	}
@@ -211,11 +211,11 @@ static ConsoleListener *g_svarListener;
 static std::string g_svarListenerTarget;
 static std::string g_svarListenerOutput;
 
-CON_COMMAND_F(_sar_svar_capture_stop, "Internal SAR command. Do not use\n", FCVAR_DONTRECORD | FCVAR_HIDDEN) {
+CON_COMMAND_F(_p2fx_svar_capture_stop, "Internal P2FX command. Do not use\n", FCVAR_DONTRECORD | FCVAR_HIDDEN) {
 	delete g_svarListener;
 	g_svarListener = nullptr;
 
-	_sar_svar_capture_stop.ThisPtr()->m_nFlags |= FCVAR_HIDDEN;
+	_p2fx_svar_capture_stop.ThisPtr()->m_nFlags |= FCVAR_HIDDEN;
 
 	std::string out = g_svarListenerOutput;
 	out.erase(std::remove(out.begin(), out.end(), '\n'), out.end());
@@ -237,14 +237,14 @@ CON_COMMAND_F_COMPLETION(svar_capture, "svar_capture <variable> <command> [args]
 		g_svarListenerOutput += msg;
 	});
 
-	_sar_svar_capture_stop.ThisPtr()->m_nFlags &= ~FCVAR_HIDDEN;
+	_p2fx_svar_capture_stop.ThisPtr()->m_nFlags &= ~FCVAR_HIDDEN;
 
 	// The engine won't let us execute a command during execution of
 	// this one; instead, they're added to the front of the cbuf, to be
 	// executed next. So we have to do this jank to get the output
 	// properly
 	engine->ExecuteCommand(cmd, true);
-	engine->ExecuteCommand("_sar_svar_capture_stop", true);
+	engine->ExecuteCommand("_p2fx_svar_capture_stop", true);
 }
 
 CON_COMMAND_F_COMPLETION(svar_from_cvar, "svar_from_cvar <variable> <cvar> - capture a cvar's value and place it into an svar, removing newlines\n", FCVAR_DONTRECORD, AUTOCOMPLETION_FUNCTION(svar_get)) {
@@ -385,7 +385,7 @@ static void FreeCondition(Condition *c) {
 }
 
 static const char *gameName() {
-	switch (sar.game->GetVersion()) {
+	switch (p2fx.game->GetVersion()) {
 	case SourceGame_ApertureTag: return "aptag";
 	case SourceGame_PortalStoriesMel: return "mel";
 	case SourceGame_ThinkingWithTimeMachine: return "twtm";
@@ -767,20 +767,20 @@ CON_COMMAND_F(conds, "conds [<condition> <command>]... [else] - runs the first c
 	}
 }
 
-#define MK_SAR_ON(name, when, immediately)                                                                                                \
+#define MK_P2FX_ON(name, when, immediately)                                                                                                \
 	static std::vector<std::string> _g_execs_##name;                                                                                         \
-	CON_COMMAND_F(sar_on_##name, "sar_on_" #name " <command> [args]... - registers a command to be run " when "\n", FCVAR_DONTRECORD) {      \
+	CON_COMMAND_F(p2fx_on_##name, "p2fx_on_" #name " <command> [args]... - registers a command to be run " when "\n", FCVAR_DONTRECORD) {      \
 		if (args.ArgC() < 2) {                                                                                                                  \
-			return console->Print(sar_on_##name.ThisPtr()->m_pszHelpString);                                                                       \
+			return console->Print(p2fx_on_##name.ThisPtr()->m_pszHelpString);                                                                       \
 		}                                                                                                                                       \
 		const char *cmd = Utils::ArgContinuation(args, 1);                                                  \
 		_g_execs_##name.push_back(std::string(cmd));                                                                                            \
 	}                                                                                                                                        \
-	CON_COMMAND_F(sar_on_##name##_clear, "sar_on_" #name "_clear - clears commands registered on event \"" #name "\"\n", FCVAR_DONTRECORD) { \
+	CON_COMMAND_F(p2fx_on_##name##_clear, "p2fx_on_" #name "_clear - clears commands registered on event \"" #name "\"\n", FCVAR_DONTRECORD) { \
 		console->Print("Cleared %d commands from event \"" #name "\"\n", _g_execs_##name.size());                                               \
 		_g_execs_##name.clear();                                                                                                                \
 	}                                                                                                                                        \
-	CON_COMMAND_F(sar_on_##name##_list, "sar_on_" #name "_list - lists commands registered on event \"" #name "\"\n", FCVAR_DONTRECORD) {     \
+	CON_COMMAND_F(p2fx_on_##name##_list, "p2fx_on_" #name "_list - lists commands registered on event \"" #name "\"\n", FCVAR_DONTRECORD) {     \
 		console->Print("%d commands on event \"" #name "\"\n", _g_execs_##name.size());                                                         \
 		for (auto cmd : _g_execs_##name) {                                                                                                      \
 			console->Print("%s\n", cmd.c_str());                                                                                                   \
@@ -794,20 +794,20 @@ CON_COMMAND_F(conds, "conds [<condition> <command>]... [else] - runs the first c
 
 #define RUN_EXECS(x) _runExecs_##x()
 
-MK_SAR_ON(load, "on session start", true)
-MK_SAR_ON(session_end, "on session end", true)
-MK_SAR_ON(exit, "on game exit", true)
-MK_SAR_ON(demo_start, "when demo playback starts", false)
-MK_SAR_ON(demo_stop, "when demo playback stops", false)
-MK_SAR_ON(flags, "when CM flags are hit", false)
-MK_SAR_ON(coop_reset_done, "when coop reset is completed", false)
-MK_SAR_ON(coop_reset_remote, "when coop reset run remotely", false)
-MK_SAR_ON(coop_spawn, "on coop spawn", true)
-MK_SAR_ON(config_exec, "on config.cfg exec", true)
-MK_SAR_ON(tas_start, "when TAS script playback starts", true)
-MK_SAR_ON(tas_end, "when TAS script playback ends", true)
-MK_SAR_ON(pb, "when auto-submitter detects PB", true)
-MK_SAR_ON(not_pb, "when auto-submitter detects not PB", true)
+MK_P2FX_ON(load, "on session start", true)
+MK_P2FX_ON(session_end, "on session end", true)
+MK_P2FX_ON(exit, "on game exit", true)
+MK_P2FX_ON(demo_start, "when demo playback starts", false)
+MK_P2FX_ON(demo_stop, "when demo playback stops", false)
+MK_P2FX_ON(flags, "when CM flags are hit", false)
+MK_P2FX_ON(coop_reset_done, "when coop reset is completed", false)
+MK_P2FX_ON(coop_reset_remote, "when coop reset run remotely", false)
+MK_P2FX_ON(coop_spawn, "on coop spawn", true)
+MK_P2FX_ON(config_exec, "on config.cfg exec", true)
+MK_P2FX_ON(tas_start, "when TAS script playback starts", true)
+MK_P2FX_ON(tas_end, "when TAS script playback ends", true)
+MK_P2FX_ON(pb, "when auto-submitter detects PB", true)
+MK_P2FX_ON(not_pb, "when auto-submitter detects not PB", true)
 
 ON_EVENT_P(SESSION_START, 1000000) {
 	RUN_EXECS(load);
@@ -816,7 +816,7 @@ ON_EVENT_P(SESSION_START, 1000000) {
 ON_EVENT(SESSION_END) {
 	RUN_EXECS(session_end);
 }
-ON_EVENT(SAR_UNLOAD) {
+ON_EVENT(P2FX_UNLOAD) {
 	RUN_EXECS(exit);
 }
 ON_EVENT(DEMO_START) {
@@ -905,12 +905,12 @@ struct AliasInfo {
 static std::map<std::string, AliasInfo> g_aliases;
 
 static void _aliasCallback(const CCommand &args) {
-	engine->ExecuteCommand(Utils::ssprintf("sar_alias_run %s", args.m_pArgSBuffer).c_str(), true);
+	engine->ExecuteCommand(Utils::ssprintf("p2fx_alias_run %s", args.m_pArgSBuffer).c_str(), true);
 }
 
-CON_COMMAND_F(sar_alias, "sar_alias <name> [command] [args]... - create an alias, similar to the 'alias' command but not requiring quoting. If no command is specified, prints the given alias\n", FCVAR_DONTRECORD) {
+CON_COMMAND_F(p2fx_alias, "p2fx_alias <name> [command] [args]... - create an alias, similar to the 'alias' command but not requiring quoting. If no command is specified, prints the given alias\n", FCVAR_DONTRECORD) {
 	if (args.ArgC() < 2) {
-		return console->Print(sar_alias.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_alias.ThisPtr()->m_pszHelpString);
 	}
 
 	if (args.ArgC() == 2) {
@@ -932,7 +932,7 @@ CON_COMMAND_F(sar_alias, "sar_alias <name> [command] [args]... - create an alias
 			return;
 		} else {
 			char *name = strdup(args[1]);  // We do this so that the ConCommand has a persistent handle to the command name
-			Command *c = new Command(name, &_aliasCallback, "SAR alias command.\n", FCVAR_DONTRECORD);
+			Command *c = new Command(name, &_aliasCallback, "P2FX alias command.\n", FCVAR_DONTRECORD);
 			c->Register();
 			g_aliases[std::string(args[1])] = {c, cmd, name};
 		}
@@ -942,9 +942,9 @@ CON_COMMAND_F(sar_alias, "sar_alias <name> [command] [args]... - create an alias
 	}
 }
 
-CON_COMMAND_F(sar_alias_run, "sar_alias_run <name> [args]... - run a SAR alias, passing on any additional arguments\n", FCVAR_DONTRECORD) {
+CON_COMMAND_F(p2fx_alias_run, "p2fx_alias_run <name> [args]... - run a P2FX alias, passing on any additional arguments\n", FCVAR_DONTRECORD) {
 	if (args.ArgC() < 2) {
-		return console->Print(sar_alias_run.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_alias_run.ThisPtr()->m_pszHelpString);
 	}
 
 	auto it = g_aliases.find({args[1]});
@@ -965,12 +965,12 @@ CON_COMMAND_F(sar_alias_run, "sar_alias_run <name> [args]... - run a SAR alias, 
 static std::map<std::string, AliasInfo> g_functions;
 
 static void _functionCallback(const CCommand &args) {
-	engine->ExecuteCommand(Utils::ssprintf("sar_function_run %s", args.m_pArgSBuffer).c_str(), true);
+	engine->ExecuteCommand(Utils::ssprintf("p2fx_function_run %s", args.m_pArgSBuffer).c_str(), true);
 }
 
-CON_COMMAND_F(sar_function, "sar_function <name> [command] [args]... - create a function, replacing $1, $2 etc in the command string with the respective argument, and more. If no command is specified, prints the given function\n", FCVAR_DONTRECORD) {
+CON_COMMAND_F(p2fx_function, "p2fx_function <name> [command] [args]... - create a function, replacing $1, $2 etc in the command string with the respective argument, and more. If no command is specified, prints the given function\n", FCVAR_DONTRECORD) {
 	if (args.ArgC() < 2) {
-		return console->Print(sar_function.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_function.ThisPtr()->m_pszHelpString);
 	}
 
 	if (args.ArgC() == 2) {
@@ -992,7 +992,7 @@ CON_COMMAND_F(sar_function, "sar_function <name> [command] [args]... - create a 
 			return;
 		} else {
 			char *name = strdup(args[1]);  // We do this so that the ConCommand has a persistent handle to the command name
-			Command *c = new Command(name, &_functionCallback, "SAR function command.\n", FCVAR_DONTRECORD);
+			Command *c = new Command(name, &_functionCallback, "P2FX function command.\n", FCVAR_DONTRECORD);
 			c->Register();
 			g_functions[std::string(args[1])] = {c, cmd, name};
 		}
@@ -1032,7 +1032,7 @@ static void expand(const CCommand &args, std::string body) {
 					}
 					if (arg - 1 < nargs) {
 						// Skip the first n + 1 arguments
-						// (sar_function_run)
+						// (p2fx_function_run)
 						const char *greedy = args.m_pArgSBuffer + args.m_nArgv0Size;
 						while (isspace(*greedy)) ++greedy;
 						for (int j = 1; j < arg + 1; ++j) {
@@ -1090,9 +1090,9 @@ static void expand(const CCommand &args, std::string body) {
 	engine->ExecuteCommand(cmd.c_str(), true);
 }
 
-CON_COMMAND_F(sar_expand, "sar_expand [cmd]... - run a command after expanding svar substitutions\n", FCVAR_DONTRECORD) {
+CON_COMMAND_F(p2fx_expand, "p2fx_expand [cmd]... - run a command after expanding svar substitutions\n", FCVAR_DONTRECORD) {
 	if (args.ArgC() < 2) {
-		return console->Print(sar_expand.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_expand.ThisPtr()->m_pszHelpString);
 	}
 
 	const char *cmd = Utils::ArgContinuation(args, 1);
@@ -1100,9 +1100,9 @@ CON_COMMAND_F(sar_expand, "sar_expand [cmd]... - run a command after expanding s
 	expand(noArgs, std::string(cmd));
 }
 
-CON_COMMAND_F(sar_function_run, "sar_function_run <name> [args]... - run a function with the given arguments\n", FCVAR_DONTRECORD) {
+CON_COMMAND_F(p2fx_function_run, "p2fx_function_run <name> [args]... - run a function with the given arguments\n", FCVAR_DONTRECORD) {
 	if (args.ArgC() < 2) {
-		return console->Print(sar_function_run.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_function_run.ThisPtr()->m_pszHelpString);
 	}
 
 	auto it = g_functions.find({args[1]});

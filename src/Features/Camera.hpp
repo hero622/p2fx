@@ -13,12 +13,12 @@
 #include <sstream>
 #include <type_traits>
 
-extern Variable sar_cam_control;
-extern Variable sar_cam_drive;
-extern Variable sar_cam_ortho;
-extern Variable sar_cam_ortho_scale;
-extern Variable sar_cam_ortho_nearz;
-extern Variable sar_cam_path_interp;
+extern Variable p2fx_cam_control;
+extern Variable p2fx_cam_drive;
+extern Variable p2fx_cam_ortho;
+extern Variable p2fx_cam_ortho_scale;
+extern Variable p2fx_cam_ortho_nearz;
+extern Variable p2fx_cam_path_interp;
 
 extern Variable cl_skip_player_render_in_main_view;
 extern Variable ss_force_primary_fullscreen;
@@ -150,4 +150,4 @@ public:
 
 extern Camera *camera;
 
-extern DECL_DECLARE_AUTOCOMPLETION_FUNCTION(sar_cam_path_setkf);
+extern DECL_DECLARE_AUTOCOMPLETION_FUNCTION(p2fx_cam_path_setkf);

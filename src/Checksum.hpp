@@ -6,4 +6,4 @@
 bool AddDemoChecksum(const char *filename);
 void AddDemoFileChecksums();
 
-void InitSARChecksum();
+void InitP2FXChecksum();

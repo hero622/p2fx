@@ -36,7 +36,7 @@
 
 #define DEFAULT_TAS_CLIENT_SOCKET 6555
 
-Variable sar_tas_server("sar_tas_server", "0", 0, "Enable the remote TAS server. Setting this value to something higher than one will bind the server on that port.\n");
+Variable p2fx_tas_server("p2fx_tas_server", "0", 0, "Enable the remote TAS server. Setting this value to something higher than one will bind the server on that port.\n");
 
 struct ClientData {
 	SOCKET sock;
@@ -259,7 +259,7 @@ static bool processCommands(ClientData &cl) {
 			{
 				union { uint32_t i; float f; } rate = { popRaw32(cl.cmdbuf) };
 				Scheduler::OnMainThread([=](){
-					sar_tas_playback_rate.SetValue(rate.f);
+					p2fx_tas_playback_rate.SetValue(rate.f);
 				});
 			}
 			break;
@@ -286,8 +286,8 @@ static bool processCommands(ClientData &cl) {
 				bool pause_after = cl.cmdbuf[0];
 				cl.cmdbuf.pop_front();
 				Scheduler::OnMainThread([=](){
-					sar_tas_skipto.SetValue(tick);
-					if (pause_after) sar_tas_pauseat.SetValue(tick);
+					p2fx_tas_skipto.SetValue(tick);
+					if (pause_after) p2fx_tas_pauseat.SetValue(tick);
 				});
 			}
 			break;
@@ -298,7 +298,7 @@ static bool processCommands(ClientData &cl) {
 			{
 				int tick = popRaw32(cl.cmdbuf);
 				Scheduler::OnMainThread([=](){
-					sar_tas_pauseat.SetValue(tick);
+					p2fx_tas_pauseat.SetValue(tick);
 				});
 			}
 			break;
@@ -511,8 +511,8 @@ static std::thread g_net_thread;
 static bool g_running;
 
 ON_EVENT(FRAME) {
-	int tas_server_port = sar_tas_server.GetInt() == 1 ? DEFAULT_TAS_CLIENT_SOCKET : sar_tas_server.GetInt();
-	bool should_run = sar_tas_server.GetBool();
+	int tas_server_port = p2fx_tas_server.GetInt() == 1 ? DEFAULT_TAS_CLIENT_SOCKET : p2fx_tas_server.GetInt();
+	bool should_run = p2fx_tas_server.GetBool();
 
 	if (g_running && !should_run) {
 		g_should_stop.store(true);
@@ -525,8 +525,8 @@ ON_EVENT(FRAME) {
 	}
 }
 
-ON_EVENT_P(SAR_UNLOAD, -100) {
-	sar_tas_server.SetValue(false);
+ON_EVENT_P(P2FX_UNLOAD, -100) {
+	p2fx_tas_server.SetValue(false);
 	g_should_stop.store(true);
 	if (g_net_thread.joinable()) g_net_thread.join();
 }

@@ -45,28 +45,28 @@ ConsoleListener::~ConsoleListener() {
 
 Console *console;
 
-CON_COMMAND_F(sar_echo, "sar_echo <color> <string...> - echo a string to console with a given color\n", FCVAR_DONTRECORD) {
+CON_COMMAND_F(p2fx_echo, "p2fx_echo <color> <string...> - echo a string to console with a given color\n", FCVAR_DONTRECORD) {
 	if (args.ArgC() < 2) {
-		return console->Print(sar_echo.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_echo.ThisPtr()->m_pszHelpString);
 	}
 
 	std::optional<Color> col = Utils::GetColor(args[1], false);
 	if (!col) {
-		return console->Print(sar_echo.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_echo.ThisPtr()->m_pszHelpString);
 	}
 
 	const char *str = Utils::ArgContinuation(args, 2);
 	console->ColorMsg(*col, "%s\n", str);
 }
 
-CON_COMMAND_F(sar_echo_nolf, "sar_echo_nolf <color> <string...> - echo a string to console with a given color and no trailing line feed\n", FCVAR_DONTRECORD) {
+CON_COMMAND_F(p2fx_echo_nolf, "p2fx_echo_nolf <color> <string...> - echo a string to console with a given color and no trailing line feed\n", FCVAR_DONTRECORD) {
 	if (args.ArgC() < 2) {
-		return console->Print(sar_echo_nolf.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_echo_nolf.ThisPtr()->m_pszHelpString);
 	}
 
 	std::optional<Color> col = Utils::GetColor(args[1], false);
 	if (!col) {
-		return console->Print(sar_echo_nolf.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_echo_nolf.ThisPtr()->m_pszHelpString);
 	}
 
 	const char *str = Utils::ArgContinuation(args, 2);

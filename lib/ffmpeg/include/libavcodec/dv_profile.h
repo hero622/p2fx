@@ -46,7 +46,7 @@ typedef struct AVDVProfile {
     int              ltc_divisor;           /* FPS from the LTS standpoint */
     int              height;                /* picture height in pixels */
     int              width;                 /* picture width in pixels */
-    AVRational       sar[2];                /* sample aspect ratios for 4:3 and 16:9 */
+    AVRational       p2fx[2];                /* sample aspect ratios for 4:3 and 16:9 */
     enum AVPixelFormat pix_fmt;             /* picture pixel format */
     int              bpm;                   /* blocks per macroblock */
     const uint8_t   *block_sizes;           /* AC block sizes, in bits */

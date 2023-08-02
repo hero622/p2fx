@@ -11,4 +11,4 @@ public:
 
 extern SeamshotFind *seamshotFind;
 
-extern Variable sar_seamshot_finder;
+extern Variable p2fx_seamshot_finder;

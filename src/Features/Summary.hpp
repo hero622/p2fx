@@ -22,4 +22,4 @@ public:
 
 extern Summary *summary;
 
-extern Variable sar_sum_during_session;
+extern Variable p2fx_sum_during_session;

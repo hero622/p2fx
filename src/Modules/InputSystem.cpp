@@ -5,7 +5,7 @@
 #include "Interface.hpp"
 #include "Module.hpp"
 #include "Offsets.hpp"
-#include "SAR.hpp"
+#include "P2FX.hpp"
 #include "Utils.hpp"
 
 REDECL(InputSystem::SleepUntilInput);
@@ -29,14 +29,14 @@ void InputSystem::SetCursorPos(int x, int y) {
 	return this->SetCursorPosition(this->g_InputSystem->ThisPtr(), x, y);
 }
 
-Variable sar_dpi_scale("sar_dpi_scale", "1", 1, "Fraction to scale mouse DPI down by.\n");
+Variable p2fx_dpi_scale("p2fx_dpi_scale", "1", 1, "Fraction to scale mouse DPI down by.\n");
 void InputSystem::DPIScaleDeltas(int &x, int &y) {
 	static int saved_x = 0;
 	static int saved_y = 0;
 
 	static int last_dpi_scale = 1;
 
-	int scale = sar_dpi_scale.GetInt();
+	int scale = p2fx_dpi_scale.GetInt();
 	if (scale < 1) scale = 1;
 
 	if (scale != last_dpi_scale) {
@@ -57,7 +57,7 @@ void InputSystem::DPIScaleDeltas(int &x, int &y) {
 
 // CInputSystem::SleepUntilInput
 DETOUR(InputSystem::SleepUntilInput, int nMaxSleepTimeMS) {
-	if (sar_disable_no_focus_sleep.GetBool()) {
+	if (p2fx_disable_no_focus_sleep.GetBool()) {
 		nMaxSleepTimeMS = 0;
 	}
 

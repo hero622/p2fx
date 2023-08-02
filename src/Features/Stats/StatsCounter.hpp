@@ -8,10 +8,10 @@
 #include <map>
 #include <string>
 
-#define SAR_MAP_COUNTER_EXPORT_HEADER "Map Name,CM Retries,CM Total Time,FG Reloads,FG Total Time"
-#define SAR_CM_COUNTER_EXPORT_HEADER "Nb CM Reset,Total Time CM"
-#define SAR_FULLGAME_COUNTER_EXPORT_HEADER "Completed Runs,Avg Reset Time,Nb Reset,Total Time SP,Total Time Coop,Portal Count"
-#define SAR_TOTAL_COUNTER_EXPORT_HEADER "Total Time In-Game"
+#define P2FX_MAP_COUNTER_EXPORT_HEADER "Map Name,CM Retries,CM Total Time,FG Reloads,FG Total Time"
+#define P2FX_CM_COUNTER_EXPORT_HEADER "Nb CM Reset,Total Time CM"
+#define P2FX_FULLGAME_COUNTER_EXPORT_HEADER "Completed Runs,Avg Reset Time,Nb Reset,Total Time SP,Total Time Coop,Portal Count"
+#define P2FX_TOTAL_COUNTER_EXPORT_HEADER "Total Time In-Game"
 
 struct MapStats {
 	bool coop;
@@ -48,4 +48,4 @@ public:
 
 extern StatsCounter *statsCounter;
 
-extern Variable sar_statcounter_filePath;
+extern Variable p2fx_statcounter_filePath;

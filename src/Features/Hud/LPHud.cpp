@@ -13,11 +13,11 @@
 
 LPHud lpHud;
 
-Variable sar_lphud("sar_lphud", "0", "Enables or disables the portals display on screen.\n");
-Variable sar_lphud_x("sar_lphud_x", "-10", "x pos of lp counter.\n", 0);
-Variable sar_lphud_y("sar_lphud_y", "-10", "y pos of lp counter.\n", 0);
-Variable sar_lphud_font("sar_lphud_font", "92", 0, "Change font of portal counter.\n");
-Variable sar_lphud_reset_on_changelevel("sar_lphud_reset_on_changelevel", "0", "Reset the lp counter on any changelevel or restart_level. Useful for ILs.\n");
+Variable p2fx_lphud("p2fx_lphud", "0", "Enables or disables the portals display on screen.\n");
+Variable p2fx_lphud_x("p2fx_lphud_x", "-10", "x pos of lp counter.\n", 0);
+Variable p2fx_lphud_y("p2fx_lphud_y", "-10", "y pos of lp counter.\n", 0);
+Variable p2fx_lphud_font("p2fx_lphud_font", "92", 0, "Change font of portal counter.\n");
+Variable p2fx_lphud_reset_on_changelevel("p2fx_lphud_reset_on_changelevel", "0", "Reset the lp counter on any changelevel or restart_level. Useful for ILs.\n");
 
 struct LPHudCountHistoryInfo {
 	std::string map;
@@ -85,7 +85,7 @@ LPHud::LPHud()
 	: Hud(HudType_InGame, true) {
 }
 bool LPHud::ShouldDraw() {
-	return sar_lphud.GetBool() && Hud::ShouldDraw();
+	return p2fx_lphud.GetBool() && Hud::ShouldDraw();
 }
 
 ON_EVENT(SESSION_START) {
@@ -105,7 +105,7 @@ ON_EVENT(SESSION_START) {
 		}
 	} else {
 		// It was a restart_level or something like that
-		if (sar_lphud_reset_on_changelevel.GetBool()) {
+		if (p2fx_lphud_reset_on_changelevel.GetBool()) {
 			lpHud.Set(0);
 		} else {
 			// Restore the portal count from the first entry for this map, or
@@ -136,10 +136,10 @@ ON_EVENT(POST_TICK) {
 }
 
 void LPHud::Paint(int slot) {
-	auto font = scheme->GetFontByID(sar_lphud_font.GetInt());
+	auto font = scheme->GetFontByID(p2fx_lphud_font.GetInt());
 
-	int cX = PositionFromString(sar_lphud_x.GetString(), true);
-	int cY = PositionFromString(sar_lphud_y.GetString(), false);
+	int cX = PositionFromString(p2fx_lphud_x.GetString(), true);
+	int cY = PositionFromString(p2fx_lphud_y.GetString(), false);
 
 	int digitWidth = surface->GetFontLength(font, "3");
 	int charHeight = surface->GetFontHeight(font);
@@ -160,7 +160,7 @@ void LPHud::Paint(int slot) {
 }
 
 bool LPHud::GetCurrentSize(int &xSize, int &ySize) {
-	auto font = scheme->GetFontByID(sar_lphud_font.GetInt());
+	auto font = scheme->GetFontByID(p2fx_lphud_font.GetInt());
 
 	int charHeight = surface->GetFontHeight(font);
 	xSize = surface->GetFontLength(font, "Portals:") * 2;
@@ -176,24 +176,24 @@ void LPHud::Set(int count) {
 	addNewCount(count);
 }
 
-CON_COMMAND(sar_lphud_set, "sar_lphud_set <number> - sets lp counter to given number\n") {
+CON_COMMAND(p2fx_lphud_set, "p2fx_lphud_set <number> - sets lp counter to given number\n") {
 	IGNORE_DEMO_PLAYER();
 
 	if (args.ArgC() != 2) {
-		return console->Print(sar_lphud_set.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_lphud_set.ThisPtr()->m_pszHelpString);
 	}
 
 	lpHud.Set(std::atoi(args[1]));
 }
 
-CON_COMMAND(sar_lphud_reset, "sar_lphud_reset - resets lp counter\n") {
+CON_COMMAND(p2fx_lphud_reset, "p2fx_lphud_reset - resets lp counter\n") {
 	IGNORE_DEMO_PLAYER();
 
 	if (args.ArgC() != 1) {
-		return console->Print(sar_lphud_reset.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_lphud_reset.ThisPtr()->m_pszHelpString);
 	}
 
 	lpHud.Set(0);
 }
 
-CON_COMMAND_HUD_SETPOS(sar_lphud, "least portals HUD")
+CON_COMMAND_HUD_SETPOS(p2fx_lphud, "least portals HUD")

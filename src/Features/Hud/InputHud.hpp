@@ -74,8 +74,8 @@ public:
 
 extern InputHud inputHud;
 
-extern Variable sar_ihud;
-extern Variable sar_ihud_x;
-extern Variable sar_ihud_y;
-extern Variable sar_ihud_grid_padding;
-extern Variable sar_ihud_grid_size;
+extern Variable p2fx_ihud;
+extern Variable p2fx_ihud_x;
+extern Variable p2fx_ihud_y;
+extern Variable p2fx_ihud_grid_padding;
+extern Variable p2fx_ihud_grid_size;

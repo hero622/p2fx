@@ -23,10 +23,10 @@
 #include <chrono>
 #include <thread>
 
-Variable sar_loads_uncap("sar_loads_uncap", "0", 0, 1, "Temporarily set fps_max to 0 during loads\n");
-Variable sar_loads_norender("sar_loads_norender", "0", 0, 1, "Temporarily set mat_norendering to 1 during loads\n");
+Variable p2fx_loads_uncap("p2fx_loads_uncap", "0", 0, 1, "Temporarily set fps_max to 0 during loads\n");
+Variable p2fx_loads_norender("p2fx_loads_norender", "0", 0, 1, "Temporarily set mat_norendering to 1 during loads\n");
 
-Variable sar_load_delay("sar_load_delay", "0", 0, "Delay for this number of milliseconds at the end of a load.\n");
+Variable p2fx_load_delay("p2fx_load_delay", "0", 0, "Delay for this number of milliseconds at the end of a load.\n");
 
 Session *session;
 
@@ -56,7 +56,7 @@ void Session::Started(bool menu) {
 		console->Print("Session started! (menu)\n");
 		this->Rebase(engine->GetTick());
 
-		if (sar_speedrun_stop_in_menu.isRegistered && sar_speedrun_stop_in_menu.GetBool()) {
+		if (p2fx_speedrun_stop_in_menu.isRegistered && p2fx_speedrun_stop_in_menu.GetBool()) {
 			SpeedrunTimer::Stop("menu");
 		} else {
 			SpeedrunTimer::Resume();
@@ -120,7 +120,7 @@ void Session::Ended() {
 	}
 
 	if (timer->isRunning) {
-		if (sar_timer_always_running.GetBool()) {
+		if (p2fx_timer_always_running.GetBool()) {
 			timer->Save(engine->GetTick());
 			console->Print("Timer paused: %i (%.3f)!\n", timer->totalTicks, engine->ToTime(timer->totalTicks));
 		} else {
@@ -129,7 +129,7 @@ void Session::Ended() {
 		}
 	}
 
-	auto reset = sar_stats_auto_reset.GetInt();
+	auto reset = p2fx_stats_auto_reset.GetInt();
 	if ((reset == 1 && !*engine->m_bLoadgame) || reset >= 2) {
 		stats->ResetAll();
 	}
@@ -196,8 +196,8 @@ void Session::Changed(int state) {
 		auto time = std::chrono::duration_cast<std::chrono::milliseconds>(this->loadEnd - this->loadStart).count();
 		console->DevMsg("Load took: %dms\n", time);
 
-		if (sar_load_delay.GetInt()) {
-			std::this_thread::sleep_for(std::chrono::milliseconds(sar_load_delay.GetInt()));
+		if (p2fx_load_delay.GetInt()) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(p2fx_load_delay.GetInt()));
 		}
 	} else if (state == SIGNONSTATE_PRESPAWN) {
 		this->ResetLoads();
@@ -208,22 +208,22 @@ void Session::Changed(int state) {
 }
 
 void Session::DoFastLoads() {
-	if (sar_loads_uncap.GetBool()) {
+	if (p2fx_loads_uncap.GetBool()) {
 		this->oldFpsMax = fps_max.GetInt();
 		fps_max.SetValue(0);
 	}
 
-	if (sar_loads_norender.GetBool()) {
+	if (p2fx_loads_norender.GetBool()) {
 		mat_norendering.SetValue(1);
 	}
 }
 
 void Session::ResetLoads() {
-	if (sar_loads_uncap.GetBool() && fps_max.GetInt() == 0) {
+	if (p2fx_loads_uncap.GetBool() && fps_max.GetInt() == 0) {
 		fps_max.SetValue(this->oldFpsMax);
 	}
 
-	if (sar_loads_norender.GetBool()) {
+	if (p2fx_loads_norender.GetBool()) {
 		mat_norendering.SetValue(0);
 	}
 }
@@ -238,7 +238,7 @@ HUD_ELEMENT2(last_session, "0", "Draws value of latest completed session.\n", Hu
 	ctx->DrawElement("last session: %i (%.3f)", session->lastSession, engine->ToTime(session->lastSession));
 }
 HUD_ELEMENT2(sum, "0", "Draws summary value of sessions.\n", HudType_InGame | HudType_Paused | HudType_Menu | HudType_LoadingScreen) {
-	if (summary->isRunning && sar_sum_during_session.GetBool()) {
+	if (summary->isRunning && p2fx_sum_during_session.GetBool()) {
 		auto tick = (session->isRunning) ? session->GetTick() : 0;
 		auto time = engine->ToTime(tick);
 		ctx->DrawElement("sum: %i (%.3f)", summary->totalTicks + tick, engine->ToTime(summary->totalTicks) + time);

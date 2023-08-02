@@ -22,4 +22,4 @@ public:
 	bool Parse(std::string filePath, Demo *demo, bool ghostRequest = false, std::map<int, DataGhost> *datas = nullptr, CustomDatas *customDatas = nullptr);
 };
 
-extern Variable sar_time_demo_dev;
+extern Variable p2fx_time_demo_dev;

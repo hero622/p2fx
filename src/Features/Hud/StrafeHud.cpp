@@ -13,17 +13,17 @@
 #include "Features/Tas/TasTools/TasUtils.hpp"
 
 
-Variable sar_strafehud("sar_strafehud", "0", "Enables or disables strafe hud.\n");
-Variable sar_strafehud_x("sar_strafehud_x", "-10", "The X position of the strafe hud.\n", 0);
-Variable sar_strafehud_y("sar_strafehud_y", "10", "The Y position of the strafe hud.\n", 0);
-Variable sar_strafehud_size("sar_strafehud_size", "256", "The width and height of the strafe hud.\n", 0);
-Variable sar_strafehud_font("sar_strafehud_font", "13", "Font used by strafe hud.\n", 0);
-Variable sar_strafehud_detail_scale("sar_strafehud_detail_scale", "4", "The detail scale for the lines of hud.\n", 0);
+Variable p2fx_strafehud("p2fx_strafehud", "0", "Enables or disables strafe hud.\n");
+Variable p2fx_strafehud_x("p2fx_strafehud_x", "-10", "The X position of the strafe hud.\n", 0);
+Variable p2fx_strafehud_y("p2fx_strafehud_y", "10", "The Y position of the strafe hud.\n", 0);
+Variable p2fx_strafehud_size("p2fx_strafehud_size", "256", "The width and height of the strafe hud.\n", 0);
+Variable p2fx_strafehud_font("p2fx_strafehud_font", "13", "Font used by strafe hud.\n", 0);
+Variable p2fx_strafehud_detail_scale("p2fx_strafehud_detail_scale", "4", "The detail scale for the lines of hud.\n", 0);
 
-Variable sar_strafehud_use_friction("sar_strafehud_use_friction", "0", "Use ground friction when calculating acceleration.\n");
-Variable sar_strafehud_avg_sample_count("sar_strafehud_avg_sample_count", "60", 1, 9999, "How many samples to use for average counter.\n");
-Variable sar_strafehud_match_accel_scale("sar_strafehud_match_accel_scale", "0", "Match the scales for minimum and maximum deceleration.\n");
-Variable sar_strafehud_lock_mode("sar_strafehud_lock_mode", "1", 0, 2,
+Variable p2fx_strafehud_use_friction("p2fx_strafehud_use_friction", "0", "Use ground friction when calculating acceleration.\n");
+Variable p2fx_strafehud_avg_sample_count("p2fx_strafehud_avg_sample_count", "60", 1, 9999, "How many samples to use for average counter.\n");
+Variable p2fx_strafehud_match_accel_scale("p2fx_strafehud_match_accel_scale", "0", "Match the scales for minimum and maximum deceleration.\n");
+Variable p2fx_strafehud_lock_mode("p2fx_strafehud_lock_mode", "1", 0, 2,
 	"Lock mode used by strafe hud:\n"
 	"0 - view direction\n"
 	"1 - velocity direction\n"
@@ -32,7 +32,7 @@ Variable sar_strafehud_lock_mode("sar_strafehud_lock_mode", "1", 0, 2,
 StrafeHud strafeHud;
 
 void StrafeHud::SetData(int slot, void *player, CUserCmd *cmd, bool serverside) {
-	if (!sar_strafehud.GetBool() || !sv_cheats.GetBool()) return;
+	if (!p2fx_strafehud.GetBool() || !sv_cheats.GetBool()) return;
 
 	data[slot].accelValues.clear();
 
@@ -45,7 +45,7 @@ void StrafeHud::SetData(int slot, void *player, CUserCmd *cmd, bool serverside) 
 	float smallestAccel = 0.0f;
 
 	float relAng = 0.0f;
-	int lockMode = sar_strafehud_lock_mode.GetInt();
+	int lockMode = p2fx_strafehud_lock_mode.GetInt();
 	if (lockMode > 0) {
 		float velAng = TasUtils::GetVelocityAngles(&playerInfo).x;
 		float lookAng = playerInfo.angles.y;
@@ -55,9 +55,9 @@ void StrafeHud::SetData(int slot, void *player, CUserCmd *cmd, bool serverside) 
 		relAng = DEG2RAD(relAng);
 	}
 
-	float detail = sar_strafehud_size.GetInt() * sar_strafehud_detail_scale.GetFloat();
+	float detail = p2fx_strafehud_size.GetInt() * p2fx_strafehud_detail_scale.GetFloat();
 	float step = 1.0f / detail;
-	if (!sar_strafehud_use_friction.GetBool()) {
+	if (!p2fx_strafehud_use_friction.GetBool()) {
 		oldVel = autoStrafeTool->GetGroundFrictionVelocity(playerInfo).Length2D();
 	}
 
@@ -71,7 +71,7 @@ void StrafeHud::SetData(int slot, void *player, CUserCmd *cmd, bool serverside) 
 		if (i == 0 || accel < smallestAccel) smallestAccel = accel;
 	}
 
-	if (sar_strafehud_match_accel_scale.GetBool()) {
+	if (p2fx_strafehud_match_accel_scale.GetBool()) {
 		float max = biggestAccel;
 		if (fabsf(smallestAccel) > max) max = fabsf(smallestAccel);
 		smallestAccel = -max;
@@ -91,7 +91,7 @@ void StrafeHud::SetData(int slot, void *player, CUserCmd *cmd, bool serverside) 
 	data[slot].maxAccel = biggestAccel;
 	data[slot].minAccel = smallestAccel;
 	
-	while (data[slot].precisionLog.size() > fmaxf(sar_strafehud_avg_sample_count.GetInt(), 0)) {
+	while (data[slot].precisionLog.size() > fmaxf(p2fx_strafehud_avg_sample_count.GetInt(), 0)) {
 		data[slot].precisionLog.pop_front();
 	}
 	float nextVel = autoStrafeTool->GetVelocityAfterMove(playerInfo, cmd->forwardmove, cmd->sidemove).Length2D();
@@ -129,14 +129,14 @@ void StrafeHud::SetData(int slot, void *player, CUserCmd *cmd, bool serverside) 
 
 
 void StrafeHud::Paint(int slot) {
-	if (!sar_strafehud.GetBool() || !sv_cheats.GetBool()) return;
+	if (!p2fx_strafehud.GetBool() || !sv_cheats.GetBool()) return;
 
 	
-	auto font = scheme->GetFontByID(sar_strafehud_font.GetInt());
+	auto font = scheme->GetFontByID(p2fx_strafehud_font.GetInt());
 	int fontHeight = surface->GetFontHeight(font);
 	float pad = 5;
-	float s = sar_strafehud_size.GetInt();
-	int x = sar_strafehud_x.GetInt(), y = sar_strafehud_y.GetInt();
+	float s = p2fx_strafehud_size.GetInt();
+	int x = p2fx_strafehud_x.GetInt(), y = p2fx_strafehud_y.GetInt();
 
 	int sw, sh;
 	engine->GetScreenSize(nullptr, sw, sh);
@@ -180,7 +180,7 @@ void StrafeHud::Paint(int slot) {
 	surface->DrawColoredLine(x, y + s, x + s, y, linesColor);
 
 	// acceleration line
-	float detail = sar_strafehud_size.GetInt() * sar_strafehud_detail_scale.GetFloat();
+	float detail = p2fx_strafehud_size.GetInt() * p2fx_strafehud_detail_scale.GetFloat();
 	for (size_t i = 0; i < data[slot].accelValues.size(); i++) {
 		float ang1 = (i / detail) * 2.0f * M_PI;
 		int i2 = (i + 1 >= data[slot].accelValues.size()) ? 0 : i + 1;

@@ -6,7 +6,7 @@
 #include "Interface.hpp"
 #include "Module.hpp"
 #include "Offsets.hpp"
-#include "SAR.hpp"
+#include "P2FX.hpp"
 #include "Utils.hpp"
 #include "Features/OverlayRender.hpp"
 
@@ -47,7 +47,7 @@ REDECL(MaterialSystem::CreateMaterial);
 
 DETOUR(MaterialSystem::UncacheUnusedMaterials, bool bRecomputeStateSnapshots) {
 	auto start = std::chrono::high_resolution_clock::now();
-	bool bRecomputeStateSnapshotFixed = sar_prevent_mat_snapshot_recompute.GetBool() ? false : bRecomputeStateSnapshots;
+	bool bRecomputeStateSnapshotFixed = p2fx_prevent_mat_snapshot_recompute.GetBool() ? false : bRecomputeStateSnapshots;
 	auto result = MaterialSystem::UncacheUnusedMaterials(thisptr, bRecomputeStateSnapshotFixed);
 	auto stop = std::chrono::high_resolution_clock::now();
 	console->DevMsg("UncacheUnusedMaterials - %dms\n", std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count());
@@ -103,7 +103,7 @@ ITexture *MaterialSystem::CreateTexture(const char *name, int w, int h, uint8_t 
 	// VTF texture, so we may as well mirror that in the actual texture too. Note
 	// that this also means the argument to this function must be BGRA unless we
 	// implement some custom conversion logic in MemTexRegen
-	ITexture *tex = CreateProceduralTexture(this->materials->ThisPtr(), name, "SAR textures", w, h, IMAGE_FORMAT_BGRA8888, TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT | TEXTUREFLAGS_NOMIP | TEXTUREFLAGS_NOLOD | TEXTUREFLAGS_SINGLECOPY);
+	ITexture *tex = CreateProceduralTexture(this->materials->ThisPtr(), name, "P2FX textures", w, h, IMAGE_FORMAT_BGRA8888, TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT | TEXTUREFLAGS_NOMIP | TEXTUREFLAGS_NOLOD | TEXTUREFLAGS_SINGLECOPY);
 	if (!tex) return nullptr;
 
 	tex->SetTextureRegenerator(new MemTexRegen(bgra, w, h));

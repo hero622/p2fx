@@ -1,9 +1,9 @@
 #include "CategoriesPreset.hpp"
 
-#include "SAR.hpp"
+#include "P2FX.hpp"
 
 void InitSpeedrunCategoriesTo(std::map<std::string, SpeedrunCategory> *cats, std::map<std::string, SpeedrunRule> *rules, std::string *defaultCat) {
-	if (sar.game->Is(SourceGame_PortalStoriesMel)) {
+	if (p2fx.game->Is(SourceGame_PortalStoriesMel)) {
 		// PS:M {{{
 		*defaultCat = "RTA";
 		*cats = {
@@ -64,7 +64,7 @@ void InitSpeedrunCategoriesTo(std::map<std::string, SpeedrunCategory> *cats, std
 			},
 		};
 		// }}}
-	} else if (sar.game->Is(SourceGame_ApertureTag)) {
+	} else if (p2fx.game->Is(SourceGame_ApertureTag)) {
 		// ApTag {{{
 		*defaultCat = "RTA";
 		*cats = {
@@ -112,7 +112,7 @@ void InitSpeedrunCategoriesTo(std::map<std::string, SpeedrunCategory> *cats, std
 			},
 		};
 		// }}}
-	} else if (sar.game->Is(SourceGame_ThinkingWithTimeMachine)) {
+	} else if (p2fx.game->Is(SourceGame_ThinkingWithTimeMachine)) {
 		// TWTM {{{
 		*defaultCat = "RTA";
 		*cats = {
@@ -147,7 +147,7 @@ void InitSpeedrunCategoriesTo(std::map<std::string, SpeedrunCategory> *cats, std
 			},
 		};
 		// }}}
-	} else if (sar.game->Is(SourceGame_PortalReloaded)) {
+	} else if (p2fx.game->Is(SourceGame_PortalReloaded)) {
 		// Portal Reloaded {{{
 		*defaultCat = "Chambers RTA";
 		*cats = {

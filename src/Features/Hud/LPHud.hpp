@@ -17,9 +17,9 @@ public:
 
 extern LPHud lpHud;
 
-extern Variable sar_lphud;
-extern Variable sar_lphud_x;
-extern Variable sar_lphud_y;
-extern Variable sar_lphud_font;
+extern Variable p2fx_lphud;
+extern Variable p2fx_lphud_x;
+extern Variable p2fx_lphud_y;
+extern Variable p2fx_lphud_font;
 
-extern Command sar_lphud_set;
+extern Command p2fx_lphud_set;

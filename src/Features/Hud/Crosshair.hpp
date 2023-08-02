@@ -32,9 +32,9 @@ public:
 
 extern Crosshair crosshair;
 
-extern Variable sar_crosshair_mode;
-extern Variable sar_quickhud_mode;
-extern Variable sar_crosshair_P1;
+extern Variable p2fx_crosshair_mode;
+extern Variable p2fx_quickhud_mode;
+extern Variable p2fx_crosshair_P1;
 
 extern Variable cl_crosshair_t;
 extern Variable cl_crosshairgap;
@@ -57,5 +57,5 @@ extern Variable cl_quickhudrightcolor_g;
 extern Variable cl_quickhudrightcolor_b;
 extern Variable cl_quickhud_alpha;
 
-extern Command sar_crosshair_set_texture;
-extern Command sar_quickhud_set_texture;
+extern Command p2fx_crosshair_set_texture;
+extern Command p2fx_quickhud_set_texture;

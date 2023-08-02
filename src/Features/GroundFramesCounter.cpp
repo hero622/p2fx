@@ -23,7 +23,7 @@ void GroundFramesCounter::HandleMovementFrame(int slot, bool grounded) {
 		this->AddToTotal(slot, this->counter[slot]);
 	}
 
-	int hudMode = sar_hud_groundframes.GetInt();
+	int hudMode = p2fx_hud_groundframes.GetInt();
 
 	if ((!this->grounded[slot] && grounded) || hudMode == 0) {
 		if (hudMode != 2) this->counter[slot] = 0;
@@ -39,7 +39,7 @@ void GroundFramesCounter::AddToTotal(int slot, int count) {
 	this->totals[slot][count] += 1;
 }
 
-CON_COMMAND(sar_groundframes_total, "sar_groundframes_total [slot] - output a summary of groundframe counts for the given player slot.\n") {
+CON_COMMAND(p2fx_groundframes_total, "p2fx_groundframes_total [slot] - output a summary of groundframe counts for the given player slot.\n") {
 	int slot = args.ArgC() > 1 ? atoi(args[1]) : 0;
 	if (slot < 0) slot = 0;
 	if (slot > 1) slot = 1;
@@ -57,7 +57,7 @@ CON_COMMAND(sar_groundframes_total, "sar_groundframes_total [slot] - output a su
 	}
 }
 
-CON_COMMAND(sar_groundframes_reset, "sar_groundframes_reset - reset recorded groundframe statistics.\n") {
+CON_COMMAND(p2fx_groundframes_reset, "p2fx_groundframes_reset - reset recorded groundframe statistics.\n") {
 	for (int i = 0; i < MAX_GROUNDFRAMES_TRACK; ++i) {
 		groundFramesCounter->totals[0][i] = 0;
 		groundFramesCounter->totals[1][i] = 0;

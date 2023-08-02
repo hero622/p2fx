@@ -14,10 +14,10 @@ public:
 
 extern PortalPlacementHud portalplacementHud;
 
-extern Variable sar_pp_hud;
-extern Variable sar_pp_hud_show_blue;
-extern Variable sar_pp_hud_show_orange;
-extern Variable sar_pp_hud_x;
-extern Variable sar_pp_hud_y;
-extern Variable sar_pp_hud_opacity;
-extern Variable sar_pp_hud_font;
+extern Variable p2fx_pp_hud;
+extern Variable p2fx_pp_hud_show_blue;
+extern Variable p2fx_pp_hud_show_orange;
+extern Variable p2fx_pp_hud_x;
+extern Variable p2fx_pp_hud_y;
+extern Variable p2fx_pp_hud_opacity;
+extern Variable p2fx_pp_hud_font;

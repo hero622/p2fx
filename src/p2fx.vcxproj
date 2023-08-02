@@ -252,7 +252,7 @@
     <ClCompile Include="Modules\VGui.cpp" />
     <ClCompile Include="Offsets.cpp" />
     <ClCompile Include="Plugin.cpp" />
-    <ClCompile Include="SAR.cpp" />
+    <ClCompile Include="P2FX.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="Utils\ed25519\add_scalar.cpp" />
     <ClCompile Include="Utils\ed25519\fe.cpp" />
@@ -439,7 +439,7 @@
     <ClInclude Include="Modules\VGui.hpp" />
     <ClInclude Include="Offsets.hpp" />
     <ClInclude Include="Plugin.hpp" />
-    <ClInclude Include="SAR.hpp" />
+    <ClInclude Include="P2FX.hpp" />
     <ClInclude Include="Utils.hpp" />
     <ClInclude Include="Utils\ed25519\ed25519.h" />
     <ClInclude Include="Utils\ed25519\fe.h" />

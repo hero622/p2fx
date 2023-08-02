@@ -11,11 +11,11 @@
 #define MAP_PAD 5
 #define PLAYER_SIZE 10
 
-Variable sar_minimap_x("sar_minimap_x", "-10", "The X position of the minimap.\n", 0);
-Variable sar_minimap_y("sar_minimap_y", "10", "The Y position of the minimap.\n", 0);
-Variable sar_minimap_max_width("sar_minimap_max_width", "500", "The maximum width of the minimap.\n", 0);
-Variable sar_minimap_max_height("sar_minimap_max_height", "1000", "The maximum height of the minimap.\n", 0);
-Variable sar_minimap_player_color("sar_minimap_player_color", "255 0 0 255", "The color of the circle representing the player on the minimap.\n", 0);
+Variable p2fx_minimap_x("p2fx_minimap_x", "-10", "The X position of the minimap.\n", 0);
+Variable p2fx_minimap_y("p2fx_minimap_y", "10", "The Y position of the minimap.\n", 0);
+Variable p2fx_minimap_max_width("p2fx_minimap_max_width", "500", "The maximum width of the minimap.\n", 0);
+Variable p2fx_minimap_max_height("p2fx_minimap_max_height", "1000", "The maximum height of the minimap.\n", 0);
+Variable p2fx_minimap_player_color("p2fx_minimap_player_color", "255 0 0 255", "The color of the circle representing the player on the minimap.\n", 0);
 
 static std::map<std::string, std::pair<int, float>> g_textures;
 
@@ -164,7 +164,7 @@ static void drawMinimap(Minimap m, MinimapSettings s) {
 				int pix_x = x + from_left * width;
 				int pix_y = y + from_top * height;
 
-				auto col = Utils::GetColor(sar_minimap_player_color.GetString(), false);
+				auto col = Utils::GetColor(p2fx_minimap_player_color.GetString(), false);
 				if (!col) col = Color{ 255, 0, 0, 255 };
 
 				surface->DrawRect(*col, pix_x - PLAYER_SIZE / 2, pix_y - PLAYER_SIZE / 2, pix_x + PLAYER_SIZE / 2, pix_y + PLAYER_SIZE / 2);
@@ -175,8 +175,8 @@ static void drawMinimap(Minimap m, MinimapSettings s) {
 
 static std::optional<Minimap> g_cur_map;
 
-CON_COMMAND(sar_minimap_load, "sar_minimap_load <filename> - load a minimap from a JSON file.\n") {
-	if (args.ArgC() != 2) return console->Print(sar_minimap_load.ThisPtr()->m_pszHelpString);
+CON_COMMAND(p2fx_minimap_load, "p2fx_minimap_load <filename> - load a minimap from a JSON file.\n") {
+	if (args.ArgC() != 2) return console->Print(p2fx_minimap_load.ThisPtr()->m_pszHelpString);
 
 	std::string path = args[1];
 
@@ -194,10 +194,10 @@ public:
 		if (g_cur_map) {
 			drawMinimap(
 				*g_cur_map, {
-					sar_minimap_x.GetInt(),
-					sar_minimap_y.GetInt(),
-					sar_minimap_max_width.GetInt(),
-					sar_minimap_max_height.GetInt(),
+					p2fx_minimap_x.GetInt(),
+					p2fx_minimap_y.GetInt(),
+					p2fx_minimap_max_width.GetInt(),
+					p2fx_minimap_max_height.GetInt(),
 				}
 			);
 		}

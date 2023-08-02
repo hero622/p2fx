@@ -1,6 +1,6 @@
 #include "Version.hpp"
 
-#if defined(SAR_DEV_BUILD) && !defined(NO_DEV_WATERMARK)
+#if defined(P2FX_DEV_BUILD) && !defined(NO_DEV_WATERMARK)
 
 #	include "Hud.hpp"
 #	include "Modules/Engine.hpp"

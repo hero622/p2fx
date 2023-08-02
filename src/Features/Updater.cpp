@@ -19,11 +19,11 @@ extern "C" {
 #include <utility>
 
 #ifdef _WIN32
-#	define ASSET_NAME "sar.dll"
-#	define PDB_ASSET_NAME "sar.pdb"
-#	define PDB_PATH "sar.pdb"
+#	define ASSET_NAME "p2fx.dll"
+#	define PDB_ASSET_NAME "p2fx.pdb"
+#	define PDB_PATH "p2fx.pdb"
 #else
-#	define ASSET_NAME "sar.so"
+#	define ASSET_NAME "p2fx.so"
 #endif
 
 static CURL *g_curl;
@@ -32,13 +32,13 @@ static std::thread g_worker;
 
 #define MAX_VERSION_COMPONENTS 6
 
-struct SarVersion {
+struct P2fxVersion {
 	unsigned components[MAX_VERSION_COMPONENTS];
 	unsigned pre;
 };
 
-static std::optional<SarVersion> getVersionComponents(const char *str) {
-	SarVersion v = {0};
+static std::optional<P2fxVersion> getVersionComponents(const char *str) {
+	P2fxVersion v = {0};
 	v.pre = UINT_MAX;
 
 	size_t i = 0;
@@ -68,7 +68,7 @@ static std::optional<SarVersion> getVersionComponents(const char *str) {
 }
 
 static bool isNewerVersion(const char *verStr) {
-	auto current = getVersionComponents(SAR_VERSION);
+	auto current = getVersionComponents(P2FX_VERSION);
 	auto version = getVersionComponents(verStr);
 
 	if (!current) {
@@ -230,7 +230,7 @@ void checkUpdate(bool allowPre) {
 	if (!isNewerVersion(name.c_str())) {
 		THREAD_PRINT("You're all up-to-date!\n");
 	} else {
-		THREAD_PRINT("Update with sar_update, or at %s\n", dlUrl.c_str());
+		THREAD_PRINT("Update with p2fx_update, or at %s\n", dlUrl.c_str());
 	}
 }
 
@@ -249,14 +249,14 @@ void doUpdate(bool allowPre, bool exitOnSuccess, bool force) {
 		return;
 	}
 
-	std::string sar = Utils::GetSARPath();
+	std::string p2fx = Utils::GetP2FXPath();
 	std::string tmp = createTempPath(ASSET_NAME);
 #ifdef _WIN32
 	std::string tmpPdb = createTempPath(PDB_ASSET_NAME);
 #endif
 
-	// Step 1: download SAR to the given temporary file
-	THREAD_PRINT("Downloading SAR %s...\n", name.c_str());
+	// Step 1: download P2FX to the given temporary file
+	THREAD_PRINT("Downloading P2FX %s...\n", name.c_str());
 	if (!downloadFile(dlUrl.c_str(), tmp.c_str())) {
 		THREAD_PRINT("An error occurred\n");
 		return;
@@ -269,24 +269,24 @@ void doUpdate(bool allowPre, bool exitOnSuccess, bool force) {
 	}
 #endif
 
-	// Step 2: delete the current SAR image. For some reason, on Linux
+	// Step 2: delete the current P2FX image. For some reason, on Linux
 	// we have to delete it, while on Windows we have to move it. Don't
 	// ask because I don't know
 	THREAD_PRINT("Deleting old version...\n");
 #ifdef _WIN32
-	std::filesystem::rename(sar, "sar.dll.old-auto");
+	std::filesystem::rename(p2fx, "p2fx.dll.old-auto");
 	if (std::filesystem::exists(PDB_PATH)) {
-		std::filesystem::rename(PDB_PATH, "sar.pdb.old-auto");
+		std::filesystem::rename(PDB_PATH, "p2fx.pdb.old-auto");
 	}
 #else
-	std::filesystem::remove(sar);
+	std::filesystem::remove(p2fx);
 #endif
 
-	// Step 3: copy the new SAR image to the location of the old one,
+	// Step 3: copy the new P2FX image to the location of the old one,
 	// and then delete the temporary file. We can't just move it
 	// for........reasons
 	THREAD_PRINT("Installing...\n", name.c_str());
-	std::filesystem::copy(tmp, sar);
+	std::filesystem::copy(tmp, p2fx);
 	std::filesystem::remove(tmp);
 #ifdef _WIN32
 	std::filesystem::copy(tmpPdb, PDB_PATH);
@@ -297,7 +297,7 @@ void doUpdate(bool allowPre, bool exitOnSuccess, bool force) {
 
 	if (exitOnSuccess) {
 		Scheduler::OnMainThread([]() {
-			toastHud.AddToast("update", "SAR has been updated. Your game will now exit.\n");
+			toastHud.AddToast("update", "P2FX has been updated. Your game will now exit.\n");
 			Scheduler::InHostTicks(120, []() {
 				engine->ExecuteCommand("quit");
 			});
@@ -305,9 +305,9 @@ void doUpdate(bool allowPre, bool exitOnSuccess, bool force) {
 	}
 }
 
-CON_COMMAND(sar_check_update, "sar_check_update [release|pre] - check whether the latest version of SAR is being used\n") {
+CON_COMMAND(p2fx_check_update, "p2fx_check_update [release|pre] - check whether the latest version of P2FX is being used\n") {
 	if (args.ArgC() > 2) {
-		return THREAD_PRINT(sar_check_update.ThisPtr()->m_pszHelpString);
+		return THREAD_PRINT(p2fx_check_update.ThisPtr()->m_pszHelpString);
 	}
 
 	bool allowPre = args.ArgC() == 2 && !strcmp(args[1], "pre");
@@ -316,7 +316,7 @@ CON_COMMAND(sar_check_update, "sar_check_update [release|pre] - check whether th
 	g_worker = std::thread(checkUpdate, allowPre);
 }
 
-CON_COMMAND(sar_update, "sar_update [release|pre] [exit] [force] - update SAR to the latest version. If exit is given, exit the game upon successful update; if force is given, always re-install, even if it may be a downgrade\n") {
+CON_COMMAND(p2fx_update, "p2fx_update [release|pre] [exit] [force] - update P2FX to the latest version. If exit is given, exit the game upon successful update; if force is given, always re-install, even if it may be a downgrade\n") {
 	bool allowPre = false, exitOnSuccess = false, force = false;
 
 	for (int i = 1; i < args.ArgC(); ++i) {
@@ -330,7 +330,7 @@ CON_COMMAND(sar_update, "sar_update [release|pre] [exit] [force] - update SAR to
 			force = true;
 		} else {
 			console->Print("Invalid argument '%s'\n", args[i]);
-			console->Print(sar_update.ThisPtr()->m_pszHelpString);
+			console->Print(p2fx_update.ThisPtr()->m_pszHelpString);
 			return;
 		}
 	}
@@ -339,6 +339,6 @@ CON_COMMAND(sar_update, "sar_update [release|pre] [exit] [force] - update SAR to
 	g_worker = std::thread(doUpdate, allowPre, exitOnSuccess, force);
 }
 
-ON_EVENT(SAR_UNLOAD) {
+ON_EVENT(P2FX_UNLOAD) {
 	if (g_worker.joinable()) g_worker.detach();
 }

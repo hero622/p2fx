@@ -15,13 +15,13 @@
 #include "Variable.hpp"
 #include "VelocityStats.hpp"
 
-Variable sar_stats_jumps_xy("sar_stats_jumps_xy", "0", "Saves jump distance as 2D vector.\n");
-Variable sar_stats_velocity_peak_xy("sar_stats_velocity_peak_xy", "0", "Saves velocity peak as 2D vector.\n");
-Variable sar_stats_auto_reset("sar_stats_auto_reset", "0", 0,
+Variable p2fx_stats_jumps_xy("p2fx_stats_jumps_xy", "0", "Saves jump distance as 2D vector.\n");
+Variable p2fx_stats_velocity_peak_xy("p2fx_stats_velocity_peak_xy", "0", "Saves velocity peak as 2D vector.\n");
+Variable p2fx_stats_auto_reset("p2fx_stats_auto_reset", "0", 0,
                               "Resets all stats automatically.\n"
                               "0 = Default,\n"
                               "1 = Restart or disconnect only,\n"
-                              "2 = Any load & sar_timer_start.\n"
+                              "2 = Any load & p2fx_timer_start.\n"
                               "Note: Portal counter is not part of the \"stats\" feature.\n");
 
 Stats *stats;
@@ -50,7 +50,7 @@ void Stats::ResetAll() {
 
 // Commands
 
-CON_COMMAND(sar_stats_jump, "sar_stats_jump - prints jump stats\n") {
+CON_COMMAND(p2fx_stats_jump, "p2fx_stats_jump - prints jump stats\n") {
 	auto stat = stats->Get(GET_SLOT());
 
 	auto type = std::string();
@@ -64,11 +64,11 @@ CON_COMMAND(sar_stats_jump, "sar_stats_jump - prints jump stats\n") {
 	console->Print("Peak: %.3f %s\n", stat->jumps->distancePeak, type.c_str());
 	console->Print("Jumps: %i\n", stat->jumps->total);
 }
-CON_COMMAND(sar_stats_steps, "sar_stats_steps - prints total amount of steps\n") {
+CON_COMMAND(p2fx_stats_steps, "p2fx_stats_steps - prints total amount of steps\n") {
 	auto stat = stats->Get(GET_SLOT());
 	console->Print("Steps: %i\n", stat->jumps->total);
 }
-CON_COMMAND(sar_stats_velocity, "sar_stats_velocity - prints velocity stats\n") {
+CON_COMMAND(p2fx_stats_velocity, "p2fx_stats_velocity - prints velocity stats\n") {
 	auto nSlot = GET_SLOT();
 	auto stat = stats->Get(nSlot);
 
@@ -87,16 +87,16 @@ CON_COMMAND(sar_stats_velocity, "sar_stats_velocity - prints velocity stats\n") 
 
 	console->Print("Peak: %.3f %s\n", stat->velocity->peak, type.c_str());
 }
-CON_COMMAND(sar_stats_jumps_reset, "sar_stats_jumps_reset - resets total jump count and jump distance peak\n") {
+CON_COMMAND(p2fx_stats_jumps_reset, "p2fx_stats_jumps_reset - resets total jump count and jump distance peak\n") {
 	stats->Get(GET_SLOT())->jumps->Reset();
 }
-CON_COMMAND(sar_stats_steps_reset, "sar_stats_steps_reset - resets total step count\n") {
+CON_COMMAND(p2fx_stats_steps_reset, "p2fx_stats_steps_reset - resets total step count\n") {
 	stats->Get(GET_SLOT())->steps->Reset();
 }
-CON_COMMAND(sar_stats_velocity_reset, "sar_stats_velocity_reset - resets velocity peak\n") {
+CON_COMMAND(p2fx_stats_velocity_reset, "p2fx_stats_velocity_reset - resets velocity peak\n") {
 	stats->Get(GET_SLOT())->velocity->Reset();
 }
-CON_COMMAND(sar_stats_reset, "sar_stats_reset - resets all saved stats\n") {
+CON_COMMAND(p2fx_stats_reset, "p2fx_stats_reset - resets all saved stats\n") {
 	stats->Get(GET_SLOT())->Reset();
 }
 
@@ -131,14 +131,14 @@ HUD_ELEMENT2(velocity_peak, "0", "Draws last saved velocity peak.\n", HudType_In
 	ctx->DrawElement("vel peak: %.3f", stat->velocity->peak);
 }
 
-CON_COMMAND(sar_export_stats, "sar_export_stats <filepath> -  export the stats to the specifed path in a .csv file\n") {
+CON_COMMAND(p2fx_export_stats, "p2fx_export_stats <filepath> -  export the stats to the specifed path in a .csv file\n") {
 	bool result = false;
-	std::string path = args.ArgC() == 1 ? sar_statcounter_filePath.GetString() : args[1];
+	std::string path = args.ArgC() == 1 ? p2fx_statcounter_filePath.GetString() : args[1];
 
 	if (args.ArgC() >= 1) {
 		result = statsCounter->ExportToFile(path);
 	} else {
-		return console->Print(sar_export_stats.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_export_stats.ThisPtr()->m_pszHelpString);
 	}
 
 	if (!result) {
@@ -148,14 +148,14 @@ CON_COMMAND(sar_export_stats, "sar_export_stats <filepath> -  export the stats t
 	console->Print("Datas has been successfully exported.\n");
 }
 
-CON_COMMAND(sar_import_stats, "sar_import_stats <filePath> - import the stats from the specified .csv file\n") {
+CON_COMMAND(p2fx_import_stats, "p2fx_import_stats <filePath> - import the stats from the specified .csv file\n") {
 	bool result = false;
-	std::string path = args.ArgC() == 1 ? sar_statcounter_filePath.GetString() : args[1];
+	std::string path = args.ArgC() == 1 ? p2fx_statcounter_filePath.GetString() : args[1];
 
 	if (args.ArgC() >= 1) {
 		result = statsCounter->LoadFromFile(path);
 	} else {
-		return console->Print(sar_import_stats.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_import_stats.ThisPtr()->m_pszHelpString);
 	}
 
 	if (!result) {
@@ -165,6 +165,6 @@ CON_COMMAND(sar_import_stats, "sar_import_stats <filePath> - import the stats fr
 	console->Print("Datas has been successfully loaded.\n");
 }
 
-CON_COMMAND(sar_print_stats, "sar_print_stats - prints your statistics if those are loaded\n") {
+CON_COMMAND(p2fx_print_stats, "p2fx_print_stats - prints your statistics if those are loaded\n") {
 	statsCounter->Print();
 }

@@ -11,23 +11,23 @@ public:
 	static void AutoStrafe(int slot, void *player, CUserCmd *cmd);
 };
 
-extern Variable sar_autorecord;
-extern Variable sar_autojump;
-extern Variable sar_jumpboost;
-extern Variable sar_aircontrol;
-extern Variable sar_duckjump;
-extern Variable sar_disable_challenge_stats_hud;
-extern Variable sar_disable_steam_pause;
-extern Variable sar_disable_no_focus_sleep;
-extern Variable sar_disable_progress_bar_update;
-extern Variable sar_prevent_mat_snapshot_recompute;
-extern Variable sar_challenge_autostop;
-extern Variable sar_show_entinp;
-extern Variable sar_force_qc;
-extern Variable sar_patch_bhop;
-extern Variable sar_patch_cfg;
-extern Variable sar_prevent_ehm;
-extern Variable sar_disable_weapon_sway;
+extern Variable p2fx_autorecord;
+extern Variable p2fx_autojump;
+extern Variable p2fx_jumpboost;
+extern Variable p2fx_aircontrol;
+extern Variable p2fx_duckjump;
+extern Variable p2fx_disable_challenge_stats_hud;
+extern Variable p2fx_disable_steam_pause;
+extern Variable p2fx_disable_no_focus_sleep;
+extern Variable p2fx_disable_progress_bar_update;
+extern Variable p2fx_prevent_mat_snapshot_recompute;
+extern Variable p2fx_challenge_autostop;
+extern Variable p2fx_show_entinp;
+extern Variable p2fx_force_qc;
+extern Variable p2fx_patch_bhop;
+extern Variable p2fx_patch_cfg;
+extern Variable p2fx_prevent_ehm;
+extern Variable p2fx_disable_weapon_sway;
 
 extern Variable sv_laser_cube_autoaim;
 extern Variable ui_loadingscreen_transition_time;
@@ -39,4 +39,4 @@ extern Variable hide_gun_when_holding;
 extern Variable cl_viewmodelfov;
 extern Variable r_flashlightbrightness;
 
-extern Command sar_togglewait;
+extern Command p2fx_togglewait;

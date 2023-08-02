@@ -18,4 +18,4 @@ private:
 extern ReloadedFix *reloadedFix;
 
 
-extern Variable sar_fix_reloaded_cheats;
+extern Variable p2fx_fix_reloaded_cheats;

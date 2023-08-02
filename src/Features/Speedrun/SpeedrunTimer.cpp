@@ -201,8 +201,8 @@ ON_EVENT_P(SESSION_START, -1000) {
 	g_inDemoLoad = false;
 }
 ON_EVENT(SESSION_START) {
-	if (!sar_speedrun_skip_cutscenes.GetBool()) return;
-	if (sar.game->GetVersion() != SourceGame_Portal2) return;
+	if (!p2fx_speedrun_skip_cutscenes.GetBool()) return;
+	if (p2fx.game->GetVersion() != SourceGame_Portal2) return;
 	if (Game::IsSpeedrunMod()) return;
 
 	if (SpeedrunTimer::IsRunning()) {
@@ -272,7 +272,7 @@ static void sendCoopPacket(PacketType t, std::string *splitName = NULL, int newS
 }
 
 int SpeedrunTimer::GetOffsetTicks() {
-	const char *offset = sar_speedrun_offset.GetString();
+	const char *offset = p2fx_speedrun_offset.GetString();
 
 	char *end;
 	long ticks = strtol(offset, &end, 10);
@@ -299,7 +299,7 @@ int SpeedrunTimer::GetSegmentTicks() {
 	ticks += g_speedrun.saved;
 	if (!g_speedrun.isPaused && !g_speedrun.inCoopPause && (!engine->demoplayer->IsPlaying() || engine->demoplayer->IsPlaybackFixReady())) {
 
-		if (sar_speedrun_skip_cutscenes.GetBool() && sar.game->GetVersion() == SourceGame_Portal2 && !Game::IsSpeedrunMod()) {
+		if (p2fx_speedrun_skip_cutscenes.GetBool() && p2fx.game->GetVersion() == SourceGame_Portal2 && !Game::IsSpeedrunMod()) {
 			if (g_speedrun.lastMap == "sp_a2_bts6") return 3112;
 			else if (g_speedrun.lastMap == "sp_a3_00") return 4666;
 		}
@@ -309,7 +309,7 @@ int SpeedrunTimer::GetSegmentTicks() {
 
 	if (ticks < 0) {
 		// This can happen for precisely one tick if you
-		// sar_speedrun_start then unpause, because for some dumb
+		// p2fx_speedrun_start then unpause, because for some dumb
 		// reason, console unpausing makes the engine go back one tick
 		ticks = 0;
 	}
@@ -358,7 +358,7 @@ void SpeedrunTimer::Update() {
 
 	std::string map = getEffectiveMapName();
 
-	if (engine->IsCoop() && !engine->IsOrange() && SpeedrunTimer::IsRunning() && !sar_speedrun_time_pauses.GetBool()) {
+	if (engine->IsCoop() && !engine->IsOrange() && SpeedrunTimer::IsRunning() && !p2fx_speedrun_time_pauses.GetBool()) {
 		if (pauseTimer->IsActive() && !g_speedrun.inCoopPause) {
 			// I don't understand how any of this works but I think we're off-by-one here
 			g_speedrun.saved = SpeedrunTimer::GetTotalTicks() + 1;
@@ -391,7 +391,7 @@ void SpeedrunTimer::Update() {
 			g_speedrun.visitedMaps.push_back(map);
 		}
 
-		bool newSplit = !visited || !sar_speedrun_smartsplit.GetBool();
+		bool newSplit = !visited || !p2fx_speedrun_smartsplit.GetBool();
 		SpeedrunTimer::Split(newSplit, g_speedrun.lastMap);
 		if (newSplit && networkManager.isConnected) {
 			int total = SpeedrunTimer::GetTotalTicks();
@@ -421,7 +421,7 @@ ON_EVENT(PRE_TICK) {
 		return;
 	}
 
-	if (!g_speedrun.isRunning || g_speedrun.isPaused || !sar_speedrun_time_pauses.GetBool()) {
+	if (!g_speedrun.isRunning || g_speedrun.isPaused || !p2fx_speedrun_time_pauses.GetBool()) {
 		return;
 	}
 
@@ -469,10 +469,10 @@ void SpeedrunTimer::Start() {
 	g_speedrun.visitedMaps.push_back(map);
 
 	sendCoopPacket(PacketType::START);
-	if (!sar_mtrigger_legacy.GetBool()) {
+	if (!p2fx_mtrigger_legacy.GetBool()) {
 		toastHud.AddToast(SPEEDRUN_TOAST_TAG, "Speedrun started!");
 	} else {
-		auto color = Utils::GetColor(sar_mtrigger_legacy_textcolor.GetString());
+		auto color = Utils::GetColor(p2fx_mtrigger_legacy_textcolor.GetString());
 		client->Chat(color.value_or(Color{255, 176, 0}), "Speedrun started!");
 	}
 
@@ -566,7 +566,7 @@ void SpeedrunTimer::Stop(std::string segName) {
 
 	Scheduler::InHostTicks(DEMO_AUTOSTOP_DELAY, [=]() {
 		if (!engine->demorecorder->isRecordingDemo) return; // manual stop before autostop
-		switch (sar_speedrun_autostop.GetInt()) {
+		switch (p2fx_speedrun_autostop.GetInt()) {
 			case 1:
 				engine->demorecorder->Stop();
 				break;
@@ -658,20 +658,20 @@ void SpeedrunTimer::Split(bool newSplit, std::string segName, bool requested) {
 		setTimerAction(TimerAction::SPLIT);
 		float totalTime = SpeedrunTimer::GetTotalTicks() * *engine->interval_per_tick;
 		float splitTime = g_speedrun.splits.back().ticks * *engine->interval_per_tick;
-		if (!sar_mtrigger_legacy.GetBool()) {
+		if (!p2fx_mtrigger_legacy.GetBool()) {
 			std::string text = Utils::ssprintf("%s\n%s (%s)", segName.c_str(), SpeedrunTimer::Format(totalTime).c_str(), SpeedrunTimer::Format(splitTime).c_str());
 			toastHud.AddToast(SPEEDRUN_TOAST_TAG, text);
 		} else {
 			std::string cleanSegName = segName;
 			replace(cleanSegName, GetCategoryName() + " - ", "");
 
-			std::string formattedString = sar_mtrigger_legacy_format.GetString();
+			std::string formattedString = p2fx_mtrigger_legacy_format.GetString();
 			replace(formattedString, "!map", GetCategoryName());
 			replace(formattedString, "!seg", cleanSegName);
 			replace(formattedString, "!tt", SpeedrunTimer::Format(totalTime));
 			replace(formattedString, "!st", SpeedrunTimer::Format(splitTime));
 
-			auto color = Utils::GetColor(sar_mtrigger_legacy_textcolor.GetString());
+			auto color = Utils::GetColor(p2fx_mtrigger_legacy_textcolor.GetString());
 			client->Chat(color.value_or(Color{255, 176, 0}), formattedString.c_str());
 		}
 	}
@@ -725,13 +725,13 @@ void SpeedrunTimer::OnLoad() {
 		return;
 	}
 
-	if (!sar_speedrun_start_on_load.isRegistered) {
+	if (!p2fx_speedrun_start_on_load.isRegistered) {
 		return;
 	}
 
-	if (sar_speedrun_start_on_load.GetInt() == 2) {
+	if (p2fx_speedrun_start_on_load.GetInt() == 2) {
 		SpeedrunTimer::Start();
-	} else if (sar_speedrun_start_on_load.GetInt() == 1 && !SpeedrunTimer::IsRunning()) {
+	} else if (p2fx_speedrun_start_on_load.GetInt() == 1 && !SpeedrunTimer::IsRunning()) {
 		SpeedrunTimer::Start();
 	}
 }
@@ -806,43 +806,43 @@ float SpeedrunTimer::UnFormat(const std::string &formatted_time) {
 
 // }}}
 
-Variable sar_speedrun_skip_cutscenes("sar_speedrun_skip_cutscenes", "0", "Skip Tube Ride and Long Fall in Portal 2.\n");
-Variable sar_speedrun_smartsplit("sar_speedrun_smartsplit", "1", "Only split the speedrun timer a maximum of once per map.\n");
-Variable sar_speedrun_time_pauses("sar_speedrun_time_pauses", "0", "Include time spent paused in the speedrun timer.\n");
-Variable sar_speedrun_stop_in_menu("sar_speedrun_stop_in_menu", "0", "Automatically stop the speedrun timer when the menu is loaded.\n");
-Variable sar_speedrun_start_on_load("sar_speedrun_start_on_load", "0", 0, 2, "Automatically start the speedrun timer when a map is loaded. 2 = restart if active.\n");
-Variable sar_speedrun_offset("sar_speedrun_offset", "0", 0, "Start speedruns with this time on the timer.\n", 0);
-Variable sar_speedrun_autostop("sar_speedrun_autostop", "0", 0, 2, "Automatically stop recording demos when a speedrun finishes. If 2, automatically append the run time to the demo name.\n");
+Variable p2fx_speedrun_skip_cutscenes("p2fx_speedrun_skip_cutscenes", "0", "Skip Tube Ride and Long Fall in Portal 2.\n");
+Variable p2fx_speedrun_smartsplit("p2fx_speedrun_smartsplit", "1", "Only split the speedrun timer a maximum of once per map.\n");
+Variable p2fx_speedrun_time_pauses("p2fx_speedrun_time_pauses", "0", "Include time spent paused in the speedrun timer.\n");
+Variable p2fx_speedrun_stop_in_menu("p2fx_speedrun_stop_in_menu", "0", "Automatically stop the speedrun timer when the menu is loaded.\n");
+Variable p2fx_speedrun_start_on_load("p2fx_speedrun_start_on_load", "0", 0, 2, "Automatically start the speedrun timer when a map is loaded. 2 = restart if active.\n");
+Variable p2fx_speedrun_offset("p2fx_speedrun_offset", "0", 0, "Start speedruns with this time on the timer.\n", 0);
+Variable p2fx_speedrun_autostop("p2fx_speedrun_autostop", "0", 0, 2, "Automatically stop recording demos when a speedrun finishes. If 2, automatically append the run time to the demo name.\n");
 
-Variable sar_mtrigger_legacy("sar_mtrigger_legacy", "0", 0, 1, "\n");
-Variable sar_mtrigger_legacy_format("sar_mtrigger_legacy_format", "!seg -> !tt (!st)", "Formatting of the text that is displayed in the chat (!map - for map name, !seg - for segment name, !tt - for total time, !st - for split time).\n", 0);
-Variable sar_mtrigger_legacy_textcolor("sar_mtrigger_legacy_textcolor", "255 176 0", "The color of the text that is displayed in the chat.\n", 0);
+Variable p2fx_mtrigger_legacy("p2fx_mtrigger_legacy", "0", 0, 1, "\n");
+Variable p2fx_mtrigger_legacy_format("p2fx_mtrigger_legacy_format", "!seg -> !tt (!st)", "Formatting of the text that is displayed in the chat (!map - for map name, !seg - for segment name, !tt - for total time, !st - for split time).\n", 0);
+Variable p2fx_mtrigger_legacy_textcolor("p2fx_mtrigger_legacy_textcolor", "255 176 0", "The color of the text that is displayed in the chat.\n", 0);
 
-CON_COMMAND(sar_speedrun_start, "sar_speedrun_start - start the speedrun timer\n") {
+CON_COMMAND(p2fx_speedrun_start, "p2fx_speedrun_start - start the speedrun timer\n") {
 	SpeedrunTimer::Start();
 }
 
-CON_COMMAND(sar_speedrun_stop, "sar_speedrun_stop - stop the speedrun timer\n") {
+CON_COMMAND(p2fx_speedrun_stop, "p2fx_speedrun_stop - stop the speedrun timer\n") {
 	SpeedrunTimer::Stop(getEffectiveMapName());
 }
 
-CON_COMMAND(sar_speedrun_split, "sar_speedrun_split - perform a split on the speedrun timer\n") {
+CON_COMMAND(p2fx_speedrun_split, "p2fx_speedrun_split - perform a split on the speedrun timer\n") {
 	SpeedrunTimer::Split(true, getEffectiveMapName());
 }
 
-CON_COMMAND(sar_speedrun_pause, "sar_speedrun_pause - pause the speedrun timer\n") {
+CON_COMMAND(p2fx_speedrun_pause, "p2fx_speedrun_pause - pause the speedrun timer\n") {
 	SpeedrunTimer::Pause();
 }
 
-CON_COMMAND(sar_speedrun_resume, "sar_speedrun_resume - resume the speedrun timer\n") {
+CON_COMMAND(p2fx_speedrun_resume, "p2fx_speedrun_resume - resume the speedrun timer\n") {
 	SpeedrunTimer::Resume();
 }
 
-CON_COMMAND(sar_speedrun_reset, "sar_speedrun_reset - reset the speedrun timer\n") {
+CON_COMMAND(p2fx_speedrun_reset, "p2fx_speedrun_reset - reset the speedrun timer\n") {
 	SpeedrunTimer::Reset();
 }
 
-CON_COMMAND(sar_speedrun_result, "sar_speedrun_result - print the speedrun result\n") {
+CON_COMMAND(p2fx_speedrun_result, "p2fx_speedrun_result - print the speedrun result\n") {
 	if (g_speedrun.isReset) {
 		console->Print("No active or completed speedrun!\n");
 		return;
@@ -885,9 +885,9 @@ CON_COMMAND(sar_speedrun_result, "sar_speedrun_result - print the speedrun resul
 	console->Print("Total: %d (%s)\n", total, SpeedrunTimer::Format(total * *engine->interval_per_tick).c_str());
 }
 
-CON_COMMAND(sar_speedrun_export, "sar_speedrun_export <filename> - export the speedrun result to the specified CSV file\n") {
+CON_COMMAND(p2fx_speedrun_export, "p2fx_speedrun_export <filename> - export the speedrun result to the specified CSV file\n") {
 	if (args.ArgC() != 2) {
-		console->Print(sar_speedrun_export.ThisPtr()->m_pszHelpString);
+		console->Print(p2fx_speedrun_export.ThisPtr()->m_pszHelpString);
 		return;
 	}
 
@@ -934,9 +934,9 @@ CON_COMMAND(sar_speedrun_export, "sar_speedrun_export <filename> - export the sp
 	console->Print("Speedrun successfully exported to '%s'!\n", filename.c_str());
 }
 
-CON_COMMAND(sar_speedrun_recover, "sar_speedrun_recover <ticks|time> - recover a crashed run by resuming the timer at the given time on next load\n") {
+CON_COMMAND(p2fx_speedrun_recover, "p2fx_speedrun_recover <ticks|time> - recover a crashed run by resuming the timer at the given time on next load\n") {
 	if (args.ArgC() < 2) {
-		return console->Print(sar_speedrun_recover.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_speedrun_recover.ThisPtr()->m_pszHelpString);
 	}
 
 	const char *time = Utils::ArgContinuation(args, 1);
@@ -952,12 +952,12 @@ CON_COMMAND(sar_speedrun_recover, "sar_speedrun_recover <ticks|time> - recover a
 	console->Print("Timer will start on next load at %s\n", SpeedrunTimer::Format(ticks / 60.0f).c_str());
 }
 
-CON_COMMAND(sar_speedrun_export_all, "sar_speedrun_export_all <filename> - export the results of many speedruns to the specified CSV file\n") {
+CON_COMMAND(p2fx_speedrun_export_all, "p2fx_speedrun_export_all <filename> - export the results of many speedruns to the specified CSV file\n") {
 	// TODO: this kinda isn't good, and should probably be revamped when the
 	// speedrun system is modified to track all splits.
 
 	if (args.ArgC() != 2) {
-		return console->Print(sar_speedrun_export_all.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_speedrun_export_all.ThisPtr()->m_pszHelpString);
 	}
 
 	if (SpeedrunTimer::IsRunning()) {
@@ -1039,16 +1039,16 @@ void SpeedrunTimer::CategoryChanged() {
 	g_runs.clear();
 }
 
-CON_COMMAND(sar_speedrun_reset_export, "sar_speedrun_reset_export - reset the log of complete and incomplete runs to be exported\n") {
+CON_COMMAND(p2fx_speedrun_reset_export, "p2fx_speedrun_reset_export - reset the log of complete and incomplete runs to be exported\n") {
 	g_runs.clear();
 }
 
 static std::vector<int> g_autoreset_ticks;
 
-DECL_COMMAND_FILE_COMPLETION(sar_speedrun_autoreset_load, ".txt", ".", 1)
+DECL_COMMAND_FILE_COMPLETION(p2fx_speedrun_autoreset_load, ".txt", ".", 1)
 
-CON_COMMAND_F_COMPLETION(sar_speedrun_autoreset_load, "sar_speedrun_autoreset_load <file> - load the given file of autoreset timestamps and use it while the speedrun timer is active\n", 0, AUTOCOMPLETION_FUNCTION(sar_speedrun_autoreset_load)) {
-	if (args.ArgC() != 2) return console->Print(sar_speedrun_autoreset_load.ThisPtr()->m_pszHelpString);
+CON_COMMAND_F_COMPLETION(p2fx_speedrun_autoreset_load, "p2fx_speedrun_autoreset_load <file> - load the given file of autoreset timestamps and use it while the speedrun timer is active\n", 0, AUTOCOMPLETION_FUNCTION(p2fx_speedrun_autoreset_load)) {
+	if (args.ArgC() != 2) return console->Print(p2fx_speedrun_autoreset_load.ThisPtr()->m_pszHelpString);
 
 	std::string name = args[1];
 	name += ".txt";
@@ -1073,7 +1073,7 @@ CON_COMMAND_F_COMPLETION(sar_speedrun_autoreset_load, "sar_speedrun_autoreset_lo
 	console->Print("Successfully loaded %d autoreset ticks\n", g_autoreset_ticks.size());
 }
 
-CON_COMMAND(sar_speedrun_autoreset_clear, "sar_speedrun_autoreset_clear - stop using the autoreset file\n") {
+CON_COMMAND(p2fx_speedrun_autoreset_clear, "p2fx_speedrun_autoreset_clear - stop using the autoreset file\n") {
 	g_autoreset_ticks.clear();
 }
 

@@ -29,7 +29,7 @@ void SetAngleTool::Apply(TasFramebulk &bulk, const TasPlayerInfo &playerInfo) {
 		params.easingType
 	);
 
-	if (sar_tas_debug.GetBool()) {
+	if (p2fx_tas_debug.GetBool()) {
 		console->Print("setang %.3f %.3f\n", bulk.viewAnalog.x, bulk.viewAnalog.y);
 	}
 

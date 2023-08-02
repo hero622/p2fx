@@ -14,5 +14,5 @@ public:
 
 extern VelocityGraph velocityGraph;
 
-extern Variable sar_velocitygraph;
-extern Variable sar_velocitygraph_font_index;
+extern Variable p2fx_velocitygraph;
+extern Variable p2fx_velocitygraph_font_index;

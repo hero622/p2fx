@@ -30,17 +30,17 @@ static int g_lastMouseDeltas[2];
 
 StrafeQualityHud strafeQuality;
 
-static Variable sar_strafe_quality("sar_strafe_quality", "0", "Enables or disables the strafe quality HUD.\n");
-static Variable sar_strafe_quality_ticks("sar_strafe_quality_ticks", "40", 10, "The number of ticks to average over for the strafe quality HUD.\n");
-static Variable sar_strafe_quality_width("sar_strafe_quality_width", "300", 10, "The width of the strafe quality HUD.\n");
-static Variable sar_strafe_quality_height("sar_strafe_quality_height", "50", 10, "The height of the strafe quality HUD.\n");
+static Variable p2fx_strafe_quality("p2fx_strafe_quality", "0", "Enables or disables the strafe quality HUD.\n");
+static Variable p2fx_strafe_quality_ticks("p2fx_strafe_quality_ticks", "40", 10, "The number of ticks to average over for the strafe quality HUD.\n");
+static Variable p2fx_strafe_quality_width("p2fx_strafe_quality_width", "300", 10, "The width of the strafe quality HUD.\n");
+static Variable p2fx_strafe_quality_height("p2fx_strafe_quality_height", "50", 10, "The height of the strafe quality HUD.\n");
 
 StrafeQualityHud::StrafeQualityHud()
 	: Hud(HudType_InGame | HudType_Paused, true) {
 }
 
 bool StrafeQualityHud::ShouldDraw() {
-	return Hud::ShouldDraw() && sar_strafe_quality.GetBool();
+	return Hud::ShouldDraw() && p2fx_strafe_quality.GetBool();
 }
 
 bool StrafeQualityHud::GetCurrentSize(int &width, int &height) {
@@ -60,7 +60,7 @@ static inline void getSyncForTick(const TickInfo &tick, int *totalStrafe, int *s
 }
 
 static inline void purgeOldTicks(int slot) {
-	while (g_ticks[slot].size() >= unsigned(sar_strafe_quality_width.GetInt() + sar_strafe_quality_ticks.GetInt())) {
+	while (g_ticks[slot].size() >= unsigned(p2fx_strafe_quality_width.GetInt() + p2fx_strafe_quality_ticks.GetInt())) {
 		g_ticks[slot].erase(g_ticks[slot].begin());
 	}
 }
@@ -70,13 +70,13 @@ void StrafeQualityHud::Paint(int slot) {
 
 	auto &ticks = g_ticks[slot];
 
-	unsigned ticksAvg = sar_strafe_quality_ticks.GetInt();
+	unsigned ticksAvg = p2fx_strafe_quality_ticks.GetInt();
 
 	int screenWidth, screenHeight;
 	engine->GetScreenSize(nullptr, screenWidth, screenHeight);
 
-	int width = sar_strafe_quality_width.GetInt();
-	int height = sar_strafe_quality_height.GetInt();
+	int width = p2fx_strafe_quality_width.GetInt();
+	int height = p2fx_strafe_quality_height.GetInt();
 
 	int x = screenWidth / 2 - width / 2;
 	int y = screenHeight - height - 16;

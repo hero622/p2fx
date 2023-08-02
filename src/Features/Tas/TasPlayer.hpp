@@ -16,8 +16,8 @@
 
 class TasToolCommand;
 
-extern Variable sar_tas_tools_enabled;
-extern Variable sar_tas_tools_force;
+extern Variable p2fx_tas_tools_enabled;
+extern Variable p2fx_tas_tools_force;
 
 struct TasPlaybackInfo {
 	TasScript slots[2];
@@ -120,9 +120,9 @@ public:
 	~TasPlayer();
 };
 
-extern Variable sar_tas_debug;
-extern Variable sar_tas_autosave_raw;
+extern Variable p2fx_tas_debug;
+extern Variable p2fx_tas_autosave_raw;
 
-extern Variable sar_tas_skipto;
-extern Variable sar_tas_pauseat;
-extern Variable sar_tas_playback_rate;
+extern Variable p2fx_tas_skipto;
+extern Variable p2fx_tas_pauseat;
+extern Variable p2fx_tas_playback_rate;

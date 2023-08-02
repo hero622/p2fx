@@ -10,9 +10,9 @@
 
 #include <stdarg.h>
 
-CON_COMMAND(sar_font_get_name, "sar_font_get_name <id> - gets the name of a font from its index\n") {
+CON_COMMAND(p2fx_font_get_name, "p2fx_font_get_name <id> - gets the name of a font from its index\n") {
 	if (args.ArgC() != 2) {
-		return console->Print(sar_font_get_name.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_font_get_name.ThisPtr()->m_pszHelpString);
 	}
 
 	int id = scheme->GetDefaultFont() + atoi(args[1]);
@@ -24,7 +24,7 @@ CON_COMMAND(sar_font_get_name, "sar_font_get_name <id> - gets the name of a font
 	}
 }
 
-CON_COMMAND(sar_font_list, "sar_font_list - lists all available fonts\n") {
+CON_COMMAND(p2fx_font_list, "p2fx_font_list - lists all available fonts\n") {
 	if (surface->m_FontAmalgams == nullptr) return;
 	int fontCount = surface->m_FontAmalgams->m_Size;
 

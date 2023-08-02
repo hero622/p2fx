@@ -13,13 +13,13 @@
 
 VphysHud vphysHud;
 
-Variable sar_vphys_hud("sar_vphys_hud", "0", 0, "Enables or disables the vphys HUD.\n");
-Variable sar_vphys_hud_font("sar_vphys_hud_font", "1", 0, "Sets font of the vphys HUD.\n");
-Variable sar_vphys_hud_precision("sar_vphys_hud_precision", "3", 1, 16, "Sets decimal precision of the vphys HUD.\n");
-Variable sar_vphys_hud_x("sar_vphys_hud_x", "0", 0, "The x position of the vphys HUD.\n");
-Variable sar_vphys_hud_y("sar_vphys_hud_y", "0", 0, "The y position of the vphys HUD.\n");
+Variable p2fx_vphys_hud("p2fx_vphys_hud", "0", 0, "Enables or disables the vphys HUD.\n");
+Variable p2fx_vphys_hud_font("p2fx_vphys_hud_font", "1", 0, "Sets font of the vphys HUD.\n");
+Variable p2fx_vphys_hud_precision("p2fx_vphys_hud_precision", "3", 1, 16, "Sets decimal precision of the vphys HUD.\n");
+Variable p2fx_vphys_hud_x("p2fx_vphys_hud_x", "0", 0, "The x position of the vphys HUD.\n");
+Variable p2fx_vphys_hud_y("p2fx_vphys_hud_y", "0", 0, "The y position of the vphys HUD.\n");
 
-Variable sar_vphys_hud_show_hitboxes("sar_vphys_hud_show_hitboxes", "2", 0, 3, 
+Variable p2fx_vphys_hud_show_hitboxes("p2fx_vphys_hud_show_hitboxes", "2", 0, 3, 
 	"Sets visibility of hitboxes when vphys hud is active.\n"
 	"0 = hitboxes are not drawn\n"
 	"1 = only active vphys hitbox is drawn\n"
@@ -31,13 +31,13 @@ VphysHud::VphysHud()
 	: Hud(HudType_InGame, true) {
 }
 bool VphysHud::ShouldDraw() {
-	return sar_vphys_hud.GetBool() && Hud::ShouldDraw() && sv_cheats.GetBool();
+	return p2fx_vphys_hud.GetBool() && Hud::ShouldDraw() && sv_cheats.GetBool();
 }
 void VphysHud::Paint(int slot) {
-	auto font = scheme->GetFontByID(sar_vphys_hud_font.GetInt());
+	auto font = scheme->GetFontByID(p2fx_vphys_hud_font.GetInt());
 
-	int cX = sar_vphys_hud_x.GetInt();
-	int cY = sar_vphys_hud_y.GetInt();
+	int cX = p2fx_vphys_hud_x.GetInt();
+	int cY = p2fx_vphys_hud_y.GetInt();
 	 
 	float fh = surface->GetFontHeight(font);
 
@@ -54,7 +54,7 @@ void VphysHud::Paint(int slot) {
 			disableColor.a = 100;
 		}
 
-		int p = sar_vphys_hud_precision.GetInt();
+		int p = p2fx_vphys_hud_precision.GetInt();
 
 		surface->DrawTxt(font, x, y, posColor, "%s: ", name);
 		surface->DrawTxt(font, x + 10, (y += fh), posColor, "pos: %.*f, %.*f, %.*f", 
@@ -116,13 +116,13 @@ VphysShadowInfo VphysHud::GetVphysInfo(int slot, bool crouched) {
 
 // drawing player's hitboxes
 ON_EVENT(RENDER) {
-	if (!sv_cheats.GetBool() || !sar_vphys_hud.GetBool() || !sar_vphys_hud_show_hitboxes.GetBool()) 
+	if (!sv_cheats.GetBool() || !p2fx_vphys_hud.GetBool() || !p2fx_vphys_hud_show_hitboxes.GetBool()) 
 		return;
 
 	void *player = server->GetPlayer(GET_SLOT() + 1);
 	if (!player) return;
 
-	int renderState = sar_vphys_hud_show_hitboxes.GetInt();
+	int renderState = p2fx_vphys_hud_show_hitboxes.GetInt();
 
 	const auto renderHitbox = [=](Color c, float solidScale, Vector pos, Vector size, QAngle rot) {
 		RenderCallback solid = RenderCallback::constant({c.r, c.g, c.b, (uint8_t)(c.a * solidScale)});
@@ -160,16 +160,16 @@ ON_EVENT(RENDER) {
 }
 
 
-CON_COMMAND(sar_vphys_setgravity, "sar_vphys_setgravity <hitbox> <enabled> - sets gravity flag state to either standing (0) or crouching (1) havok collision shadow\n") {
+CON_COMMAND(p2fx_vphys_setgravity, "p2fx_vphys_setgravity <hitbox> <enabled> - sets gravity flag state to either standing (0) or crouching (1) havok collision shadow\n") {
 	if (engine->demoplayer->IsPlaying()) {
 		return;
 	}
 	if (!sv_cheats.GetBool()) {
-		return console->Print("Cannot use sar_vphys_setgravity without sv_cheats set to 1.\n");
+		return console->Print("Cannot use p2fx_vphys_setgravity without sv_cheats set to 1.\n");
 	}
 
 	if (args.ArgC() != 3) {
-		return console->Print(sar_vphys_setgravity.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_vphys_setgravity.ThisPtr()->m_pszHelpString);
 	}
 
 	void *player = server->GetPlayer(1);
@@ -185,16 +185,16 @@ CON_COMMAND(sar_vphys_setgravity, "sar_vphys_setgravity <hitbox> <enabled> - set
 	EnableGravity(hitbox ? m_pShadowCrouch : m_pShadowStand, enabled);
 }
 
-CON_COMMAND(sar_vphys_setangle, "sar_vphys_setangle <hitbox> <angle> - sets rotation angle to either standing (0) or crouching (1) havok collision shadow\n") {
+CON_COMMAND(p2fx_vphys_setangle, "p2fx_vphys_setangle <hitbox> <angle> - sets rotation angle to either standing (0) or crouching (1) havok collision shadow\n") {
 	if (engine->demoplayer->IsPlaying()) {
 		return;
 	}
 	if (!sv_cheats.GetBool()) {
-		return console->Print("Cannot use sar_vphys_setangle without sv_cheats set to 1.\n");
+		return console->Print("Cannot use p2fx_vphys_setangle without sv_cheats set to 1.\n");
 	}
 
 	if (args.ArgC() != 3) {
-		return console->Print(sar_vphys_setangle.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_vphys_setangle.ThisPtr()->m_pszHelpString);
 	}
 
 	void *player = server->GetPlayer(1);
@@ -218,16 +218,16 @@ CON_COMMAND(sar_vphys_setangle, "sar_vphys_setangle <hitbox> <angle> - sets rota
 	SetPosition(selected, v, q, false);
 }
 
-CON_COMMAND(sar_vphys_setspin, "sar_vphys_setspin <hitbox> <angvel> - sets rotation speed to either standing (0) or crouching (1) havok collision shadow\n") {
+CON_COMMAND(p2fx_vphys_setspin, "p2fx_vphys_setspin <hitbox> <angvel> - sets rotation speed to either standing (0) or crouching (1) havok collision shadow\n") {
 	if (engine->demoplayer->IsPlaying()) {
 		return;
 	}
 	if (!sv_cheats.GetBool()) {
-		return console->Print("Cannot use sar_vphys_setspin without sv_cheats set to 1.\n");
+		return console->Print("Cannot use p2fx_vphys_setspin without sv_cheats set to 1.\n");
 	}
 
 	if (args.ArgC() != 3) {
-		return console->Print(sar_vphys_setspin.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_vphys_setspin.ThisPtr()->m_pszHelpString);
 	}
 
 	void *player = server->GetPlayer(1);
@@ -250,16 +250,16 @@ CON_COMMAND(sar_vphys_setspin, "sar_vphys_setspin <hitbox> <angvel> - sets rotat
 	SetVelocity(selected, NULL, &v);
 }
 
-CON_COMMAND(sar_vphys_setasleep, "sar_vphys_setasleep <hitbox> <asleep> - sets whether your standing (0) or crouching (1) havok collision shadow is asleep\n") {
+CON_COMMAND(p2fx_vphys_setasleep, "p2fx_vphys_setasleep <hitbox> <asleep> - sets whether your standing (0) or crouching (1) havok collision shadow is asleep\n") {
 	if (engine->demoplayer->IsPlaying()) {
 		return;
 	}
 	if (!sv_cheats.GetBool()) {
-		return console->Print("Cannot use sar_vphys_setasleep without sv_cheats set to 1.\n");
+		return console->Print("Cannot use p2fx_vphys_setasleep without sv_cheats set to 1.\n");
 	}
 
 	if (args.ArgC() != 3) {
-		return console->Print(sar_vphys_setasleep.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_vphys_setasleep.ThisPtr()->m_pszHelpString);
 	}
 
 	void *player = server->GetPlayer(1);

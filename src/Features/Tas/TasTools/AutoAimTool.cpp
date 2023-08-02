@@ -116,7 +116,7 @@ void AutoAimTool::Apply(TasFramebulk &bulk, const TasPlayerInfo &playerInfo) {
 		params.easingType
 	);
 
-	if (sar_tas_debug.GetBool()) {
+	if (p2fx_tas_debug.GetBool()) {
 		console->Print("autoaim pitch:%.2f yaw:%.2f\n", pitch, yaw);
 	}
 

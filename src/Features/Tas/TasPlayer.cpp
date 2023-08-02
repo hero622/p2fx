@@ -18,17 +18,17 @@
 #include <climits>
 #include <fstream>
 
-Variable sar_tas_debug("sar_tas_debug", "0", 0, 2, "Debug TAS informations. 0 - none, 1 - basic, 2 - all.\n");
-Variable sar_tas_dump_usercmd("sar_tas_dump_usercmd", "0", "Dump TAS-generated usercmds to a file.\n");
-Variable sar_tas_dump_player_info("sar_tas_dump_player_info", "0", "Dump player info for each tick of TAS playback to a file.\n");
-Variable sar_tas_tools_enabled("sar_tas_tools_enabled", "1", "Enables tool processing for TAS script making.\n");
-Variable sar_tas_tools_force("sar_tas_tools_force", "0", "Force tool playback for TAS scripts; primarily for debugging.\n");
-Variable sar_tas_autosave_raw("sar_tas_autosave_raw", "1", "Enables automatic saving of raw, processed TAS scripts.\n");
-Variable sar_tas_pauseat("sar_tas_pauseat", "0", 0, "Pauses the TAS playback on specified tick.\n");
-Variable sar_tas_skipto("sar_tas_skipto", "0", 0, "Fast-forwards the TAS playback until given playback tick.\n");
-Variable sar_tas_playback_rate("sar_tas_playback_rate", "1.0", 0.02, "The rate at which to play back TAS scripts.\n");
-Variable sar_tas_restore_fps("sar_tas_restore_fps", "1", "Restore fps_max and host_framerate after TAS playback.\n");
-Variable sar_tas_interpolate("sar_tas_interpolate", "0", "Preserve client interpolation in TAS playback.\n");
+Variable p2fx_tas_debug("p2fx_tas_debug", "0", 0, 2, "Debug TAS informations. 0 - none, 1 - basic, 2 - all.\n");
+Variable p2fx_tas_dump_usercmd("p2fx_tas_dump_usercmd", "0", "Dump TAS-generated usercmds to a file.\n");
+Variable p2fx_tas_dump_player_info("p2fx_tas_dump_player_info", "0", "Dump player info for each tick of TAS playback to a file.\n");
+Variable p2fx_tas_tools_enabled("p2fx_tas_tools_enabled", "1", "Enables tool processing for TAS script making.\n");
+Variable p2fx_tas_tools_force("p2fx_tas_tools_force", "0", "Force tool playback for TAS scripts; primarily for debugging.\n");
+Variable p2fx_tas_autosave_raw("p2fx_tas_autosave_raw", "1", "Enables automatic saving of raw, processed TAS scripts.\n");
+Variable p2fx_tas_pauseat("p2fx_tas_pauseat", "0", 0, "Pauses the TAS playback on specified tick.\n");
+Variable p2fx_tas_skipto("p2fx_tas_skipto", "0", 0, "Fast-forwards the TAS playback until given playback tick.\n");
+Variable p2fx_tas_playback_rate("p2fx_tas_playback_rate", "1.0", 0.02, "The rate at which to play back TAS scripts.\n");
+Variable p2fx_tas_restore_fps("p2fx_tas_restore_fps", "1", "Restore fps_max and host_framerate after TAS playback.\n");
+Variable p2fx_tas_interpolate("p2fx_tas_interpolate", "0", "Preserve client interpolation in TAS playback.\n");
 
 TasPlayer *tasPlayer;
 
@@ -52,13 +52,13 @@ void SetPlaybackVars(bool active) {
 		old_motionblur = mat_motion_blur_enabled.GetBool();
 		in_forceuser.SetValue(tasPlayer->playbackInfo.coopControlSlot >= 0 ? tasPlayer->playbackInfo.coopControlSlot : 100);
 		host_framerate.SetValue(60);
-		if (!sar_tas_interpolate.GetBool() && tasPlayer->IsUsingTools()) {
+		if (!p2fx_tas_interpolate.GetBool() && tasPlayer->IsUsingTools()) {
 			cl_interpolate.SetValue(false);
 			mat_motion_blur_enabled.SetValue(false);
 		}
 	} else if (!active && was_active) {
 		in_forceuser.SetValue(old_forceuser);
-		if (sar_tas_restore_fps.GetBool()) {
+		if (p2fx_tas_restore_fps.GetBool()) {
 			engine->SetSkipping(false);
 			host_framerate.SetValue(old_hostframerate);
 			if (saved_fps) {
@@ -85,12 +85,12 @@ void SetPlaybackVars(bool active) {
 	}
 
 	if (saved_fps && active && tasPlayer->IsReady()) {
-		if (tasPlayer->GetTick() < sar_tas_skipto.GetInt()) {
+		if (tasPlayer->GetTick() < p2fx_tas_skipto.GetInt()) {
 			engine->SetSkipping(true);
 			fps_max.SetValue(0);
-		} else if (tasPlayer->GetTick() >= sar_tas_skipto.GetInt()) {
+		} else if (tasPlayer->GetTick() >= p2fx_tas_skipto.GetInt()) {
 			engine->SetSkipping(false);
-			fps_max.SetValue((int)(sar_tas_playback_rate.GetFloat() * 60.0f));
+			fps_max.SetValue((int)(p2fx_tas_playback_rate.GetFloat() * 60.0f));
 		}
 	}
 
@@ -99,7 +99,7 @@ void SetPlaybackVars(bool active) {
 
 ON_EVENT(FRAME) {
 	bool tools = tasPlayer->IsUsingTools();
-	if (tasPlayer->IsRunning() && !sar_tas_interpolate.GetBool() && tools) {
+	if (tasPlayer->IsRunning() && !p2fx_tas_interpolate.GetBool() && tools) {
 		for (int i = 0; i < Offsets::NUM_ENT_ENTRIES; ++i) {
 			// check for prop_portal on the server cuz i can't figure out how
 			// to do it client-side lol
@@ -216,14 +216,14 @@ void TasPlayer::Activate(TasPlaybackInfo info) {
 	}
 
 	console->Print("TAS script has been activated.\n");
-	if (sar_tas_debug.GetInt() > 0) {
+	if (p2fx_tas_debug.GetInt() > 0) {
 		console->Print("Length: %d ticks\n", lastTick + 1);
 	}
 }
 
 void TasPlayer::Start() {
 	console->Print("TAS script has been started.\n");
-	if (sar_tas_debug.GetInt() > 0) {
+	if (p2fx_tas_debug.GetInt() > 0) {
 		console->Print("Length: %d ticks\n", lastTick + 1);
 	}
 
@@ -236,7 +236,7 @@ void TasPlayer::Start() {
 
 void TasPlayer::PostStart() {
 	startTick = server->gpGlobals->tickcount;
-	if (sar_tas_debug.GetInt() > 1) {
+	if (p2fx_tas_debug.GetInt() > 1) {
 		console->Print("Start tick: %d\n", startTick);
 	}
 	tasControllers[0]->Enable();
@@ -254,7 +254,7 @@ void TasPlayer::Stop(bool interrupted) {
 			currentTick
 		);
 
-		if (sar_tas_autosave_raw.GetBool()) {
+		if (p2fx_tas_autosave_raw.GetBool()) {
 			SaveProcessedFramebulks();
 		}
 
@@ -443,7 +443,7 @@ void TasPlayer::SaveProcessedFramebulks() {
 
 		if (tasPlayer->inControllerCommands) {
 			// Okay so this is an annoying situation. We've just started playing
-			// a new TAS with a 'sar_tas_play' command *within* a framebulk of
+			// a new TAS with a 'p2fx_tas_play' command *within* a framebulk of
 			// another TAS, which has executed the command and called 'Stop'
 			// which has called this. We actually want to save the framebulk
 			// currently being run, since its commands are important! But
@@ -493,7 +493,7 @@ void TasPlayer::FetchInputs(int slot, TasController *controller) {
 
 	int fbTick = fb.tick;
 
-	if (sar_tas_debug.GetInt() > 0 && fbTick == tick) {
+	if (p2fx_tas_debug.GetInt() > 0 && fbTick == tick) {
 		console->Print("%s\n", fb.ToString().c_str());
 	}
 
@@ -672,13 +672,13 @@ void TasPlayer::PostProcess(int slot, void *player, CUserCmd *cmd) {
 }
 
 void TasPlayer::DumpUsercmd(int slot, const CUserCmd *cmd, int tick, const char *source) {
-	if (!sar_tas_dump_usercmd.GetBool()) return;
+	if (!p2fx_tas_dump_usercmd.GetBool()) return;
 	std::string str = Utils::ssprintf("%s,%d,%.6f,%.6f,%08X,%.6f,%.6f,%.6f", source, tick, cmd->forwardmove, cmd->sidemove, cmd->buttons, cmd->viewangles.x, cmd->viewangles.y, cmd->viewangles.z);
 	playbackInfo.slots[slot].userCmdDebugs.push_back(str);
 }
 
 void TasPlayer::DumpPlayerInfo(int slot, int tick, Vector pos, Vector eye_pos, QAngle ang) {
-	if (!sar_tas_dump_player_info.GetBool()) return;
+	if (!p2fx_tas_dump_player_info.GetBool()) return;
 	std::string str = Utils::ssprintf("%d,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f", tick, pos.x, pos.y, pos.z, eye_pos.x, eye_pos.y, eye_pos.z, ang.x, ang.y, ang.z);
 	playbackInfo.slots[slot].playerInfoDebugs.push_back(str);
 }
@@ -716,7 +716,7 @@ void TasPlayer::Update() {
 				}
 			}
 
-			int pauseTick = sar_tas_pauseat.GetInt();
+			int pauseTick = p2fx_tas_pauseat.GetInt();
 			if (currentTick == pauseTick && pauseTick > 0) {
 				Pause();
 			}
@@ -762,17 +762,17 @@ void TasPlayer::UpdateServer() {
 	status.playback_state =
 		engine->IsAdvancing()
 		? PlaybackState::PAUSED
-		: this->GetTick() < sar_tas_skipto.GetInt()
+		: this->GetTick() < p2fx_tas_skipto.GetInt()
 		? PlaybackState::SKIPPING
 		: PlaybackState::PLAYING;
-	status.playback_rate = sar_tas_playback_rate.GetFloat();
+	status.playback_rate = p2fx_tas_playback_rate.GetFloat();
 	status.playback_tick = this->GetTick();
 
 	TasServer::SetStatus(status);
 }
 
-DECL_COMMAND_FILE_COMPLETION(sar_tas_play, TAS_SCRIPT_EXT, TAS_SCRIPTS_DIR, 2)
-DECL_COMMAND_FILE_COMPLETION(sar_tas_play_single, TAS_SCRIPT_EXT, TAS_SCRIPTS_DIR, 1)
+DECL_COMMAND_FILE_COMPLETION(p2fx_tas_play, TAS_SCRIPT_EXT, TAS_SCRIPTS_DIR, 2)
+DECL_COMMAND_FILE_COMPLETION(p2fx_tas_play_single, TAS_SCRIPT_EXT, TAS_SCRIPTS_DIR, 1)
 
 
 void TasPlayer::PlayFile(std::string slot0scriptPath, std::string slot1scriptPath) {
@@ -869,34 +869,34 @@ void TasPlayer::Replay(bool automatic) {
 }
 
 CON_COMMAND_F_COMPLETION(
-	sar_tas_play,
-	"sar_tas_play <filename> [filename2] - plays a TAS script with given name. If two script names are given, play coop\n",
+	p2fx_tas_play,
+	"p2fx_tas_play <filename> [filename2] - plays a TAS script with given name. If two script names are given, play coop\n",
 	0,
-	AUTOCOMPLETION_FUNCTION(sar_tas_play)) {
+	AUTOCOMPLETION_FUNCTION(p2fx_tas_play)) {
 	IGNORE_DEMO_PLAYER();
 
 	if (args.ArgC() != 2 && args.ArgC() != 3) {
-		return console->Print(sar_tas_play.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_tas_play.ThisPtr()->m_pszHelpString);
 	}
 
 	tasPlayer->PlayFile(args[1], args.ArgC() == 3 ? args[2] : "");
 }
 
 CON_COMMAND_F_COMPLETION(
-	sar_tas_play_single,
-	"sar_tas_play_single <filename> [slot] - plays a single coop TAS script, giving the player control of the other slot.\n",
+	p2fx_tas_play_single,
+	"p2fx_tas_play_single <filename> [slot] - plays a single coop TAS script, giving the player control of the other slot.\n",
 	0,
-	AUTOCOMPLETION_FUNCTION(sar_tas_play_single)) {
+	AUTOCOMPLETION_FUNCTION(p2fx_tas_play_single)) {
 	IGNORE_DEMO_PLAYER();
 
 	if (args.ArgC() != 2 && args.ArgC() != 3) {
-		return console->Print(sar_tas_play_single.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_tas_play_single.ThisPtr()->m_pszHelpString);
 	}
 
 	tasPlayer->PlaySingleCoop(args[1], args.ArgC() == 3 ? atoi(args[2]) : 0);
 }
 
-CON_COMMAND(sar_tas_replay, "sar_tas_replay - replays the last played TAS\n") {
+CON_COMMAND(p2fx_tas_replay, "p2fx_tas_replay - replays the last played TAS\n") {
 	if (!tasPlayer->previousPlaybackInfo.HasActiveSlot() && !tasPlayer->IsRunning()) {
 		return console->Print("No TAS to replay\n");
 	}
@@ -908,19 +908,19 @@ CON_COMMAND(sar_tas_replay, "sar_tas_replay - replays the last played TAS\n") {
 	tasPlayer->Replay();
 }
 
-CON_COMMAND(sar_tas_pause, "sar_tas_pause - pauses TAS playback\n") {
+CON_COMMAND(p2fx_tas_pause, "p2fx_tas_pause - pauses TAS playback\n") {
 	tasPlayer->Pause();
 }
 
-CON_COMMAND(sar_tas_resume, "sar_tas_resume - resumes TAS playback\n") {
+CON_COMMAND(p2fx_tas_resume, "p2fx_tas_resume - resumes TAS playback\n") {
 	tasPlayer->Resume();
 }
 
-CON_COMMAND(sar_tas_advance, "sar_tas_advance - advances TAS playback by one tick\n") {
+CON_COMMAND(p2fx_tas_advance, "p2fx_tas_advance - advances TAS playback by one tick\n") {
 	tasPlayer->AdvanceFrame();
 }
 
-CON_COMMAND(sar_tas_stop, "sar_tas_stop - stop TAS playing\n") {
+CON_COMMAND(p2fx_tas_stop, "p2fx_tas_stop - stop TAS playing\n") {
 	if (!tasPlayer->IsActive()) {
 		console->Print("TAS player is not active.\n");
 	} else {
@@ -928,11 +928,11 @@ CON_COMMAND(sar_tas_stop, "sar_tas_stop - stop TAS playing\n") {
 	}
 }
 
-CON_COMMAND(sar_tas_save_raw, "sar_tas_save_raw - saves a processed version of just processed script\n") {
+CON_COMMAND(p2fx_tas_save_raw, "p2fx_tas_save_raw - saves a processed version of just processed script\n") {
 	IGNORE_DEMO_PLAYER();
 
 	if (args.ArgC() != 1) {
-		return console->Print(sar_tas_save_raw.ThisPtr()->m_pszHelpString);
+		return console->Print(p2fx_tas_save_raw.ThisPtr()->m_pszHelpString);
 	}
 
 	tasPlayer->SaveProcessedFramebulks();

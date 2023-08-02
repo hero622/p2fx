@@ -392,10 +392,10 @@ HUD_ELEMENT2_NO_DISABLE(pp_scan, HudType_InGame) {
 		status_text = "Select second corner of portal success detection area.";
 		break;
 	case SetupState::READY:
-		status_text = "Placement scan is ready. Use sar_pp_scan_set to begin.";
+		status_text = "Placement scan is ready. Use p2fx_pp_scan_set to begin.";
 		break;
 	case SetupState::RUNNING:
-		status_text = "Scanning to pp_scan.tga... use sar_pp_scan_set to cancel.";
+		status_text = "Scanning to pp_scan.tga... use p2fx_pp_scan_set to cancel.";
 		break;
 	default:
 		break;
@@ -409,7 +409,7 @@ HUD_ELEMENT2_NO_DISABLE(pp_scan, HudType_InGame) {
 	}
 }
 
-CON_COMMAND(sar_pp_scan_set, "sar_pp_scan_set - set the ppscan point where you're aiming.\n") {
+CON_COMMAND(p2fx_pp_scan_set, "p2fx_pp_scan_set - set the ppscan point where you're aiming.\n") {
 	switch (g_setup.state) {
 	case SetupState::NONE:
 		g_setup.state = SetupState::SET_WALL;
@@ -447,6 +447,6 @@ CON_COMMAND(sar_pp_scan_set, "sar_pp_scan_set - set the ppscan point where you'r
 	}
 }
 
-CON_COMMAND(sar_pp_scan_reset, "sar_pp_scan_reset - reset ppscan.\n") {
+CON_COMMAND(p2fx_pp_scan_reset, "p2fx_pp_scan_reset - reset ppscan.\n") {
 	g_setup.state = SetupState::NONE;
 }

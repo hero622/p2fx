@@ -10,16 +10,16 @@
 
 PortalgunHud portalgunHud;
 
-Variable sar_portalgun_hud("sar_portalgun_hud", "0", "Enables the portalgun HUD.\n");
-Variable sar_portalgun_hud_x("sar_portalgun_hud_x", "5", 0, "The x position of the portalgun HUD.\n");
-Variable sar_portalgun_hud_y("sar_portalgun_hud_y", "5", 0, "The y position of the portalgun HUD.\n");
+Variable p2fx_portalgun_hud("p2fx_portalgun_hud", "0", "Enables the portalgun HUD.\n");
+Variable p2fx_portalgun_hud_x("p2fx_portalgun_hud_x", "5", 0, "The x position of the portalgun HUD.\n");
+Variable p2fx_portalgun_hud_y("p2fx_portalgun_hud_y", "5", 0, "The y position of the portalgun HUD.\n");
 
 PortalgunHud::PortalgunHud()
 	: Hud(HudType_InGame, true) {
 }
 
 bool PortalgunHud::ShouldDraw() {
-	return sar_portalgun_hud.GetBool() && Hud::ShouldDraw() && sv_cheats.GetBool();
+	return p2fx_portalgun_hud.GetBool() && Hud::ShouldDraw() && sv_cheats.GetBool();
 }
 
 bool PortalgunHud::GetCurrentSize(int &w, int &h) {
@@ -32,8 +32,8 @@ void PortalgunHud::Paint(int slot) {
 		return;
 	}
 
-	int x = sar_portalgun_hud_x.GetInt();
-	int y = sar_portalgun_hud_y.GetInt();
+	int x = p2fx_portalgun_hud_x.GetInt();
+	int y = p2fx_portalgun_hud_y.GetInt();
 
 	auto font = scheme->GetFontByID(1);
 

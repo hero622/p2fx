@@ -164,7 +164,7 @@ static bool fileChecksum(FILE *fp, size_t ignoreEnd, uint32_t *crcOut) {
 	return true;
 }
 
-static uint32_t sarChecksum;
+static uint32_t p2fxChecksum;
 
 static bool signDemo(FILE *fp, unsigned char *signature) {
 	if (fseek(fp, 0, SEEK_END)) return false;
@@ -174,18 +174,18 @@ static bool signDemo(FILE *fp, unsigned char *signature) {
 
 	if (fseek(fp, 0, SEEK_SET)) return false;
 
-	char *buf = (char *)malloc(size + 4); // extra bytes for SAR checksum
+	char *buf = (char *)malloc(size + 4); // extra bytes for P2FX checksum
 	fread(buf, 1, size, fp);
 	if (ferror(fp)) {
 		free(buf);
 		return false;
 	}
 
-	// write sar checksum to end so that it's also signed
-	*(uint32_t *)(buf + size) = sarChecksum;
+	// write p2fx checksum to end so that it's also signed
+	*(uint32_t *)(buf + size) = p2fxChecksum;
 
-	unsigned char pubkey[32] = SAR_DEMO_SIGN_PUBKEY;
-	unsigned char privkey[64] = SAR_DEMO_SIGN_PRIVKEY;
+	unsigned char pubkey[32] = P2FX_DEMO_SIGN_PUBKEY;
+	unsigned char privkey[64] = P2FX_DEMO_SIGN_PRIVKEY;
 
 	ed25519_sign(signature, (unsigned char *)buf, size + 4, pubkey, privkey);
 
@@ -213,8 +213,8 @@ bool AddDemoChecksum(const char *filename) {
 		WRITE_LE32(0x4D),         // Size: 77 bytes
 		WRITE_LE32(0xFFFFFFFF),   // Cursor x
 		WRITE_LE32(0xFFFFFFFF),   // Cursor y
-		0xFE,                     // First byte of data: SAR message ID (0xFE = v2 checksum)
-		WRITE_LE32(sarChecksum),  // SAR checksum
+		0xFE,                     // First byte of data: P2FX message ID (0xFE = v2 checksum)
+		WRITE_LE32(p2fxChecksum),  // P2FX checksum
 		// 64 bytes remain to be filled with signature
 	};
 
@@ -234,7 +234,7 @@ bool AddDemoChecksum(const char *filename) {
 static std::thread g_sumthreads[NUM_FILE_SUM_THREADS];
 static std::map<std::string, uint32_t> g_filesums[NUM_FILE_SUM_THREADS];
 
-ON_EVENT(SAR_UNLOAD) {
+ON_EVENT(P2FX_UNLOAD) {
 	for (size_t i = 0; i < NUM_FILE_SUM_THREADS; ++i) {
 		if (g_sumthreads[i].joinable()) g_sumthreads[i].detach();
 	}
@@ -310,15 +310,15 @@ void AddDemoFileChecksums() {
 	}
 }
 
-void InitSARChecksum() {
+void InitP2FXChecksum() {
 	initFileSums();
 
-	std::string path = Utils::GetSARPath();
+	std::string path = Utils::GetP2FXPath();
 
 	FILE *fp = fopen(path.c_str(), "rb");  // Open for binary reading
 	if (!fp) return;
 
-	fileChecksum(fp, 0, &sarChecksum);
+	fileChecksum(fp, 0, &p2fxChecksum);
 
 	fclose(fp);
 }

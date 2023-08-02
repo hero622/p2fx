@@ -13,8 +13,8 @@
 #include "Utils.hpp"
 #include "Variable.hpp"
 
-Variable sar_timer_always_running("sar_timer_always_running", "1", "Timer will save current value when disconnecting.\n");
-Variable sar_timer_time_pauses("sar_timer_time_pauses", "1", "Timer adds non-simulated ticks when server pauses.\n");
+Variable p2fx_timer_always_running("p2fx_timer_always_running", "1", "Timer will save current value when disconnecting.\n");
+Variable p2fx_timer_time_pauses("p2fx_timer_time_pauses", "1", "Timer adds non-simulated ticks when server pauses.\n");
 
 Timer *timer;
 
@@ -62,7 +62,7 @@ void Timer::Stop(int engineTick) {
 
 // Commands
 
-CON_COMMAND(sar_timer_start, "sar_timer_start - starts timer\n") {
+CON_COMMAND(p2fx_timer_start, "p2fx_timer_start - starts timer\n") {
 	if (timer->isRunning) {
 		console->DevMsg("Restarting timer!\n");
 	} else {
@@ -71,11 +71,11 @@ CON_COMMAND(sar_timer_start, "sar_timer_start - starts timer\n") {
 
 	timer->Start(engine->GetTick());
 
-	if (sar_stats_auto_reset.GetInt() >= 2) {
+	if (p2fx_stats_auto_reset.GetInt() >= 2) {
 		stats->ResetAll();
 	}
 }
-CON_COMMAND(sar_timer_stop, "sar_timer_stop - stops timer\n") {
+CON_COMMAND(p2fx_timer_stop, "p2fx_timer_stop - stops timer\n") {
 	if (!timer->isRunning) {
 		return console->DevMsg("Timer isn't running!\n");
 	}
@@ -87,7 +87,7 @@ CON_COMMAND(sar_timer_stop, "sar_timer_stop - stops timer\n") {
 		timer->avg->Add(tick, engine->ToTime(tick), engine->GetCurrentMapName());
 	}
 }
-CON_COMMAND(sar_timer_result, "sar_timer_result - prints result of timer\n") {
+CON_COMMAND(p2fx_timer_result, "p2fx_timer_result - prints result of timer\n") {
 	auto tick = timer->GetTick(engine->GetTick());
 	auto time = engine->ToTime(tick);
 
@@ -97,13 +97,13 @@ CON_COMMAND(sar_timer_result, "sar_timer_result - prints result of timer\n") {
 		console->Print("Result: %i (%.3f)\n", tick, time);
 	}
 }
-CON_COMMAND(sar_avg_start, "sar_avg_start - starts calculating the average when using timer\n") {
+CON_COMMAND(p2fx_avg_start, "p2fx_avg_start - starts calculating the average when using timer\n") {
 	timer->avg->Start();
 }
-CON_COMMAND(sar_avg_stop, "sar_avg_stop - stops average calculation\n") {
+CON_COMMAND(p2fx_avg_stop, "p2fx_avg_stop - stops average calculation\n") {
 	timer->avg->isEnabled = false;
 }
-CON_COMMAND(sar_avg_result, "sar_avg_result - prints result of average\n") {
+CON_COMMAND(p2fx_avg_result, "p2fx_avg_result - prints result of average\n") {
 	auto average = timer->avg->items.size();
 	if (!average) {
 		return console->Print("No result!\n");
@@ -122,7 +122,7 @@ CON_COMMAND(sar_avg_result, "sar_avg_result - prints result of average\n") {
 		console->Print("Result: %i (%.3f)\n", timer->avg->averageTicks, timer->avg->averageTime);
 	}
 }
-CON_COMMAND(sar_cps_add, "sar_cps_add - saves current time of timer\n") {
+CON_COMMAND(p2fx_cps_add, "p2fx_cps_add - saves current time of timer\n") {
 	if (!timer->isRunning) {
 		return console->DevMsg("Timer isn't running!\n");
 	}
@@ -130,10 +130,10 @@ CON_COMMAND(sar_cps_add, "sar_cps_add - saves current time of timer\n") {
 	auto tick = timer->GetTick(session->GetTick());
 	timer->cps->Add(tick, engine->ToTime(tick), engine->GetCurrentMapName());
 }
-CON_COMMAND(sar_cps_clear, "sar_cps_clear - resets saved times of timer\n") {
+CON_COMMAND(p2fx_cps_clear, "p2fx_cps_clear - resets saved times of timer\n") {
 	timer->cps->Reset();
 }
-CON_COMMAND(sar_cps_result, "sar_cps_result - prints result of timer checkpoints\n") {
+CON_COMMAND(p2fx_cps_result, "p2fx_cps_result - prints result of timer checkpoints\n") {
 	auto cps = timer->cps->items.size();
 	if (cps > 0) {
 		console->Print("Result of %i checkpoint%s:\n", cps, (cps == 1) ? "" : "s");
@@ -179,7 +179,7 @@ ON_EVENT(PRE_TICK) {
 		return;
 	}
 
-	if (session->isRunning && pauseTimer->IsActive() && timer->isRunning && sar_timer_time_pauses.GetBool()) {
+	if (session->isRunning && pauseTimer->IsActive() && timer->isRunning && p2fx_timer_time_pauses.GetBool()) {
 		++timer->totalTicks;
 	}
 }

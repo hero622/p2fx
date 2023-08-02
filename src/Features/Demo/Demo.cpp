@@ -1,6 +1,6 @@
 #include "Demo.hpp"
 
-#include "SAR.hpp"
+#include "P2FX.hpp"
 
 #include <cstdint>
 
@@ -12,10 +12,10 @@ int32_t Demo::LastTick() {
 float Demo::IntervalPerTick() {
 	return (this->playbackTicks != 0)
 		? this->playbackTime / this->playbackTicks
-		: 1 / sar.game->Tickrate();
+		: 1 / p2fx.game->Tickrate();
 }
 float Demo::Tickrate() {
 	return (this->playbackTime != 0)
 		? this->playbackTicks / this->playbackTime
-		: sar.game->Tickrate();
+		: p2fx.game->Tickrate();
 }

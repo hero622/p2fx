@@ -4,7 +4,7 @@
 #include "Utils.hpp"
 #include "Variable.hpp"
 
-#define SAR_INSPECTION_EXPORT_HEADER                         \
+#define P2FX_INSPECTION_EXPORT_HEADER                         \
 	"Index,Tick,"                                               \
 	"m_vecAbsOrigin.x,m_vecAbsOrigin.y,m_vecAbsOrigin.z,"       \
 	"m_angAbsRotation.x,m_angAbsRotation.y,m_angAbsRotation.z," \
@@ -47,10 +47,10 @@ public:
 
 extern EntityInspector *inspector;
 
-extern Variable sar_inspection_save_every_tick;
+extern Variable p2fx_inspection_save_every_tick;
 
-extern Command sar_inspection_start;
-extern Command sar_inspection_stop;
-extern Command sar_inspection_print;
-extern Command sar_inspection_export;
-extern Command sar_inspection_index;
+extern Command p2fx_inspection_start;
+extern Command p2fx_inspection_stop;
+extern Command p2fx_inspection_print;
+extern Command p2fx_inspection_export;
+extern Command p2fx_inspection_index;

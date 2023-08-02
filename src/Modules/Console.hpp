@@ -20,8 +20,8 @@
 #define MSG_SYMBOL "Msg"
 #define WARNING_SYMBOL "Warning"
 
-#define SAR_PRINT_COLOR Color(247, 214, 68)
-#define SAR_PRINT_ACTIVE_COLOR Color(110, 247, 76)
+#define P2FX_PRINT_COLOR Color(247, 214, 68)
+#define P2FX_PRINT_ACTIVE_COLOR Color(110, 247, 76)
 
 #define THREAD_PRINT(...) \
 	Scheduler::OnMainThread([=]() { \
@@ -60,11 +60,11 @@ public:
 public:
 	template <typename... T>
 	void Print(const char *fmt, T... args) {
-		this->ColorMsg(SAR_PRINT_COLOR, fmt, args...);
+		this->ColorMsg(P2FX_PRINT_COLOR, fmt, args...);
 	}
 	template <typename... T>
 	void PrintActive(const char *fmt, T... args) {
-		this->ColorMsg(SAR_PRINT_ACTIVE_COLOR, fmt, args...);
+		this->ColorMsg(P2FX_PRINT_ACTIVE_COLOR, fmt, args...);
 	}
 
 	bool Init() override;

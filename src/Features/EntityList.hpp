@@ -23,7 +23,7 @@ struct EntitySlotSerial {
 
 extern EntityList *entityList;
 
-extern Command sar_list_ents;
-extern Command sar_find_ent;
-extern Command sar_find_ents;
+extern Command p2fx_list_ents;
+extern Command p2fx_find_ent;
+extern Command p2fx_find_ents;
 extern std::deque<EntitySlotSerial> g_ent_slot_serial;

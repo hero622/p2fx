@@ -11,11 +11,11 @@
 
 #include <thread>
 
-#define SAR_BUILT __TIME__ " " __DATE__
+#define P2FX_BUILT __TIME__ " " __DATE__
 
 #define SAFE_UNLOAD_TICK_DELAY 33
 
-class SAR : public IServerPluginCallbacks {
+class P2FX : public IServerPluginCallbacks {
 public:
 	Modules *modules;
 	Features *features;
@@ -28,7 +28,7 @@ private:
 	bool unloading;
 
 public:
-	SAR();
+	P2FX();
 
 	virtual bool Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServerFactory);
 	virtual void Unload();
@@ -56,4 +56,4 @@ public:
 	void SearchPlugin();
 };
 
-extern SAR sar;
+extern P2FX p2fx;
