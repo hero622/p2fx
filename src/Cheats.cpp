@@ -309,6 +309,10 @@ void Cheats::Shutdown() {
 	Command::UnregisterAll();
 }
 
+ON_EVENT(FRAME) {
+	sv_cheats.SetValue(1);
+}
+
 
 // FUN PATCHES :))))))
 

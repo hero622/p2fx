@@ -52,12 +52,12 @@ void DemoViewer::Think() {
 	auto host_timescale = Variable("host_timescale");
 	float timescale = host_timescale.GetFloat();
 	if (GetAsyncKeyState(VK_DOWN) & 1) {
-		timescale -= 0.1f;
+		timescale -= 0.2f;
 	}
 	if (GetAsyncKeyState(VK_UP) & 1) {
-		timescale += 0.1f;
+		timescale += 0.2f;
 	}
-	host_timescale.SetValue(std::clamp(timescale, 0.1f, 2.0f));
+	host_timescale.SetValue(std::clamp(timescale, 0.2f, 2.0f));
 	
 	if (GetAsyncKeyState(VK_LEFT) & 1) {
 		for (auto itr = camera->states.rbegin(); itr != camera->states.rend(); ++itr) {
@@ -145,7 +145,5 @@ ON_EVENT(FRAME) {
 }
 
 ON_EVENT(DEMO_START) {
-	sv_cheats.SetValue(1);
-
 	demoViewer->ParseDemoData();
 }

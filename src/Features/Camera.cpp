@@ -245,9 +245,11 @@ void Camera::DrawInWorld() const {
 
 	if (!(sv_cheats.GetBool() || engine->demoplayer->IsPlaying()) || sar_cam_control.GetInt() == 2) return;
 
-	MeshId mesh_path = OverlayRender::createMesh(RenderCallback::none, RenderCallback::constant({ 255, 255, 255 }, true));
-	MeshId mesh_cams = OverlayRender::createMesh(RenderCallback::none, RenderCallback::constant({ 255, 0, 0 }, true));
-	MeshId mesh_currentCam = OverlayRender::createMesh(RenderCallback::none, RenderCallback::constant({ 255, 255, 0 }, true));
+	MeshId green = OverlayRender::createMesh(RenderCallback::constant({0, 255, 0, 32}), RenderCallback::none);
+	MeshId orange = OverlayRender::createMesh(RenderCallback::constant({255, 100, 64, 32}), RenderCallback::none);
+	MeshId red = OverlayRender::createMesh(RenderCallback::constant({255, 0, 0, 32}), RenderCallback::none);
+	MeshId white = OverlayRender::createMesh(RenderCallback::constant({255, 255, 255, 32}), RenderCallback::none);
+	MeshId brightwhite = OverlayRender::createMesh(RenderCallback::constant({255, 255, 255, 100}), RenderCallback::none);
 
 	if (camera->states.size() > 1) {
 		float frameTime = 1.0 / 60;
@@ -270,7 +272,7 @@ void Camera::DrawInWorld() const {
 			// Don't draw a 0 length line
 			float pos_delta = (pos - new_pos).Length();
 			if (pos_delta > 0.001) {
-				OverlayRender::addLine(mesh_path, pos, new_pos);
+				OverlayRender::addQuad(orange, pos + Vector{0, 0, 1}, pos - Vector{0, 0, 1}, new_pos - Vector{0, 0, 1}, new_pos + Vector{0, 0, 1});
 				pos = new_pos;
 			}
 		}
@@ -290,27 +292,26 @@ void Camera::DrawInWorld() const {
 
 	int w, h;
 	engine->GetScreenSize(nullptr, w, h);
-	float aspect = (float)h / (float)w;
 
 	Vector uvs[] = {
-			{-1, -1},
-			{ 1, -1},
-			{ 1,  1},
-			{-1,  1},
+			{ 0, -1},
+			{-1,  0},
+			{ 0,  1},
+			{ 1,  0},
 	};
 
 	for (size_t stateI = 0; stateI < camera->states.size() + 1; stateI++) {
 		bool isKeyframe = stateI < camera->states.size();
 		auto state = isKeyframe ? camera->states[keyframeTicks[stateI]] : currentCameraState;
-		auto mesh = isKeyframe ? mesh_cams : mesh_currentCam;
+		auto mesh = isKeyframe ? stateI == 0 ? green : stateI + 1 == camera->states.size() ? red : orange : white;
 
 		OverlayRender::addBoxMesh(
 			state.origin,
-			{ -2, -2, -2 },
-			{  2,  2,  2 },
+			{0, -4, -4},
+			{-20, 4,  4},
 			state.angles,
-			RenderCallback::constant({ 255, (uint8_t)(isKeyframe ? 0 : 255), 0, 20 }, true),
-			RenderCallback::constant({ 255, (uint8_t)(isKeyframe ? 0 : 255), 0, 255}, true)
+			RenderCallback::constant({64, 64, 64, 255}),
+			RenderCallback::none
 		);
 		
 		Vector forward, right, up;
@@ -332,16 +333,28 @@ void Camera::DrawInWorld() const {
 
 		up = right.Cross(forward);
 
-
-		float fovScalar = tanf(DEG2RAD(state.fov / 2));
-
 		Vector points[4];
 
 		for (int i = 0; i < 4; i++) {
-			points[i] = state.origin + (forward + right * fovScalar * uvs[i].x + up * fovScalar * aspect * uvs[i].y) * 5;
-			OverlayRender::addLine(mesh, state.origin, points[i]);
-			if (i > 0) OverlayRender::addLine(mesh, points[i - 1], points[i]);
-			if (i == 3) OverlayRender::addLine(mesh, points[i], points[0]);
+			points[i] = state.origin + (forward + right * uvs[i].x * 0.3f + up * uvs[i].y * 0.3f) * 75.0f;
+
+			if (i > 0) OverlayRender::addTriangle(mesh, state.origin, points[i - 1], points[i]);
+			if (i == 3) OverlayRender::addTriangle(mesh, state.origin, points[i], points[0]);
+
+			OverlayRender::addQuad(
+				brightwhite,
+				state.origin + right * uvs[i].x * 0.5f + up * uvs[i].y * 0.5f,
+				state.origin + right * uvs[i].y * 0.5f + up * uvs[i].x * 0.5f,
+				points[i]    + right * uvs[i].x * 0.5f + up * uvs[i].y * 0.5f,
+				points[i]    + right * uvs[i].y * 0.5f + up * uvs[i].x * 0.5f
+			);
+			OverlayRender::addQuad(
+				brightwhite,
+				state.origin + right * uvs[i].x *  0.5f + up * uvs[i].y *  0.5f,
+				state.origin + right * uvs[i].y * -0.5f + up * uvs[i].x * -0.5f,
+				points[i]    + right * uvs[i].x *  0.5f + up * uvs[i].y *  0.5f,
+				points[i]    + right * uvs[i].y * -0.5f + up * uvs[i].x * -0.5f
+			);
 		}
 	}
 }
