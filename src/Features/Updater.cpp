@@ -156,14 +156,14 @@ static bool getLatestVersion(std::string *name, std::string *dlUrl, std::string 
 	json11::Json res;
 	if (allowPre) {
 		std::string err;
-		res = json11::Json::parse(request("https://api.github.com/repos/p2sr/p2fx/releases"), err);
+		res = json11::Json::parse(request("https://api.github.com/repos/Zyntex1/p2fx/releases"), err);
 		if (err != "") {
 			return false;
 		}
 		res = res.array_items()[0];
 	} else {
 		std::string err;
-		res = json11::Json::parse(request("https://api.github.com/repos/p2sr/p2fx/releases/latest"), err);
+		res = json11::Json::parse(request("https://api.github.com/repos/Zyntex1/p2fx/releases/latest"), err);
 		if (err != "") {
 			return false;
 		}
