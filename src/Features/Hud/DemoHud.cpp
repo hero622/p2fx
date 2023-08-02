@@ -5,6 +5,7 @@
 #include "Modules/Scheme.hpp"
 #include "Modules/Surface.hpp"
 #include "Modules/Engine.hpp"
+#include "Modules/InputSystem.hpp"
 
 #include "Features/DemoViewer.hpp"
 #include "Features/Camera.hpp"
@@ -46,7 +47,7 @@ void DemoHud::Paint(int slot) {
 
 	auto font = scheme->GetFontByID(62);
 	auto iconFont = scheme->GetFontByID(168);
-	
+
 	const Color white = {255, 255, 255};
 	const Color accent = {45, 140, 235};
 
@@ -114,7 +115,7 @@ void DemoHud::Paint(int slot) {
 		float keyframeFrac = (float)keyframeTick / (float)playbackTicks;
 		int keyframeMarker = keyframeFrac * timelineSize;
 
-		surface->DrawRect(white, x + 9 + keyframeMarker, y + 9, x + 10 + keyframeMarker, y + 25);
+		surface->DrawRect({255, 255, 0}, x + 9 + keyframeMarker, y + 9, x + 10 + keyframeMarker, y + 25);
 	}
 
 	y += 30;
@@ -132,35 +133,40 @@ void DemoHud::Paint(int slot) {
 	}
 	DRAW_CENTERED_TEXT(font, x + 88, y + 2, white, "%s", controlStr);
 
-	surface->DrawRect({20, 20, 20}, x + 172, y, x + 438, y + 30);
-	surface->DrawRect({36, 36, 36}, x + 174, y + 2, x + 436, y + 28);
+	surface->DrawRect({20, 20, 20}, x + 172, y, x + 453, y + 30);
+	surface->DrawRect({36, 36, 36}, x + 174, y + 2, x + 451, y + 28);
 
-	surface->DrawTxt(iconFont, x + 202, y - 19, white, "Y");
+	surface->DrawTxt(iconFont, x + 202, y - 19, inputSystem->IsKeyDown(KEY_LEFT) ? accent : white, "Y");
 
 	float host_timescale = Variable("host_timescale").GetFloat();
-	surface->DrawTxt(font, x + 243, y + 2, white, "%.1fx", host_timescale);
+	if (host_timescale > 1.0f) {
+		surface->DrawTxt(iconFont, x + 244, y - 19, inputSystem->IsKeyDown(KEY_DOWN) ? accent : white, "W");
+		surface->DrawTxt(font, x + 347, y + 2, inputSystem->IsKeyDown(KEY_UP) ? accent : white, "%.1fx", host_timescale);
+	} else {
+		surface->DrawTxt(font, x + 243, y + 2, inputSystem->IsKeyDown(KEY_DOWN) ? accent : white, "%.1fx", host_timescale);
+		surface->DrawTxt(iconFont, x + 355, y - 19, inputSystem->IsKeyDown(KEY_UP) ? accent : white, "S");
+	}
 
 	if (engine->demoplayer->IsPaused())
-		surface->DrawTxt(iconFont, x + 307, y - 19, white, "R");
+		surface->DrawTxt(iconFont, x + 307, y - 19, inputSystem->IsKeyDown(KEY_SPACE) ? accent : white, "R");
 	else
-		surface->DrawTxt(iconFont, x + 306, y - 19, white, "P");
+		surface->DrawTxt(iconFont, x + 306, y - 19, inputSystem->IsKeyDown(KEY_SPACE) ? accent : white, "P");
 
-	surface->DrawTxt(iconFont, x + 348, y - 19, white, "S");
-	surface->DrawTxt(iconFont, x + 395, y - 19, white, "X");
+	surface->DrawTxt(iconFont, x + 410, y - 19, inputSystem->IsKeyDown(KEY_RIGHT) ? accent : white, "X");
 
-	surface->DrawRect({20, 20, 20}, x + 442, y, x + 560, y + 30);
-	surface->DrawRect({36, 36, 36}, x + 444, y + 2, x + 558, y + 28);
-	DRAW_CENTERED_TEXT(font, x + 501, y + 2, white, "RECORD");
+	surface->DrawRect({20, 20, 20}, x + 457, y, x + 560, y + 30);
+	surface->DrawRect({36, 36, 36}, x + 459, y + 2, x + 558, y + 28);
+	DRAW_CENTERED_TEXT(font, x + 508, y + 2, inputSystem->IsKeyDown(KEY_R) ? accent : white, "RECORD");
 
 	y += 40;
 
 	DRAW_CENTERED_TEXT(font, x + 88, y, accent, "F3");
 	DRAW_CENTERED_TEXT(font, x + 207, y - 2, accent, "<");
 	DRAW_CENTERED_TEXT(font, x + 260, y - 2, accent, "v");
-	DRAW_CENTERED_TEXT(font, x + 312, y, accent, "SPACE");
-	DRAW_CENTERED_TEXT(font, x + 356, y + 3, accent, "^");
-	DRAW_CENTERED_TEXT(font, x + 402, y - 2, accent, ">");
-	DRAW_CENTERED_TEXT(font, x + 501, y, accent, "R");
+	DRAW_CENTERED_TEXT(font, x + 311, y, accent, "SPACE");
+	DRAW_CENTERED_TEXT(font, x + 364, y + 3, accent, "^");
+	DRAW_CENTERED_TEXT(font, x + 416, y - 2, accent, ">");
+	DRAW_CENTERED_TEXT(font, x + 508, y, accent, "R");
 }
 
 bool DemoHud::GetCurrentSize(int& xSize, int& ySize) {

@@ -520,7 +520,7 @@ void Camera::OverrideView(CViewSetup *m_View) {
 					bool shiftdown = inputSystem->IsKeyDown(KEY_LSHIFT) || inputSystem->IsKeyDown(KEY_RSHIFT);
 					bool controldown = inputSystem->IsKeyDown(KEY_LCONTROL) || inputSystem->IsKeyDown(KEY_RCONTROL);
 					float speed = shiftdown ? 525.0f : (controldown ? 60.0f : 175.0f);
-					speed *= engine->IsAdvancing() ? real_frame_time : engine->GetHostFrameTime();
+					speed *= real_frame_time;
 
 					if (inputSystem->IsKeyDown(ButtonCode_t::KEY_W)) {
 						currentState.origin = currentState.origin + (forward * speed);
