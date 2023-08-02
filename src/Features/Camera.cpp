@@ -239,56 +239,17 @@ CameraState Camera::InterpolateStates(float time) {
 	return interp;
 }
 
-void Camera::DrawInWorld() const {
+void Camera::DrawInWorld(CameraState state) const {
 	if (!(sv_cheats.GetBool() || engine->demoplayer->IsPlaying()) || sar_cam_control.GetInt() == 2) return;
 
-	float frameTime = 1.0 / 60;
-	int maxTimeTicks = 0;
-	int minTimeTicks = INT_MAX;
-	for (auto const &state : camera->states) {
-		maxTimeTicks = std::fmaxf(maxTimeTicks, state.first);
-		minTimeTicks = std::fminf(minTimeTicks, state.first);
-	}
-
-	// changing in-game ticks to seconds.
-	float maxTime = maxTimeTicks * frameTime;
-	float minTime = minTimeTicks * frameTime;
-
-	// for each frame, calculate interpolated path
-	Vector pos = camera->InterpolateStates(minTime).origin;
-	for (float t = minTime; t <= maxTime + frameTime; t += frameTime) {
-		Vector new_pos = camera->InterpolateStates(t).origin;
-
-		// Don't draw a 0 length line
-		float pos_delta = (pos - new_pos).Length();
-		if (pos_delta > 0.001) {
-			// OverlayRender::addLine(mesh_path, pos, new_pos);
-			pos = new_pos;
-		}
-	}
-
-	// draw fov things at each keyframe and the current one
-	// the way this is done is rather sacrilegious
-
-	float currentTime = engine->GetClientTime() - timeOffset;
-	CameraState currentCameraState = camera->InterpolateStates(currentTime);
-
-	std::vector<int> keyframeTicks(camera->states.size());
-	int i = 0;
-	for (auto const &state : camera->states) {
-		keyframeTicks[i++] = state.first;
-	}
+	MeshId mesh = OverlayRender::createMesh(RenderCallback::none, RenderCallback::constant({128, 128, 128}, true));
 
 	Vector uvs[] = {
-			{-1, -1},
-			{ 1, -1},
-			{ 1,  1},
-			{-1,  1},
+		{0, 1},
+		{1, 0},
+		{-1, 0},
+		{0, -1},
 	};
-
-	auto itr = camera->states.end();
-	--itr;
-	auto state = itr->second;
 
 	Vector forward, right, up;
 	float cp, sp, cy, sy, cr, sr;
@@ -309,36 +270,11 @@ void Camera::DrawInWorld() const {
 
 	up = right.Cross(forward);
 
-	Vector startPoints[4];
-	Vector endPoints[4];
+	Vector points[4];
 
 	for (int i = 0; i < 4; i++) {
-		startPoints[i] = state.origin + (forward + right * 0.2f * uvs[i].x + up * 0.2f * uvs[i].y) * 5.0f;
-		endPoints[i] = state.origin + (forward + right * 0.2f * uvs[i].x + up * 0.2f * uvs[i].y) * 50.0f;
-
-		BeamInfo_t beamInfo;
-		beamInfo.m_nType = 0;
-		beamInfo.m_pszModelName = "sprites/glow1.vmt";
-		beamInfo.m_nModelIndex = -1;
-		beamInfo.m_flLife = 1.0f;
-		beamInfo.m_flWidth = 1.0f;
-		beamInfo.m_flEndWidth = 1.0f;
-		beamInfo.m_flFadeLength = 0.0f;
-		beamInfo.m_flAmplitude = 0.0f;
-		beamInfo.m_flBrightness = 255.0f;
-		beamInfo.m_flSpeed = 0.0f;
-		beamInfo.m_nStartFrame = 0;
-		beamInfo.m_flFrameRate = 0.0f;
-		beamInfo.m_flRed = 255.0f;
-		beamInfo.m_flGreen = 255.0f;
-		beamInfo.m_flBlue = 255.0f;
-		beamInfo.m_nSegments = 2;
-		beamInfo.m_bRenderable = true;
-		beamInfo.m_nFlags = FBEAM_FOREVER;
-
-		beamInfo.m_vecStart = startPoints[i];
-		beamInfo.m_vecEnd = endPoints[i];
-		client->CreateAndDrawBeam(beamInfo);
+		points[i] = state.origin + (forward + right * 0.3f * uvs[i].x + up * 0.3f * uvs[i].y) * 50.0f;
+		if (i > 0) OverlayRender::addTriangle(mesh, state.origin, points[i], points[i - 1]);
 	}
 }
 
@@ -650,7 +586,7 @@ CON_COMMAND_F_COMPLETION(
 			campos.fov = nums[6];
 		}
 		camera->states[curFrame] = campos;
-		// camera->DrawInWorld();
+		camera->DrawInWorld(campos);
 		console->Print("Camera key frame %d created: ", curFrame);
 		console->Print(std::string(campos).c_str());
 		console->Print("\n");

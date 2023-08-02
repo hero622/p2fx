@@ -26,7 +26,6 @@ private:
 	Interface *g_HudMultiplayerBasicInfo = nullptr;
 	Interface *g_HudSaveStatus = nullptr;
 	Interface *g_GameMovement = nullptr;
-	Interface *g_ViewRenderBeams = nullptr;
 
 public:
 	DECL_M(GetAbsOrigin, Vector);
@@ -44,8 +43,6 @@ public:
 	using _StartMessageMode = void(__rescall *)(void *thisptr, int type);
 	using _IN_ActivateMouse = void (*)(void *thisptr);
 	using _IN_DeactivateMouse = void (*)(void *thisptr);
-	using _DrawBeam = void(__rescall *)(void *thisptr, void *pbeam);
-	using _CreateBeamPoints = void *(__rescall *)(void *thisptr, BeamInfo_t &beamInfo);
 
 	_GetClientEntity GetClientEntity = nullptr;
 	_GetAllClasses GetAllClasses = nullptr;
@@ -55,8 +52,6 @@ public:
 	_StartMessageMode StartMessageMode = nullptr;
 	_IN_ActivateMouse IN_ActivateMouse = nullptr;
 	_IN_DeactivateMouse IN_DeactivateMouse = nullptr;
-	_DrawBeam DrawBeam = nullptr;
-	_CreateBeamPoints CreateBeamPoints = nullptr;
 
 	std::string lastLevelName;
 	void **gamerules;
@@ -72,8 +67,6 @@ public:
 	int GetSplitScreenPlayerSlot(void *entity);
 	void ClFrameStageNotify(int stage);
 	void OpenChat();
-	void KillBeams();
-	void CreateAndDrawBeam(BeamInfo_t &beamInfo);
 
 public:
 	// CBaseViewModel::CalcViewModelLag

@@ -72,7 +72,7 @@ public:
 	bool IsDriving();
 	void OverrideView(CViewSetup *m_View);
 	CameraState InterpolateStates(float time);
-	void DrawInWorld() const;
+	void DrawInWorld(CameraState state) const;
 	void RequestTimeOffsetRefresh();
 	void RequestCameraRefresh();
 	void OverrideMovement(CUserCmd *cmd);

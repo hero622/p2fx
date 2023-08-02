@@ -178,15 +178,6 @@ void Client::OpenChat() {
 	this->StartMessageMode(this->g_HudChat->ThisPtr(), 1);  // MM_SAY
 }
 
-void Client::CreateAndDrawBeam(BeamInfo_t &beamInfo) {
-	void *beam = CreateBeamPoints(this->g_ViewRenderBeams->ThisPtr(), beamInfo);
-
-	if (!beam)
-		return;
-	
-	DrawBeam(this->g_ViewRenderBeams->ThisPtr(), beam);
-}
-
 // CHLClient::LevelInitPreEntity
 DETOUR(Client::LevelInitPreEntity, const char *levelName) {
 	client->lastLevelName = std::string(levelName);
@@ -600,14 +591,6 @@ bool Client::Init() {
 
 	if (this->s_EntityList) {
 		this->GetClientEntity = this->s_EntityList->Original<_GetClientEntity>(Offsets::GetClientEntity, readJmp);
-	}
-
-	uintptr_t g_pViewRenderBeams = Memory::Scan(client->Name(), "89 86 ? ? ? ? 8B 0D ? ? ? ? 8B 01 8B 10", 8);
-	void *viewRenderBeams = Memory::DerefDeref<void *>(g_pViewRenderBeams);
-
-	if (this->g_ViewRenderBeams = Interface::Create(viewRenderBeams)) {
-		this->DrawBeam = this->g_ViewRenderBeams->Original<_DrawBeam>(Offsets::DrawBeam);
-		this->CreateBeamPoints = this->g_ViewRenderBeams->Original<_CreateBeamPoints>(Offsets::CreateBeamPoints);
 	}
 
 #ifdef _WIN32

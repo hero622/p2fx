@@ -253,10 +253,6 @@ OFFSET_DEFAULT(GetSearchPath, 16, 16)
 // CGameRules
 OFFSET_DEFAULT(IsMultiplayer, 33, 34)
 
-// CViewRenderBeams
-OFFSET_DEFAULT(DrawBeam, 4, 5)
-OFFSET_DEFAULT(CreateBeamPoints, 12, 13)
-
 // Others
 OFFSET_DEFAULT(tickcount, 95, 64)
 OFFSET_DEFAULT(interval_per_tick, 65, 58)
