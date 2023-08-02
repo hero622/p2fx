@@ -239,43 +239,115 @@ CameraState Camera::InterpolateStates(float time) {
 	return interp;
 }
 
-void Camera::DrawInWorld(CameraState state) const {
+void Camera::DrawInWorld() const {
+
+	if (camera->states.size() < 1) return;
+
 	if (!(sv_cheats.GetBool() || engine->demoplayer->IsPlaying()) || sar_cam_control.GetInt() == 2) return;
 
-	MeshId mesh = OverlayRender::createMesh(RenderCallback::none, RenderCallback::constant({128, 128, 128}, true));
+	MeshId mesh_path = OverlayRender::createMesh(RenderCallback::none, RenderCallback::constant({ 255, 255, 255 }, true));
+	MeshId mesh_cams = OverlayRender::createMesh(RenderCallback::none, RenderCallback::constant({ 255, 0, 0 }, true));
+	MeshId mesh_currentCam = OverlayRender::createMesh(RenderCallback::none, RenderCallback::constant({ 255, 255, 0 }, true));
+
+	if (camera->states.size() > 1) {
+		float frameTime = 1.0 / 60;
+		int maxTimeTicks = 0;
+		int minTimeTicks = INT_MAX;
+		for (auto const &state : camera->states) {
+			maxTimeTicks = std::fmaxf(maxTimeTicks, state.first);
+			minTimeTicks = std::fminf(minTimeTicks, state.first);
+		}
+
+		// changing in-game ticks to seconds.
+		float maxTime = maxTimeTicks * frameTime;
+		float minTime = minTimeTicks * frameTime;
+
+		// for each frame, calculate interpolated path
+		Vector pos = camera->InterpolateStates(minTime).origin;
+		for (float t = minTime; t <= maxTime + frameTime; t += frameTime) {
+			Vector new_pos = camera->InterpolateStates(t).origin;
+
+			// Don't draw a 0 length line
+			float pos_delta = (pos - new_pos).Length();
+			if (pos_delta > 0.001) {
+				OverlayRender::addLine(mesh_path, pos, new_pos);
+				pos = new_pos;
+			}
+		}
+	}
+
+	// draw fov things at each keyframe and the current one
+	// the way this is done is rather sacrilegious
+
+	float currentTime = engine->GetClientTime() - timeOffset;
+	CameraState currentCameraState = camera->InterpolateStates(currentTime);
+
+	std::vector<int> keyframeTicks(camera->states.size());
+	int i = 0;
+	for (auto const &state : camera->states) {
+		keyframeTicks[i++] = state.first;
+	}
+
+	int w, h;
+	engine->GetScreenSize(nullptr, w, h);
+	float aspect = (float)h / (float)w;
 
 	Vector uvs[] = {
-		{0, 1},
-		{1, 0},
-		{-1, 0},
-		{0, -1},
+			{-1, -1},
+			{ 1, -1},
+			{ 1,  1},
+			{-1,  1},
 	};
 
-	Vector forward, right, up;
-	float cp, sp, cy, sy, cr, sr;
-	cp = cosf(DEG2RAD(state.angles.x));
-	sp = sinf(DEG2RAD(state.angles.x));
-	cy = cosf(DEG2RAD(state.angles.y));
-	sy = sinf(DEG2RAD(state.angles.y));
-	cr = cosf(DEG2RAD(state.angles.z));
-	sr = sinf(DEG2RAD(state.angles.z));
+	for (size_t stateI = 0; stateI < camera->states.size() + 1; stateI++) {
+		bool isKeyframe = stateI < camera->states.size();
+		auto state = isKeyframe ? camera->states[keyframeTicks[stateI]] : currentCameraState;
+		auto mesh = isKeyframe ? mesh_cams : mesh_currentCam;
 
-	forward.x = cp * cy;
-	forward.y = cp * sy;
-	forward.z = -sp;
+		OverlayRender::addBoxMesh(
+			state.origin,
+			{ -2, -2, -2 },
+			{  2,  2,  2 },
+			state.angles,
+			RenderCallback::constant({ 255, (uint8_t)(isKeyframe ? 0 : 255), 0, 20 }, true),
+			RenderCallback::constant({ 255, (uint8_t)(isKeyframe ? 0 : 255), 0, 255}, true)
+		);
+		
+		Vector forward, right, up;
+		float cp, sp, cy, sy, cr, sr;
+		cp = cosf(DEG2RAD(state.angles.x));
+		sp = sinf(DEG2RAD(state.angles.x));
+		cy = cosf(DEG2RAD(state.angles.y));
+		sy = sinf(DEG2RAD(state.angles.y));
+		cr = cosf(DEG2RAD(state.angles.z));
+		sr = sinf(DEG2RAD(state.angles.z));
 
-	right.x = (-1 * sr * sp * cy + -1 * cr * -sy);
-	right.y = (-1 * sr * sp * sy + -1 * cr * cy);
-	right.z = -1 * sr * cp;
+		forward.x = cp * cy;
+		forward.y = cp * sy;
+		forward.z = -sp;
 
-	up = right.Cross(forward);
+		right.x = (-1 * sr * sp * cy + -1 * cr * -sy);
+		right.y = (-1 * sr * sp * sy + -1 * cr * cy);
+		right.z = -1 * sr * cp;
 
-	Vector points[4];
+		up = right.Cross(forward);
 
-	for (int i = 0; i < 4; i++) {
-		points[i] = state.origin + (forward + right * 0.3f * uvs[i].x + up * 0.3f * uvs[i].y) * 50.0f;
-		if (i > 0) OverlayRender::addTriangle(mesh, state.origin, points[i], points[i - 1]);
+
+		float fovScalar = tanf(DEG2RAD(state.fov / 2));
+
+		Vector points[4];
+
+		for (int i = 0; i < 4; i++) {
+			points[i] = state.origin + (forward + right * fovScalar * uvs[i].x + up * fovScalar * aspect * uvs[i].y) * 5;
+			OverlayRender::addLine(mesh, state.origin, points[i]);
+			if (i > 0) OverlayRender::addLine(mesh, points[i - 1], points[i]);
+			if (i == 3) OverlayRender::addLine(mesh, points[i], points[0]);
+		}
 	}
+}
+
+ON_EVENT(RENDER) {
+	camera->DrawInWorld();
 }
 
 //Overrides view.
@@ -586,7 +658,6 @@ CON_COMMAND_F_COMPLETION(
 			campos.fov = nums[6];
 		}
 		camera->states[curFrame] = campos;
-		camera->DrawInWorld(campos);
 		console->Print("Camera key frame %d created: ", curFrame);
 		console->Print(std::string(campos).c_str());
 		console->Print("\n");

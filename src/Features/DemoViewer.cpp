@@ -145,5 +145,7 @@ ON_EVENT(FRAME) {
 }
 
 ON_EVENT(DEMO_START) {
+	sv_cheats.SetValue(1);
+
 	demoViewer->ParseDemoData();
 }
