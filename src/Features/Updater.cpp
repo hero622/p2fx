@@ -100,7 +100,7 @@ static bool curlPrepare(const char *url, int timeout) {
 		}
 
 		g_httpHdrs = curl_slist_append(g_httpHdrs, "Accept: application/vnd.github.v3+json");
-		g_httpHdrs = curl_slist_append(g_httpHdrs, "User-Agent: SourceAutoRecord");
+		g_httpHdrs = curl_slist_append(g_httpHdrs, "User-Agent: p2fx");
 	}
 
 	curl_easy_setopt(g_curl, CURLOPT_URL, url);
@@ -156,14 +156,14 @@ static bool getLatestVersion(std::string *name, std::string *dlUrl, std::string 
 	json11::Json res;
 	if (allowPre) {
 		std::string err;
-		res = json11::Json::parse(request("https://api.github.com/repos/p2sr/SourceAutoRecord/releases"), err);
+		res = json11::Json::parse(request("https://api.github.com/repos/p2sr/p2fx/releases"), err);
 		if (err != "") {
 			return false;
 		}
 		res = res.array_items()[0];
 	} else {
 		std::string err;
-		res = json11::Json::parse(request("https://api.github.com/repos/p2sr/SourceAutoRecord/releases/latest"), err);
+		res = json11::Json::parse(request("https://api.github.com/repos/p2sr/p2fx/releases/latest"), err);
 		if (err != "") {
 			return false;
 		}

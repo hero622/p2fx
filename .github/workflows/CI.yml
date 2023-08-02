@@ -55,7 +55,7 @@ jobs:
         env:
           DEMO_SIGN_PUBKEY: ${{ secrets.SAR_DEMO_SIGN_PUBKEY }}
           DEMO_SIGN_PRIVKEY: ${{ secrets.SAR_DEMO_SIGN_PRIVKEY }}
-        run: msbuild -m -t:SourceAutoRecord -p:"Configuration=Release;Platform=x86" SourceAutoRecord.sln
+        run: msbuild -m -t:p2fx -p:"Configuration=Release;Platform=x86" p2fx.sln
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:

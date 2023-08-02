@@ -125,7 +125,7 @@ bool SAR::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServerF
 
 				this->SearchPlugin();
 
-				console->PrintActive("Loaded SourceAutoRecord, Version %s\n", SAR_VERSION);
+				console->PrintActive("Loaded p2fx, Version %s\n", SAR_VERSION);
 				
 				SeasonalASCII::Init();
 
@@ -140,7 +140,7 @@ bool SAR::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServerF
 		console->Warning("SAR: Game not supported!\n");
 	}
 
-	console->Warning("SAR: Failed to load SourceAutoRecord!\n");
+	console->Warning("SAR: Failed to load p2fx!\n");
 
 	if (sar.cheats) {
 		sar.cheats->Shutdown();
@@ -262,8 +262,8 @@ CON_COMMAND(sar_session, "sar_session - prints the current tick of the server si
 	}
 }
 CON_COMMAND(sar_about, "sar_about - prints info about SAR plugin\n") {
-	console->Print("SourceAutoRecord is a speedrun plugin for Source Engine games.\n");
-	console->Print("More information at: https://github.com/p2sr/SourceAutoRecord or https://wiki.portal2.sr/SAR\n");
+	console->Print("p2fx is a speedrun plugin for Source Engine games.\n");
+	console->Print("More information at: https://github.com/p2sr/p2fx or https://wiki.portal2.sr/SAR\n");
 	console->Print("Game: %s\n", sar.game->Version());
 	console->Print("Version: " SAR_VERSION "\n");
 	console->Print("Built: " SAR_BUILT "\n");
