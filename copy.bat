@@ -1,4 +1,4 @@
-SET "binary=sar.dll"
+SET "binary=p2fx.dll"
 SET "src=..\bin\%binary%"
 SET "dest=D:\SteamLibrary\SteamApps\common"
 
