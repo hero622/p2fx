@@ -933,7 +933,7 @@ CON_COMMAND(p2fx_give_betsrighter, "p2fx_give_betsrighter [n] - gives the player
 	}
 }
 DETOUR_COMMAND(Server::say) {
-	if (args.ArgC() != 2 || Utils::StartsWith(args[1], "!P2FX:") || !networkManager.HandleGhostSay(args[1])) {
+	if (args.ArgC() != 2 || Utils::StartsWith(args[1], "!SAR:") || !networkManager.HandleGhostSay(args[1])) {
 		Server::say_callback(args);
 	}
 }

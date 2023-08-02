@@ -58,7 +58,7 @@ void NetMessage::SendMsg(const char *type, const void *data, size_t size) {
 	char player = engine->IsOrange() ? 'o' : 'b';
 
 	char *data_ = (char *)data;
-	std::string cmd = std::string("say !P2FX:") + player + ":" + type + ":";
+	std::string cmd = std::string("say !SAR:") + player + ":" + type + ":";
 	for (size_t i = 0; i < size; ++i) {
 		char c = data_[i];
 		if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) {
@@ -100,7 +100,7 @@ void NetMessage::Update() {
 }
 
 bool NetMessage::ChatData(std::string str) {
-	if (!Utils::StartsWith(str.c_str(), "!P2FX:")) return false;
+	if (!Utils::StartsWith(str.c_str(), "!SAR:")) return false;
 
 	// Strips header
 	str = str.substr(5);
