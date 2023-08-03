@@ -281,7 +281,7 @@
     <ClCompile Include="Utils\SDK\ServerPlugin.cpp" />
     <ClCompile Include="Utils\SDK\MeshBuilder.cpp" />
     <ClCompile Include="Variable.cpp" />
-    <ClCompile Include="Window.cpp" />
+    <ClCompile Include="Input.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\lib\imgui\imconfig.h" />
@@ -502,7 +502,7 @@
     <ClInclude Include="Utils\SDK\MeshBuilder.hpp" />
     <ClInclude Include="Utils\SDK\ITexture.hpp" />
     <ClInclude Include="Variable.hpp" />
-    <ClInclude Include="Window.hpp" />
+    <ClInclude Include="Input.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\lib\minhook\LICENSE.txt" />

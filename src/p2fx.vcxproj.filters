@@ -520,7 +520,7 @@
     <ClCompile Include="..\lib\imgui\imgui_impl_dx9.cpp">
       <Filter>lib\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="Window.cpp">
+    <ClCompile Include="Input.cpp">
       <Filter>p2fx</Filter>
     </ClCompile>
     <ClCompile Include="Menu.cpp">
@@ -1335,7 +1335,7 @@
     <ClInclude Include="..\lib\imgui\imgui.h">
       <Filter>lib\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="Window.hpp">
+    <ClInclude Include="Input.hpp">
       <Filter>p2fx</Filter>
     </ClInclude>
     <ClInclude Include="Menu.hpp">

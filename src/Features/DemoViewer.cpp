@@ -9,6 +9,7 @@
 #include "Hud/DemoHud.hpp"
 #include "Camera.hpp"
 
+#include "Input.hpp"
 #include "Menu.hpp"
 
 DemoViewer *demoViewer;
@@ -21,23 +22,25 @@ void DemoViewer::Think() {
 	if (!engine->demoplayer->IsPlaying())
 		return;
 
-	if (GetAsyncKeyState(VK_F4) & 1) {
+	if (Input::keys[VK_F4].IsPressed()) {
 		demoHud.g_shouldDraw = !demoHud.g_shouldDraw;
 	}
 
-	if (GetAsyncKeyState(0x46) & 1) {
-		for (const auto &state : camera->states) {
-			float dist = (camera->currentState.origin - state.second.origin).Length();
-			if (dist < 50.0f) {
-				engine->ExecuteCommand("p2fx_cam_path_remkf");
-				return;
+	if (Input::keys[0x46].IsPressed()) {
+		if (camera->controlType == Drive) {
+			for (const auto &state : camera->states) {
+				float dist = (camera->currentState.origin - state.second.origin).Length();
+				if (dist < 50.0f) {
+					engine->ExecuteCommand("p2fx_cam_path_remkf");
+					return;
+				}
 			}
-		}
 
-		engine->ExecuteCommand("p2fx_cam_path_setkf");
+			engine->ExecuteCommand("p2fx_cam_path_setkf");
+		}
 	}
 
-	if (GetAsyncKeyState(VK_F2) & 1) {
+	if (Input::keys[VK_F2].IsPressed()) {
 		Menu::g_shouldDraw = !Menu::g_shouldDraw;
 
 		if (Menu::g_shouldDraw)
@@ -46,25 +49,25 @@ void DemoViewer::Think() {
 			inputSystem->LockCursor();
 	}
 
-	if (GetAsyncKeyState(VK_F3) & 1) {
+	if (Input::keys[VK_F3].IsPressed()) {
 		engine->ExecuteCommand("incrementvar p2fx_cam_control 0 3 1");
 	}
 
-	if (GetAsyncKeyState(VK_SPACE) & 1) {
+	if (Input::keys[VK_SPACE].IsPressed()) {
 		engine->ExecuteCommand("demo_togglepause");
 	}
 
 	auto host_timescale = Variable("host_timescale");
 	float timescale = host_timescale.GetFloat();
-	if (GetAsyncKeyState(VK_DOWN) & 1) {
+	if (Input::keys[VK_DOWN].IsPressed()) {
 		timescale -= 0.2f;
 	}
-	if (GetAsyncKeyState(VK_UP) & 1) {
+	if (Input::keys[VK_UP].IsPressed()) {
 		timescale += 0.2f;
 	}
 	host_timescale.SetValue(std::clamp(timescale, 0.2f, 2.0f));
 	
-	if (GetAsyncKeyState(VK_LEFT) & 1) {
+	if (Input::keys[VK_LEFT].IsPressed()) {
 		for (auto itr = camera->states.rbegin(); itr != camera->states.rend(); ++itr) {
 			if (itr->first < engine->demoplayer->GetTick()) {
 				gotoTick = itr->first - 2;
@@ -75,7 +78,7 @@ void DemoViewer::Think() {
 		engine->ExecuteCommand("demo_gototick 0");
 		gotoTick = 0;
 	}
-	if (GetAsyncKeyState(VK_RIGHT) & 1) {
+	if (Input::keys[VK_RIGHT].IsPressed()) {
 		for (const auto &state : camera->states) {
 			if (state.first > engine->demoplayer->GetTick()) {
 				engine->ExecuteCommand(Utils::ssprintf("sv_alternateticks 0; demo_gototick %d; demo_resume; hwait 1 demo_pause; hwait 1 sv_alternateticks 1", state.first - 2).c_str());

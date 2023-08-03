@@ -5,12 +5,13 @@
 #include "Modules/Scheme.hpp"
 #include "Modules/Surface.hpp"
 #include "Modules/Engine.hpp"
-#include "Modules/InputSystem.hpp"
 
 #include "Features/DemoViewer.hpp"
 #include "Features/Camera.hpp"
 
 #include "Variable.hpp"
+
+#include "Input.hpp"
 
 #define DRAW_MULTI_COLOR_TEXT(font, x, y, clr1, clr2, txt1, txt2) \
 	surface->DrawTxt(font, x, y, clr1, txt1);                        \
@@ -143,27 +144,27 @@ void DemoHud::Paint(int slot) {
 	surface->DrawRect({20, 20, 20}, x + 172, y, x + 453, y + 30);
 	surface->DrawRect({36, 36, 36}, x + 174, y + 2, x + 451, y + 28);
 
-	surface->DrawTxt(iconFont, x + 202, y - 19, inputSystem->IsKeyDown(KEY_LEFT) ? accent : white, "Y");
+	surface->DrawTxt(iconFont, x + 202, y - 19, Input::keys[VK_LEFT].IsHeld() ? accent : white, "Y");
 
 	float host_timescale = Variable("host_timescale").GetFloat();
 	if (host_timescale > 1.0f) {
-		surface->DrawTxt(iconFont, x + 244, y - 19, inputSystem->IsKeyDown(KEY_DOWN) ? accent : white, "W");
-		surface->DrawTxt(font, x + 347, y + 2, inputSystem->IsKeyDown(KEY_UP) ? accent : white, "%.1fx", host_timescale);
+		surface->DrawTxt(iconFont, x + 244, y - 19, Input::keys[VK_DOWN].IsHeld() ? accent : white, "W");
+		surface->DrawTxt(font, x + 347, y + 2, Input::keys[VK_UP].IsHeld() ? accent : white, "%.1fx", host_timescale);
 	} else {
-		surface->DrawTxt(font, x + 243, y + 2, inputSystem->IsKeyDown(KEY_DOWN) ? accent : white, "%.1fx", host_timescale);
-		surface->DrawTxt(iconFont, x + 355, y - 19, inputSystem->IsKeyDown(KEY_UP) ? accent : white, "S");
+		surface->DrawTxt(font, x + 243, y + 2, Input::keys[VK_DOWN].IsHeld() ? accent : white, "%.1fx", host_timescale);
+		surface->DrawTxt(iconFont, x + 355, y - 19, Input::keys[VK_UP].IsHeld() ? accent : white, "S");
 	}
 
 	if (engine->demoplayer->IsPaused())
-		surface->DrawTxt(iconFont, x + 307, y - 19, inputSystem->IsKeyDown(KEY_SPACE) ? accent : white, "R");
+		surface->DrawTxt(iconFont, x + 307, y - 19, Input::keys[VK_SPACE].IsHeld() ? accent : white, "R");
 	else
-		surface->DrawTxt(iconFont, x + 306, y - 19, inputSystem->IsKeyDown(KEY_SPACE) ? accent : white, "P");
+		surface->DrawTxt(iconFont, x + 306, y - 19, Input::keys[VK_SPACE].IsHeld() ? accent : white, "P");
 
-	surface->DrawTxt(iconFont, x + 410, y - 19, inputSystem->IsKeyDown(KEY_RIGHT) ? accent : white, "X");
+	surface->DrawTxt(iconFont, x + 410, y - 19, Input::keys[VK_RIGHT].IsHeld() ? accent : white, "X");
 
 	surface->DrawRect({20, 20, 20}, x + 457, y, x + 560, y + 30);
 	surface->DrawRect({36, 36, 36}, x + 459, y + 2, x + 558, y + 28);
-	DRAW_CENTERED_TEXT(font, x + 508, y + 2, inputSystem->IsKeyDown(KEY_R) ? accent : white, "RECORD");
+	DRAW_CENTERED_TEXT(font, x + 508, y + 2, white, "RECORD");
 
 	y += 40;
 

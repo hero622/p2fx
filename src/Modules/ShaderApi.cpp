@@ -1,7 +1,7 @@
 #include "ShaderApi.hpp"
 
 #include "Hook.hpp"
-#include "Window.hpp"
+#include "Input.hpp"
 #include "Modules/Engine.hpp"
 
 #include "../lib/imgui/imgui_impl_dx9.h"
@@ -14,7 +14,7 @@ void ShaderApi::InitImGui(IDirect3DDevice9 *d3dDevice) {
 	if (!g_init) {
 		ImGui::CreateContext();
 		ImGui_ImplDX9_Init(d3dDevice);
-		ImGui_ImplWin32_Init(Window::g_hWnd);
+		ImGui_ImplWin32_Init(Input::g_hWnd);
 		Menu::Init();
 		g_init = true;
 	}

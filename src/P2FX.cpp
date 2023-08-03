@@ -22,7 +22,7 @@
 #include "Interface.hpp"
 #include "Modules.hpp"
 #include "Variable.hpp"
-#include "Window.hpp"
+#include "Input.hpp"
 
 P2FX p2fx;
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(P2FX, IServerPluginCallbacks, INTERFACEVERSION_ISERVERPLUGINCALLBACKS, p2fx);
@@ -107,7 +107,7 @@ bool P2FX::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServer
 			this->modules->InitAll();
 
 			if (engine && engine->hasLoaded) {
-				Window::Init();
+				Input::Init();
 
 				engine->demoplayer->Init();
 				engine->demorecorder->Init();
@@ -215,7 +215,7 @@ void P2FX::Unload() {
 
 	Hook::DisableAll();
 
-	Window::Shutdown();
+	Input::Shutdown();
 
 	if (p2fx.cheats) {
 		p2fx.cheats->Shutdown();
