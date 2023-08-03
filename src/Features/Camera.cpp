@@ -245,11 +245,11 @@ void Camera::DrawInWorld() const {
 
 	if (!(sv_cheats.GetBool() || engine->demoplayer->IsPlaying()) || p2fx_cam_control.GetInt() == 2) return;
 
-	MeshId green = OverlayRender::createMesh(RenderCallback::constant({0, 255, 0, 32}), RenderCallback::none);
-	MeshId orange = OverlayRender::createMesh(RenderCallback::constant({255, 100, 64, 32}), RenderCallback::none);
-	MeshId red = OverlayRender::createMesh(RenderCallback::constant({255, 0, 0, 32}), RenderCallback::none);
+	MeshId green = OverlayRender::createMesh(RenderCallback::constant({128, 255, 128, 32}), RenderCallback::none);
+	MeshId orange = OverlayRender::createMesh(RenderCallback::constant({255, 128, 100, 32}), RenderCallback::none);
+	MeshId red = OverlayRender::createMesh(RenderCallback::constant({255, 128, 128, 32}), RenderCallback::none);
 	MeshId white = OverlayRender::createMesh(RenderCallback::constant({255, 255, 255, 32}), RenderCallback::none);
-	MeshId brightwhite = OverlayRender::createMesh(RenderCallback::constant({255, 255, 255, 100}), RenderCallback::none);
+	MeshId brightwhite = OverlayRender::createMesh(RenderCallback::constant({255, 255, 255, 64}), RenderCallback::none);
 
 	if (camera->states.size() > 1) {
 		float frameTime = 1.0 / 60;
@@ -304,6 +304,15 @@ void Camera::DrawInWorld() const {
 		bool isKeyframe = stateI < camera->states.size();
 		auto state = isKeyframe ? camera->states[keyframeTicks[stateI]] : currentCameraState;
 		auto mesh = isKeyframe ? stateI == 0 ? green : stateI + 1 == camera->states.size() ? red : orange : white;
+
+		// dont draw twice
+		if (!isKeyframe) {
+			for (int tick : keyframeTicks) {
+				// ghetto comparision
+				if (std::string(state) == std::string(camera->states[tick]))
+					return;
+			}
+		}
 
 		OverlayRender::addBoxMesh(
 			state.origin,

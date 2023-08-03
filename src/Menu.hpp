@@ -31,7 +31,13 @@ namespace CImGui {
 	inline void Colorpicker3(const char *label, const char *var) {
 		auto val = Utils::GetColor(Variable(var).GetString());
 		float col[3] = {val->r / 255.0f, val->g / 255.0f, val->b / 255.0f};
-		ImGui::ColorEdit3(label, col);
+		ImGui::ColorEdit3(label, col, ImGuiColorEditFlags_NoInputs);
 		Variable(var).SetValue(Utils::ssprintf("%.0f %.0f %.0f", col[0] * 255.0f, col[1] * 255.0f, col[2] * 255.0f).c_str());
+	}
+
+	inline void Combo(const char *label, const char *var, const char *items) {
+		int val = Variable(var).GetInt();
+		ImGui::Combo(label, &val, items);
+		Variable(var).SetValue(val);
 	}
 }

@@ -29,7 +29,7 @@ void Menu::Draw() {
 			tab = 1;
 		}
 		ImGui::SameLine();
-		if (ImGui::Button("SUN", ImVec2(100.0f, 30.0f))) {
+		if (ImGui::Button("RAIN", ImVec2(100.0f, 30.0f))) {
 			tab = 2;
 		}
 		ImGui::SameLine();
@@ -47,7 +47,7 @@ void Menu::Draw() {
 			CImGui::Sliderf("Max Density", "fog_maxdensity", 0.0f, 1.0f);
 			CImGui::Sliderf("HDR Color Scale", "fog_hdrcolorscale", 0.0f, 1.0f);
 			CImGui::Checkbox("Enable Water Fog", "fog_enable_water_fog");
-			CImGui::Checkbox("Enable Skybox", "fog_enableskybox");
+			CImGui::Checkbox("Enable Skybox Fog", "fog_enableskybox");
 			CImGui::Colorpicker3("Color Skybox", "fog_colorskybox");
 			CImGui::Slider("Start Skybox", "fog_startskybox", 0, 8000);
 			CImGui::Slider("End Skybox", "fog_endskybox", 0, 8000);
@@ -64,6 +64,9 @@ void Menu::Draw() {
 			CImGui::Slider("Far Blur Radius", "mat_dof_far_blur_radius", 0, 10);
 			CImGui::Slider("Far Focus Depth", "mat_dof_far_focus_depth", 0, 8000);
 			CImGui::Slider("Max Blur Radius", "mat_dof_max_blur_radius", 0, 10);
+			break;
+		case 3:
+			CImGui::Combo("Camera Interpolation", "p2fx_cam_path_interp", "Linear\0Cubic Spline\0");
 			break;
 		}
 
