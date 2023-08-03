@@ -77,7 +77,7 @@ long __stdcall Present_Detour(IDirect3DDevice9 *pDevice, const RECT *pSourceRect
 }
 
 bool ShaderApi::Init() {
-	this->g_isVulkan = Memory::TryGetModule("dxvk_d3d9", &Memory::ModuleInfo());
+	this->g_isVulkan = GetModuleHandleA(MODULE("dxvk_d3d9"));
 
 	uintptr_t d3dDevicePtr = Memory::Scan(this->Name(), "89 1D ? ? ? ? E8 ? ? ? ? 8B 55", 2);
 	void *g_d3dDeviceAddr = Memory::DerefDeref<void *>(d3dDevicePtr);

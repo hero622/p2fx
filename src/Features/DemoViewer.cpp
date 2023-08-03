@@ -3,7 +3,6 @@
 #include "Event.hpp"
 
 #include "Modules/Engine.hpp"
-// #include "Modules/InputSystem.hpp"
 
 #include "Demo/DemoParser.hpp"
 #include "Hud/DemoHud.hpp"
@@ -20,8 +19,6 @@ DemoViewer::DemoViewer() {
 void DemoViewer::Think() {
 	if (!engine->demoplayer->IsPlaying())
 		return;
-
-	// replace GetAsyncKeyState for IsButtonDown later
 
 	if (GetAsyncKeyState(VK_F4) & 1) {
 		demoHud.g_shouldDraw = !demoHud.g_shouldDraw;
