@@ -496,6 +496,36 @@
     <ClCompile Include="Features\DemoViewer.cpp">
       <Filter>p2fx\Features</Filter>
     </ClCompile>
+    <ClCompile Include="Modules\ShaderApi.cpp">
+      <Filter>p2fx\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="..\lib\imgui\imgui_impl_win32.cpp">
+      <Filter>lib\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\lib\imgui\imgui_tables.cpp">
+      <Filter>lib\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\lib\imgui\imgui_widgets.cpp">
+      <Filter>lib\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\lib\imgui\imgui.cpp">
+      <Filter>lib\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\lib\imgui\imgui_demo.cpp">
+      <Filter>lib\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\lib\imgui\imgui_draw.cpp">
+      <Filter>lib\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\lib\imgui\imgui_impl_dx9.cpp">
+      <Filter>lib\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="Window.cpp">
+      <Filter>p2fx</Filter>
+    </ClCompile>
+    <ClCompile Include="Menu.cpp">
+      <Filter>p2fx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\lib\minhook\buffer.h">
@@ -1278,6 +1308,39 @@
     <ClInclude Include="Features\DemoViewer.hpp">
       <Filter>p2fx\Features</Filter>
     </ClInclude>
+    <ClInclude Include="Modules\ShaderApi.hpp">
+      <Filter>p2fx\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lib\imgui\imgui_impl_dx9.h">
+      <Filter>lib\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lib\imgui\imgui_impl_win32.h">
+      <Filter>lib\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lib\imgui\imgui_internal.h">
+      <Filter>lib\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lib\imgui\imstb_rectpack.h">
+      <Filter>lib\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lib\imgui\imstb_textedit.h">
+      <Filter>lib\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lib\imgui\imstb_truetype.h">
+      <Filter>lib\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lib\imgui\imconfig.h">
+      <Filter>lib\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lib\imgui\imgui.h">
+      <Filter>lib\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Window.hpp">
+      <Filter>p2fx</Filter>
+    </ClInclude>
+    <ClInclude Include="Menu.hpp">
+      <Filter>p2fx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="lib">
@@ -1339,6 +1402,9 @@
     </Filter>
     <Filter Include="p2fx\Games">
       <UniqueIdentifier>{56b78df4-db1c-44a5-9243-10415ba45a25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\imgui">
+      <UniqueIdentifier>{8ca901dd-0b40-41c0-81e1-141928691405}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

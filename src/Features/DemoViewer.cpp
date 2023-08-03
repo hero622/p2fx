@@ -9,6 +9,8 @@
 #include "Hud/DemoHud.hpp"
 #include "Camera.hpp"
 
+#include "Menu.hpp"
+
 DemoViewer *demoViewer;
 
 DemoViewer::DemoViewer() {
@@ -38,7 +40,7 @@ void DemoViewer::Think() {
 	}
 
 	if (GetAsyncKeyState(VK_F2) & 1) {
-
+		Menu::g_shouldDraw = !Menu::g_shouldDraw;
 	}
 
 	if (GetAsyncKeyState(VK_F3) & 1) {
