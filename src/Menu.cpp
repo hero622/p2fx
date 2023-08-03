@@ -1,18 +1,6 @@
 #include "Menu.hpp"
 
-#include "Modules/Engine.hpp"
-#include "Modules/InputSystem.hpp"
-
 void Menu::Draw() {
-	if (GetAsyncKeyState(VK_F2) & 1) {
-		g_shouldDraw = !g_shouldDraw;
-
-		if (g_shouldDraw)
-			inputSystem->UnlockCursor();
-		else
-			inputSystem->LockCursor();
-	}
-
 	if (!g_shouldDraw)
 		return;
 
@@ -29,11 +17,11 @@ void Menu::Draw() {
 			tab = 1;
 		}
 		ImGui::SameLine();
-		if (ImGui::Button("RAIN", ImVec2(100.0f, 30.0f))) {
+		if (ImGui::Button("HUD", ImVec2(100.0f, 30.0f))) {
 			tab = 2;
 		}
 		ImGui::SameLine();
-		if (ImGui::Button("CFG", ImVec2(100.0f, 30.0f))) {
+		if (ImGui::Button("CAM", ImVec2(100.0f, 30.0f))) {
 			tab = 3;
 		}
 
@@ -65,8 +53,15 @@ void Menu::Draw() {
 			CImGui::Slider("Far Focus Depth", "mat_dof_far_focus_depth", 0, 8000);
 			CImGui::Slider("Max Blur Radius", "mat_dof_max_blur_radius", 0, 10);
 			break;
+		case 2:
+			CImGui::CheckboxInv("Disable Crosshair", "crosshair");
+			CImGui::Checkbox("Disable Challenge Mode Leaderboard", "p2fx_disable_challenge_stats_hud");
+			CImGui::Checkbox("Disable Challenge Mode Timer", "hidehud", 71);
+			CImGui::Checkbox("Disable Coop Score Hud", "p2fx_disable_coop_score_hud");
+			break;
 		case 3:
 			CImGui::Combo("Camera Interpolation", "p2fx_cam_path_interp", "Linear\0Cubic Spline\0");
+			CImGui::Button("Remove All Camera Markers", "p2fx_cam_path_remkfs");
 			break;
 		}
 

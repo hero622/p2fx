@@ -319,7 +319,7 @@ void Camera::DrawInWorld() const {
 			{0, -4, -4},
 			{-20, 4,  4},
 			state.angles,
-			RenderCallback::constant({64, 64, 64, 255}),
+			RenderCallback::constant({64, 64, 64}),
 			RenderCallback::none
 		);
 		

@@ -115,6 +115,11 @@ void DemoHud::Paint(int slot) {
 	for (auto const &state : camera->states) {
 		int keyframeTick = state.first;
 		float keyframeFrac = (float)keyframeTick / (float)playbackTicks;
+
+		// dont draw keyframes that are out of the window
+		if (keyframeFrac > 1.0f)
+			continue;
+			
 		int keyframeMarker = keyframeFrac * timelineSize;
 
 		surface->DrawRect({255, 255, 0}, x + 9 + keyframeMarker, y + 9, x + 10 + keyframeMarker, y + 25);

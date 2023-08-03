@@ -1,5 +1,8 @@
 #pragma once
 #include "Variable.hpp"
+
+#include "Modules/Engine.hpp"
+
 #include "../lib/imgui/imgui.h"
 
 namespace Menu {
@@ -10,10 +13,16 @@ namespace Menu {
 };
 
 namespace CImGui {
-	inline void Checkbox(const char *label, const char *var) {
-		bool val = Variable(var).GetBool();
+	inline void Checkbox(const char *label, const char *var, int onvalue = 1) {
+		bool val = Variable(var).GetInt() == onvalue ? true : false;
 		ImGui::Checkbox(label, &val);
-		Variable(var).SetValue(val);
+		Variable(var).SetValue(val ? onvalue : 0);
+	}
+
+	inline void CheckboxInv(const char *label, const char *var, int onvalue = 1) {
+		bool val = Variable(var).GetInt() == onvalue ? false : true;
+		ImGui::Checkbox(label, &val);
+		Variable(var).SetValue(val ? 0 : onvalue);
 	}
 
 	inline void Slider(const char *label, const char *var, int min, int max, const char *format = "%d") {
@@ -39,5 +48,11 @@ namespace CImGui {
 		int val = Variable(var).GetInt();
 		ImGui::Combo(label, &val, items);
 		Variable(var).SetValue(val);
+	}
+
+	inline void Button(const char *label, const char *cmd, const ImVec2 &size = ImVec2(0, 0)) {
+		if (ImGui::Button(label, size)) {
+			engine->ExecuteCommand(cmd);
+		}
 	}
 }

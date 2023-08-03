@@ -3,6 +3,7 @@
 #include "Event.hpp"
 
 #include "Modules/Engine.hpp"
+#include "Modules/InputSystem.hpp"
 
 #include "Demo/DemoParser.hpp"
 #include "Hud/DemoHud.hpp"
@@ -34,6 +35,15 @@ void DemoViewer::Think() {
 		}
 
 		engine->ExecuteCommand("p2fx_cam_path_setkf");
+	}
+
+	if (GetAsyncKeyState(VK_F2) & 1) {
+		Menu::g_shouldDraw = !Menu::g_shouldDraw;
+
+		if (Menu::g_shouldDraw)
+			inputSystem->UnlockCursor();
+		else
+			inputSystem->LockCursor();
 	}
 
 	if (GetAsyncKeyState(VK_F3) & 1) {
