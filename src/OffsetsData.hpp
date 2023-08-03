@@ -79,6 +79,12 @@ OFFSET_DEFAULT(IsButtonDown, 14, 14)
 OFFSET_DEFAULT(GetCursorPosition, 45, 45)
 OFFSET_DEFAULT(SetCursorPosition, 38, 38)
 
+// CInputStackSystem
+OFFSET_DEFAULT(PushInputContext, 8, 8)
+OFFSET_DEFAULT(EnableInputContext, 10, 10)
+OFFSET_DEFAULT(SetCursorVisible, 11, 11)
+OFFSET_DEFAULT(SetMouseCapture, 13, 13)
+
 // CInput
 OFFSET_DEFAULT(GetButtonBits, 2, 2)
 OFFSET_DEFAULT(ActivateMouse, 27, 27)

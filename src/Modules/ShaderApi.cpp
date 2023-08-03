@@ -15,6 +15,7 @@ void ShaderApi::InitImGui(IDirect3DDevice9 *d3dDevice) {
 		ImGui::CreateContext();
 		ImGui_ImplDX9_Init(d3dDevice);
 		ImGui_ImplWin32_Init(Window::g_hWnd);
+		Menu::Init();
 		g_init = true;
 	}
 }
@@ -35,7 +36,7 @@ void ShaderApi::Draw(IDirect3DDevice9 *d3dDevice) {
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-	ImGui::GetIO().MouseDrawCursor = engine->demoplayer->IsPlaying() && Menu::g_shouldDraw;
+	ImGui::GetIO().MouseDrawCursor = Menu::g_shouldDraw;
 
 	Menu::Draw();
 

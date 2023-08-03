@@ -36,10 +36,6 @@ void DemoViewer::Think() {
 		engine->ExecuteCommand("p2fx_cam_path_setkf");
 	}
 
-	if (GetAsyncKeyState(VK_F2) & 1) {
-		Menu::g_shouldDraw = !Menu::g_shouldDraw;
-	}
-
 	if (GetAsyncKeyState(VK_F3) & 1) {
 		engine->ExecuteCommand("incrementvar p2fx_cam_control 0 3 1");
 	}

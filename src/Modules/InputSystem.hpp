@@ -210,24 +210,44 @@ enum ButtonCode_t {
 	KEY_XSTICK2_UP,                                  // VAXIS NEGATIVE
 };
 
+struct InputContext_t {
+	int m_hCursorIcon;
+	bool m_bEnabled;
+	bool m_bCursorVisible;
+	bool m_bMouseCaptureEnabled;
+};
+
 #define BUTTON_CODE_INVALID -1
 #define KEY_ESCAPE 70
 
 class InputSystem : public Module {
 public:
 	Interface *g_InputSystem = nullptr;
+	Interface *g_InputStackSystem = nullptr;
+
+	InputContext_t *g_Context = nullptr;
 
 	using _StringToButtonCode = ButtonCode_t(__rescall *)(void *thisptr, const char *pString);
 	using _IsButtonDown = bool(__rescall *)(void *thisptr, ButtonCode_t key);
 	using _GetCursorPosition = void(__rescall *)(void *thisptr, int &x, int &y);
 	using _SetCursorPosition = void(__rescall *)(void *thisptr, int x, int y);
 	using _KeySetBinding = void(__cdecl *)(int keynum, const char *pBinding);
+	using _PushInputContext = InputContext_t *(__rescall *)(void *thisptr);
+	using _EnableInputContext = void(__rescall *)(void *thisptr, InputContext_t *hContext, bool bEnable);
+	using _SetCursorVisible = void(__rescall *)(void *thisptr, InputContext_t *hContext, bool bEnable);
+	using _SetMouseCapture = void(__rescall *)(void *thisptr, InputContext_t *hContext, bool bEnable);
 
 	_StringToButtonCode StringToButtonCode = nullptr;
 	_IsButtonDown IsButtonDown = nullptr;
 	_GetCursorPosition GetCursorPosition = nullptr;
 	_SetCursorPosition SetCursorPosition = nullptr;
 	_KeySetBinding KeySetBinding = nullptr;
+	_PushInputContext PushInputContext = nullptr;
+	_EnableInputContext EnableInputContext = nullptr;
+	_SetCursorVisible SetCursorVisible = nullptr;
+	_SetMouseCapture SetMouseCapture = nullptr;
+
+	bool g_inputEnabled = true;
 
 public:
 	ButtonCode_t GetButton(const char *pString);
@@ -236,6 +256,9 @@ public:
 	void SetCursorPos(int x, int y);
 
 	void DPIScaleDeltas(int &x, int &y);
+
+	void UnlockCursor();
+	void LockCursor();
 
 	// CInputSystem::SleepUntilInput
 	DECL_DETOUR(SleepUntilInput, int nMaxSleepTimeMS);
