@@ -489,23 +489,6 @@ static void drawText(CViewSetup setup, OverlayText &t) {
 		break;
 	}
 
-	// draw background
-	{
-		Color bg_color{ 0, 0, 0, 200 }; 
-
-		Vector bl = top_center + rotation * Vector{ 0.0, -(float)max_width * 0.5f - FONT_HPAD, -(float)height } * scale;
-		Vector tl = top_center + rotation * Vector{ 0.0, -(float)max_width * 0.5f - FONT_HPAD, 0 } * scale;
-		Vector br = top_center + rotation * Vector{ 0.0, (float)max_width * 0.5f + FONT_HPAD, -(float)height } * scale;
-		Vector tr = top_center + rotation * Vector{ 0.0, (float)max_width * 0.5f + FONT_HPAD, 0 } * scale;
-
-		MeshBuilder bg(t.no_depth ? g_mat_solid_alpha_noz : g_mat_solid_alpha, PrimitiveType::QUADS, 1);
-		bg.Position(bl); bg.Color(bg_color); bg.AdvanceVertex();
-		bg.Position(tl); bg.Color(bg_color); bg.AdvanceVertex();
-		bg.Position(tr); bg.Color(bg_color); bg.AdvanceVertex();
-		bg.Position(br); bg.Color(bg_color); bg.AdvanceVertex();
-		bg.Draw();
-	}
-
 	top_center -= rotation * Vector{ 0, 0, FONT_VPAD } * scale;
 
 	for (auto &line : lines) {

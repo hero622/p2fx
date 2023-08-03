@@ -342,6 +342,11 @@ void Camera::DrawInWorld() const {
 
 		up = right.Cross(forward);
 
+		if (isKeyframe) {
+			OverlayRender::addText(state.origin + up * 10.0f - forward * 10.0f, Utils::ssprintf("#%d", stateI + 1), 4.0f, false);
+			OverlayRender::addText(state.origin - up * 16.0f - forward * 10.0f, Utils::ssprintf("%d", keyframeTicks[stateI]), 4.0f, false);
+		}
+
 		Vector points[4];
 
 		for (int i = 0; i < 4; i++) {
