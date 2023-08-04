@@ -15,6 +15,7 @@ public:
 	void Think();
 	void ParseDemoData();
 	void HandleGotoTick();
+	void PauseAtEnd();
 };
 
 extern DemoViewer *demoViewer;

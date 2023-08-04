@@ -8,6 +8,7 @@
 #include "Demo/DemoParser.hpp"
 #include "Hud/DemoHud.hpp"
 #include "Camera.hpp"
+#include "Renderer.hpp"
 
 #include "Input.hpp"
 #include "Menu.hpp"
@@ -54,6 +55,11 @@ void DemoViewer::Think() {
 	}
 
 	if (Input::keys[VK_SPACE].IsPressed()) {
+		if (engine->demoplayer->GetTick() == g_demoPlaybackTicks - 5) {
+			engine->ExecuteCommand("demo_gototick 0");
+			return;
+		}
+
 		engine->ExecuteCommand("demo_togglepause");
 	}
 
@@ -146,10 +152,26 @@ void DemoViewer::HandleGotoTick() {
 	}
 }
 
+Variable p2fx_demo_pause_at_end("p2fx_demo_pause_at_end", "1", "Stops the game from exiting from demos after they have finished playing.\n");
+void DemoViewer::PauseAtEnd() {
+	if (!p2fx_demo_pause_at_end.GetBool())
+		return;
+
+	if (!(g_demoPlaybackTicks > 0))
+		return;
+
+	if (engine->demoplayer->GetTick() == g_demoPlaybackTicks - 5) {
+		engine->ExecuteCommand("demo_pause");
+		Event::Trigger<Event::DEMO_STOP>({});
+	}
+}
+
 ON_EVENT(FRAME) {
 	demoViewer->Think();
 
 	demoViewer->HandleGotoTick();
+
+	demoViewer->PauseAtEnd();
 }
 
 ON_EVENT(DEMO_START) {
