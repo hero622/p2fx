@@ -68,6 +68,33 @@ std::string DemoParser::DecodeCustomData(char *data) {
 		return Utils::ssprintf("%d", slot);
 	}
 
+	if (data[0] == 0x0A) { // Speedrun time
+		data += 1;
+
+		speedrunTime.nSplits = *(size_t *)(data);
+		data += 4;
+
+		speedrunTime.splits = (SplitInfo *)malloc(speedrunTime.nSplits * sizeof(speedrunTime.splits[0]));
+
+		for (size_t i = 0; i < speedrunTime.nSplits; ++i) {
+			speedrunTime.splits[i].name = data;
+			data += strlen(speedrunTime.splits[i].name) + 1;
+
+			speedrunTime.splits[i].nSegments = *(size_t *)(data);
+			data += 4;
+
+			speedrunTime.splits[i].segments = (Segment *)malloc(speedrunTime.splits[i].nSegments * sizeof(speedrunTime.splits[i].segments[0]));
+
+			for (size_t j = 0; j < speedrunTime.splits[i].nSegments; ++j) {
+				speedrunTime.splits[i].segments[j].name = data;
+				data += strlen(speedrunTime.splits[i].segments[j].name) + 1;
+
+				speedrunTime.splits[i].segments[j].ticks = *(int *)(data);
+				data += 4;
+			}
+		}
+	}
+
 	return std::string();
 }
 

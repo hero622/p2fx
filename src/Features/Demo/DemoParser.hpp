@@ -16,8 +16,23 @@ public:
 	int maxSplitScreenClients;
 
 public:
+	struct Segment {
+		char *name;
+		int ticks;
+	};
+	struct SplitInfo {
+		char *name;
+		size_t nSegments = 0;
+		Segment *segments;
+	};
+	struct SpeedrunTime {
+		size_t nSplits = 0;
+		SplitInfo *splits;
+	} speedrunTime;
+
+public:
 	DemoParser();
-	static std::string DecodeCustomData(char *data);
+	std::string DecodeCustomData(char *data);
 	void Adjust(Demo *demo);
 	bool Parse(std::string filePath, Demo *demo, bool ghostRequest = false, std::map<int, DataGhost> *datas = nullptr, CustomDatas *customDatas = nullptr);
 };

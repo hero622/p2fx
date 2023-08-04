@@ -5,7 +5,6 @@
 #include "Modules/Engine.hpp"
 #include "Modules/InputSystem.hpp"
 
-#include "Demo/DemoParser.hpp"
 #include "Hud/DemoHud.hpp"
 #include "Camera.hpp"
 #include "Renderer.hpp"
@@ -32,12 +31,12 @@ void DemoViewer::Think() {
 			for (const auto &state : camera->states) {
 				float dist = (camera->currentState.origin - state.second.origin).Length();
 				if (dist < 50.0f) {
-					engine->ExecuteCommand("p2fx_cam_path_remkf");
+					engine->ExecuteCommand("p2fx_cam_path_remkf", true);
 					return;
 				}
 			}
 
-			engine->ExecuteCommand("p2fx_cam_path_setkf");
+			engine->ExecuteCommand("p2fx_cam_path_setkf", true);
 		}
 	}
 
@@ -51,16 +50,16 @@ void DemoViewer::Think() {
 	}
 
 	if (Input::keys[VK_F3].IsPressed()) {
-		engine->ExecuteCommand("incrementvar p2fx_cam_control 0 3 1");
+		engine->ExecuteCommand("incrementvar p2fx_cam_control 0 3 1", true);
 	}
 
 	if (Input::keys[VK_SPACE].IsPressed()) {
 		if (engine->demoplayer->GetTick() == g_demoPlaybackTicks - 5) {
-			engine->ExecuteCommand("demo_gototick 0");
+			engine->ExecuteCommand("demo_gototick 0", true);
 			return;
 		}
 
-		engine->ExecuteCommand("demo_togglepause");
+		engine->ExecuteCommand("demo_togglepause", true);
 	}
 
 	auto host_timescale = Variable("host_timescale");
@@ -76,18 +75,21 @@ void DemoViewer::Think() {
 	if (Input::keys[VK_LEFT].IsPressed()) {
 		for (auto itr = camera->states.rbegin(); itr != camera->states.rend(); ++itr) {
 			if (itr->first < engine->demoplayer->GetTick()) {
-				gotoTick = itr->first - 2;
+				gotoTick = std::max(itr->first - 2, 0);
 				return;
 			}
 		}
 
-		engine->ExecuteCommand("demo_gototick 0");
-		gotoTick = 0;
+		engine->ExecuteCommand("demo_gototick 0", true);
+		gotoTick = -1;
 	}
 	if (Input::keys[VK_RIGHT].IsPressed()) {
 		for (const auto &state : camera->states) {
 			if (state.first > engine->demoplayer->GetTick()) {
-				engine->ExecuteCommand(Utils::ssprintf("sv_alternateticks 0; demo_gototick %d; demo_resume; hwait 1 demo_pause; hwait 1 sv_alternateticks 1", state.first - 2).c_str());
+				engine->ExecuteCommand(Utils::ssprintf("sv_alternateticks 0; demo_gototick %d; demo_resume", state.first - 2, true).c_str());
+				Scheduler::InHostTicks(1, [=]() {
+					engine->ExecuteCommand("demo_pause; sv_alternateticks 1", true);
+				});
 				return;
 			}
 		}
@@ -98,11 +100,19 @@ void DemoViewer::ParseDemoData() {
 	DemoParser parser;
 	Demo demo;
 	auto dir = std::string(engine->GetGameDirectory()) + std::string("/") + std::string(engine->demoplayer->DemoName);
-	if (parser.Parse(dir, &demo)) {
+	if (parser.Parse(dir, &demo, true, &std::map<int, DataGhost>(), &CustomDatas())) {
 		parser.Adjust(&demo);
 
 		g_demoPlaybackTicks = demo.playbackTicks;
 		g_demoStart = demo.firstPositivePacketTick;
+		g_demoSpeedrunTime = parser.speedrunTime;
+		g_demoSpeedrunLength = 0;
+		for (size_t i = 0; i < g_demoSpeedrunTime.nSplits; ++i) {
+			auto split = g_demoSpeedrunTime.splits[i];
+			for (size_t j = 0; j < split.nSegments; ++j) {
+				g_demoSpeedrunLength += split.segments[j].ticks;
+			}
+		}
 	}
 }
 
@@ -112,7 +122,7 @@ ON_EVENT(SESSION_START) {
 }
 
 void DemoViewer::HandleGotoTick() {
-	if (!(gotoTick > 0)) return;
+	if (gotoTick == -1) return;
 
 	// 0 = not done anything
 	// 1 = queued skip
@@ -147,7 +157,7 @@ void DemoViewer::HandleGotoTick() {
 			engine->SendToCommandBuffer("sv_alternateticks 1; demo_pause", 0);
 			p2fx_demo_remove_broken.SetValue(remove_broken_value);
 			state = 0;
-			gotoTick = 0;
+			gotoTick = -1;
 		}
 	}
 }
@@ -157,7 +167,7 @@ void DemoViewer::PauseAtEnd() {
 	if (!p2fx_demo_pause_at_end.GetBool())
 		return;
 
-	if (!(g_demoPlaybackTicks > 0))
+	if (g_demoPlaybackTicks == -1)
 		return;
 
 	if (!engine->demoplayer->IsPaused() && engine->demoplayer->GetTick() == g_demoPlaybackTicks - 5) {

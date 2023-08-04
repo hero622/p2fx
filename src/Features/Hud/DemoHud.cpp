@@ -8,6 +8,7 @@
 
 #include "Features/DemoViewer.hpp"
 #include "Features/Camera.hpp"
+#include "Features/Speedrun/SpeedrunTimer.hpp"
 
 #include "Variable.hpp"
 
@@ -33,7 +34,7 @@ bool DemoHud::ShouldDraw() {
 void DemoHud::Paint(int slot) {
 	int playbackTicks = demoViewer->g_demoPlaybackTicks;
 
-	if (!(playbackTicks > 0))
+	if (playbackTicks == -1)
 		return;
 
 	int screenX, screenY;
@@ -88,7 +89,7 @@ void DemoHud::Paint(int slot) {
 	surface->DrawRect({20, 20, 20}, x + 9, y + 9, x + w - pbtLength - 49, y + 25);
 	surface->DrawRect({0, 0, 0}, x + 9, y + 16, x + w - pbtLength - 49, y + 25);
 
-	int timelineSize = x + w - pbtLength - 49 - (x + 9);
+	int timelineSize = x + w - pbtLength - 49 - (x + 9) - 1;
 
 	int tick = engine->demoplayer->GetTick();
 
@@ -112,6 +113,22 @@ void DemoHud::Paint(int slot) {
 	surface->DrawColoredLine(x + 9 + playbackMarker - 7, y, x + 9 + playbackMarker + 7, y, white);
 
 	DRAW_CENTERED_TEXT(font, x + 9 + playbackMarker, y - 24, white, "%d", tick);
+
+	int totalSegTicks = 0;
+	for (size_t i = 0; i < demoViewer->g_demoSpeedrunTime.nSplits; ++i) {
+		auto split = demoViewer->g_demoSpeedrunTime.splits[i];
+
+		for (size_t j = 0; j < split.nSegments; ++j) {
+			totalSegTicks += split.segments[j].ticks;
+			
+			int speedrunLength = demoViewer->g_demoSpeedrunLength;
+			int segTick = totalSegTicks;
+			float segFrac = (float)segTick / (float)speedrunLength;
+			int segMarker = segFrac * timelineSize;
+
+			surface->DrawRect({255, 255, 255}, x + 9 + segMarker, y + 9, x + 10 + segMarker, y + 25);
+		}
+	}
 
 	for (auto const &state : camera->states) {
 		int keyframeTick = state.first;
