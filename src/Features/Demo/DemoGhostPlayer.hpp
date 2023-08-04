@@ -3,7 +3,6 @@
 #include "Demo.hpp"
 #include "DemoGhostEntity.hpp"
 #include "Features/Hud/Hud.hpp"
-#include "Features/Hud/Toasts.hpp"
 #include "Features/Speedrun/SpeedrunTimer.hpp"
 #include "GhostEntity.hpp"
 #include "Modules/Console.hpp"
@@ -75,9 +74,6 @@ void DemoGhostPlayer::TestInputRule(Ts... args) {
 				text += Utils::ssprintf("%s -> +%ss ", ghost.name.c_str(), SpeedrunTimer::Format((SpeedrunTimer::GetTotalTicks() - tick) * *engine->interval_per_tick).c_str());
 		}
 	}
-
-	if (!text.empty())
-		toastHud.AddToast(SPEEDRUN_TOAST_TAG, text);
 }
 
 extern Variable ghost_sync;

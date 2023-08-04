@@ -7,30 +7,12 @@
 #include "Features/Demo/NetworkGhostPlayer.hpp"
 #include "Features/EntityList.hpp"
 #include "Features/FovChanger.hpp"
-#include "Features/FCPS.hpp"
-#include "Features/GroundFramesCounter.hpp"
 #include "Features/Hud/Crosshair.hpp"
-#include "Features/Hud/ScrollSpeed.hpp"
-#include "Features/Hud/StrafeHud.hpp"
-#include "Features/Hud/StrafeQuality.hpp"
-#include "Features/Hud/InputHud.hpp"
 #include "Features/NetMessage.hpp"
-#include "Features/PlayerTrace.hpp"
-#include "Features/ReloadedFix.hpp"
-#include "Features/Routing/EntityInspector.hpp"
-#include "Features/Routing/SeamshotFind.hpp"
-#include "Features/RNGManip.hpp"
-#include "Features/SegmentedTools.hpp"
 #include "Features/Session.hpp"
 #include "Features/Speedrun/SpeedrunTimer.hpp"
-#include "Features/Stats/Stats.hpp"
-#include "Features/StepCounter.hpp"
-#include "Features/Tas/TasController.hpp"
-#include "Features/Tas/TasPlayer.hpp"
-#include "Features/Tas/TasTools/StrafeTool.hpp"
 #include "Features/Timer/PauseTimer.hpp"
 #include "Features/Timer/Timer.hpp"
-#include "Features/TimescaleDetect.hpp"
 #include "Game.hpp"
 #include "Hook.hpp"
 #include "Interface.hpp"
@@ -155,86 +137,17 @@ DETOUR_T(bool, Server::CheckJumpButton) {
 		jumped = Server::CheckJumpButton(thisptr);
 	}
 
-	if (jumped) {
-		auto player = *reinterpret_cast<void **>((uintptr_t)thisptr + Offsets::player);
-		auto stat = stats->Get(server->GetSplitScreenPlayerSlot(player));
-		++stat->jumps->total;
-		++stat->steps->total;
-		stat->jumps->StartTrace(server->GetAbsOrigin(player));
-	}
-
 	return jumped;
 }
 
 // CGameMovement::PlayerMove
 DETOUR(Server::PlayerMove) {
-	auto player = *reinterpret_cast<void **>((uintptr_t)thisptr + Offsets::player);
-	auto mv = *reinterpret_cast<const CHLMoveData **>((uintptr_t)thisptr + Offsets::mv);
-
-	auto m_fFlags = SE(player)->field<int>("m_fFlags");
-	auto m_MoveType = SE(player)->field<char>("m_MoveType");
-	auto m_nWaterLevel = SE(player)->field<char>("m_nWaterLevel");
-
-	auto stat = stats->Get(server->GetSplitScreenPlayerSlot(player));
-
-	// Landed after a jump
-	if (stat->jumps->isTracing && m_fFlags & FL_ONGROUND && m_MoveType != MOVETYPE_NOCLIP) {
-		stat->jumps->EndTrace(server->GetAbsOrigin(player), p2fx_stats_jumps_xy.GetBool());
-	}
-
-	stepCounter->ReduceTimer(server->gpGlobals->frametime);
-
-	// Player is on ground and moving etc.
-	if (stepCounter->stepSoundTime <= 0 && m_MoveType != MOVETYPE_NOCLIP && sv_footsteps.GetFloat() && !(m_fFlags & (FL_FROZEN | FL_ATCONTROLS)) && ((m_fFlags & FL_ONGROUND && mv->m_vecVelocity.Length2D() > 0.0001f) || m_MoveType == MOVETYPE_LADDER)) {
-		stepCounter->Increment(m_fFlags, m_MoveType, mv->m_vecVelocity, m_nWaterLevel);
-		++stat->steps->total;
-	}
-
-	stat->velocity->Save(server->GetLocalVelocity(player), p2fx_stats_velocity_peak_xy.GetBool());
-	inspector->Record();
-
 	return Server::PlayerMove(thisptr);
 }
 
 extern Hook g_playerRunCommandHook;
 // CPortal_Player::PlayerRunCommand
 DETOUR(Server::PlayerRunCommand, CUserCmd *cmd, void *moveHelper) {
-	int slot = server->GetSplitScreenPlayerSlot(thisptr);
-
-	if (!engine->IsGamePaused()) {
-		if (p2fx_tas_real_controller_debug.GetInt() == 3) {
-			auto playerInfo = tasPlayer->GetPlayerInfo(slot, thisptr, cmd);
-			console->Print("Jump input state at tick %d: %s\n", playerInfo.tick, (cmd->buttons & IN_JUMP) ? "true" : "false");
-		}
-	}
-
-	if (tasPlayer->IsActive() && tasPlayer->IsUsingTools()) {
-		tasPlayer->PostProcess(slot, thisptr, cmd);
-	}
-
-	if (tasPlayer->IsActive()) {
-		int tasTick = tasPlayer->GetPlayerInfo(slot, thisptr, cmd).tick - tasPlayer->GetStartTick();
-		tasPlayer->DumpUsercmd(slot, cmd, tasTick, "server");
-
-		Vector pos = server->GetAbsOrigin(thisptr);
-		Vector eye_pos = pos + server->GetViewOffset(thisptr) + server->GetPortalLocal(thisptr).m_vEyeOffset;
-		tasPlayer->DumpPlayerInfo(slot, tasTick, pos, eye_pos, cmd->viewangles);
-	}
-
-	Cheats::AutoStrafe(slot, thisptr, cmd);
-
-	inputHud.SetInputInfo(slot, cmd->buttons, {cmd->sidemove, cmd->forwardmove, cmd->upmove});
-
-	strafeHud.SetData(slot, thisptr, cmd, true);
-
-	Cheats::PatchBhop(slot, thisptr, cmd);
-
-	// TAS playback overrides inputs, even if they're made by the map. 
-	// Allow Reloaded's +attack input for time portal.
-	if (tasPlayer->IsActive() && reloadedFix->isPlacingTimePortal) {
-		cmd->buttons |= IN_ATTACK;
-	}
-
 	g_playerRunCommandHook.Disable();
 	auto ret = Server::PlayerRunCommand(thisptr, cmd, moveHelper);
 	g_playerRunCommandHook.Enable();
@@ -243,41 +156,10 @@ DETOUR(Server::PlayerRunCommand, CUserCmd *cmd, void *moveHelper) {
 }
 Hook g_playerRunCommandHook(&Server::PlayerRunCommand_Hook);
 
-static bool (*UTIL_FindClosestPassableSpace)(const Vector &, const Vector &, const Vector &, unsigned, Vector &, int, FcpsTraceAdapter *);
-extern Hook UTIL_FindClosestPassableSpace_Hook;
-static bool UTIL_FindClosestPassableSpace_Detour(const Vector &center, const Vector &extents, const Vector &ind_push, unsigned iterations, Vector &center_out, int axis_restriction_flags, FcpsTraceAdapter *trace_adapter) {
-	if (p2fx_fcps_override.GetBool() && sv_cheats.GetBool()) {
-		return RecordFcps2(center, extents, ind_push, center_out, trace_adapter);
-	} else {
-		UTIL_FindClosestPassableSpace_Hook.Disable();
-		bool success = UTIL_FindClosestPassableSpace(center, extents, ind_push, iterations, center_out, axis_restriction_flags, trace_adapter);
-		UTIL_FindClosestPassableSpace_Hook.Enable();
-		return success;
-	}
-}
-Hook UTIL_FindClosestPassableSpace_Hook(&UTIL_FindClosestPassableSpace_Detour);
-
-static bool (*FindClosestPassableSpace)(void *, const Vector &, int);
-extern Hook FindClosestPassableSpace_Hook;
-static bool FindClosestPassableSpace_Detour(void *entity, const Vector &ind_push, int mask) {
-	if (p2fx_fcps_override.GetBool() && sv_cheats.GetBool()) {
-		return RecordFcps1(entity, ind_push, mask);
-	} else {
-		FindClosestPassableSpace_Hook.Disable();
-		bool success = FindClosestPassableSpace(entity, ind_push, mask);
-		FindClosestPassableSpace_Hook.Enable();
-		return success;
-	}
-}
-Hook FindClosestPassableSpace_Hook(&FindClosestPassableSpace_Detour);
-
 extern Hook g_ViewPunch_Hook;
 DETOUR_T(void, Server::ViewPunch, const QAngle &offset) {
-	QAngle off1 = offset;
-	RngManip::viewPunch(&off1);
-
 	g_ViewPunch_Hook.Disable();
-	Server::ViewPunch(thisptr, off1);
+	Server::ViewPunch(thisptr, offset);
 	g_ViewPunch_Hook.Enable();
 }
 Hook g_ViewPunch_Hook(&Server::ViewPunch_Hook);
@@ -285,35 +167,14 @@ Hook g_ViewPunch_Hook(&Server::ViewPunch_Hook);
 // CGameMovement::ProcessMovement
 DETOUR(Server::ProcessMovement, void *player, CMoveData *move) {
 	int slot = server->GetSplitScreenPlayerSlot(player);
-	bool grounded = SE(player)->ground_entity();
-	groundFramesCounter->HandleMovementFrame(slot, grounded);
-	strafeQuality.OnMovement(slot, grounded);
-	if (move->m_nButtons & IN_JUMP) scrollSpeedHud.OnJump(slot);
 	Event::Trigger<Event::PROCESS_MOVEMENT>({ slot, true });
 
-	auto res = Server::ProcessMovement(thisptr, player, move);
-
-	playerTrace->TweakLatestEyeOffsetForPortalShot(move, slot, false);
-
-	// We edit pos after process movement to get accurate teleportation
-	// This is for p2fx_trace_teleport_at
-	if (g_playerTraceNeedsTeleport && slot == g_playerTraceTeleportSlot) {
-		move->m_vecAbsOrigin = g_playerTraceTeleportLocation;
-		g_playerTraceNeedsTeleport = false;
-	}
-
-	return res;
+	return Server::ProcessMovement(thisptr, player, move);
 }
 
 // CGameMovement::GetPlayerViewOffset
 DETOUR_T(Vector*, Server::GetPlayerViewOffset, bool ducked) {
-
-	if (p2fx_force_qc.GetBool() && sv_cheats.GetBool()) {
-		bool holdingDuck = (inputHud.GetButtonBits(GET_SLOT()) & IN_DUCK);
-		if (holdingDuck) ducked = false;
-	}
-
-	return Server::GetPlayerViewOffset(thisptr,ducked);
+	return Server::GetPlayerViewOffset(thisptr, ducked);
 }
 
 Variable p2fx_always_transmit_heavy_ents("p2fx_always_transmit_heavy_ents", "0", "Always transmit large but seldom changing edicts to clients to prevent lag spikes.\n");
@@ -552,9 +413,6 @@ static void __cdecl AcceptInput_Hook(void *thisptr, const char *inputName, void 
 		}
 	}
 
-	// allow reloaded fix to override some commands from point_servercommand
-	reloadedFix->OverrideInput(className, inputName, &parameter);
-
 	g_AcceptInputHook.Disable();
 	server->AcceptInput(thisptr, inputName, activator, caller, parameter, outputID);
 	g_AcceptInputHook.Enable();
@@ -614,8 +472,6 @@ DETOUR(Server::GameFrame, bool simulating)
 		console->Print("CServerGameDLL::GameFrame %s (host=%d server=%d client=%d)\n", simulating ? "simulating" : "non-simulating", host, server, client);
 	}
 
-	tasPlayer->Update();
-
 	int tick = session->GetTick();
 
 	Event::Trigger<Event::PRE_TICK>({simulating, tick});
@@ -631,17 +487,7 @@ DETOUR(Server::GameFrame, bool simulating)
 
 // CServerGameDLL::ApplyGameSettings
 DETOUR(Server::ApplyGameSettings, KeyValues *pKV) {
-	auto result = Server::ApplyGameSettings(thisptr, pKV);
-
-	// sv_bonus_challenge is reset by this function on server initialisation.
-	// We need it to be set for the TAS player when it plays CM script.
-	if (tasPlayer->IsActive()) {
-		if (tasPlayer->playbackInfo.GetMainHeader().startInfo.type == ChangeLevelCM) {
-			sv_bonus_challenge.SetValue(true);
-		}
-	}
-
-	return result;
+	return Server::ApplyGameSettings(thisptr, pKV);
 }
 
 DETOUR_T(void, Server::OnRemoveEntity, IHandleEntity *ent, CBaseHandle handle) {
@@ -837,22 +683,6 @@ bool Server::Init() {
 	}
 #endif
 	g_ViewPunch_Hook.SetFunc(ViewPunch);
-
-	// fcps fuckery
-#ifdef _WIN32
-	UTIL_FindClosestPassableSpace = (decltype (UTIL_FindClosestPassableSpace))Memory::Scan(server->Name(), "53 8B DC 83 EC 08 83 E4 F0 83 C4 04 55 8B 6B 04 89 6C 24 04 8B EC 81 EC 98 02 00 00 8B 43 0C 8B 48 08 F3 0F 10 48 04 F3 0F 10 00 F3 0F 10 3D ? ? ? ?");
-	FindClosestPassableSpace = (decltype (FindClosestPassableSpace))Memory::Scan(server->Name(), "53 8B DC 83 EC 08 83 E4 F0 83 C4 04 55 8B 6B 04 89 6C 24 04 8B EC A1 ? ? ? ? 81 EC 88 02 00 00 83 78 30 00 56 57 0F 84 ? ? ? ? 8B 73 08 8B 8E DC 00 00 00");
-#else
-	if (p2fx.game->Is(SourceGame_EIPRelPIC)) {
-		UTIL_FindClosestPassableSpace = (decltype (UTIL_FindClosestPassableSpace))Memory::Scan(server->Name(), "55 BA 00 01 00 00 66 0F EF ED 66 0F EF C0 57 56 53 81 EC CC 02 00 00 8B 0D ? ? ? ? 8B 84 24 E4 02 00 00 66 89 94 24 54 01 00 00 8B 3D ? ? ? ?");
-		FindClosestPassableSpace = (decltype (FindClosestPassableSpace))Memory::Scan(server->Name(), "A1 ? ? ? ? 57 56 53 8B 5C 24 10 8B 74 24 14 8B 50 30 8B 4C 24 18 85 D2 74 29 8B 83 E4 00 00 00 8B 3D ? ? ? ? 83 F8 FF 74 24 0F B7 D0 C1 E8 10");
-	} else {
-		UTIL_FindClosestPassableSpace = (decltype (UTIL_FindClosestPassableSpace))Memory::Scan(server->Name(), "55 89 E5 57 56 53 81 EC BC 02 00 00 C6 85 7C FE FF FF 00 8B 45 0C C6 85 7D FE FF FF 01 8B 4D 08 C7 85 78 FE FF FF 00 00 00 00");
-		FindClosestPassableSpace = (decltype (FindClosestPassableSpace))Memory::Scan(server->Name(), "8B 15 ? ? ? ? B8 01 00 00 00 8B 52 30 85 D2 0F 84 ? ? ? ? 55 89 E5 57 56 53 81 EC 7C 02 00 00 8B 55 08 8B 0D ? ? ? ? 8B 92 E4 00 00 00");
-	}
-#endif
-	UTIL_FindClosestPassableSpace_Hook.SetFunc(UTIL_FindClosestPassableSpace);
-	FindClosestPassableSpace_Hook.SetFunc(FindClosestPassableSpace);
 
 	{
 		// a call to Plat_FloatTime in CGameMovement::CheckStuck

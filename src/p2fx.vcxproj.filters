@@ -43,9 +43,6 @@
     <ClCompile Include="Features\Demo\DemoParser.cpp">
       <Filter>p2fx\Features\Demo</Filter>
     </ClCompile>
-    <ClCompile Include="Features\Routing\EntityInspector.cpp">
-      <Filter>p2fx\Features\Routing</Filter>
-    </ClCompile>
     <ClCompile Include="Modules\Client.cpp">
       <Filter>p2fx\Modules</Filter>
     </ClCompile>
@@ -82,30 +79,6 @@
     <ClCompile Include="Modules\VGui.cpp">
       <Filter>p2fx\Modules</Filter>
     </ClCompile>
-    <ClCompile Include="Features\Stats\JumpStats.cpp">
-      <Filter>p2fx\Features\Stats</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Stats\Stats.cpp">
-      <Filter>p2fx\Features\Stats</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Stats\StepStats.cpp">
-      <Filter>p2fx\Features\Stats</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Stats\VelocityStats.cpp">
-      <Filter>p2fx\Features\Stats</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Hud\InspectionHud.cpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Hud\PortalPlacement.cpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Hud\InputHud.cpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Hud\SpeedrunHud.cpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClCompile>
     <ClCompile Include="Features\Timer\Timer.cpp">
       <Filter>p2fx\Features\Timer</Filter>
     </ClCompile>
@@ -114,12 +87,6 @@
     </ClCompile>
     <ClCompile Include="Features\Timer\TimerCheckPoints.cpp">
       <Filter>p2fx\Features\Timer</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\TimescaleDetect.cpp">
-      <Filter>p2fx\Features</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\ClassDumper.cpp">
-      <Filter>p2fx\Features</Filter>
     </ClCompile>
     <ClCompile Include="Features\Cvars.cpp">
       <Filter>p2fx\Features</Filter>
@@ -130,37 +97,10 @@
     <ClCompile Include="Features\Listener.cpp">
       <Filter>p2fx\Features</Filter>
     </ClCompile>
-    <ClCompile Include="Features\PlayerTrace.cpp">
-      <Filter>p2fx\Features</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\FCPS.cpp">
-      <Filter>p2fx\Features</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\RNGManip.cpp">
-      <Filter>p2fx\Features</Filter>
-    </ClCompile>
     <ClCompile Include="Features\Session.cpp">
       <Filter>p2fx\Features</Filter>
     </ClCompile>
-    <ClCompile Include="Features\StepCounter.cpp">
-      <Filter>p2fx\Features</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Stitcher.cpp">
-      <Filter>p2fx\Features</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Summary.cpp">
-      <Filter>p2fx\Features</Filter>
-    </ClCompile>
     <ClCompile Include="Features\Updater.cpp">
-      <Filter>p2fx\Features</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\AutoSubmit.cpp">
-      <Filter>p2fx\Features</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Teleporter.cpp">
-      <Filter>p2fx\Features</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\WorkshopList.cpp">
       <Filter>p2fx\Features</Filter>
     </ClCompile>
     <ClCompile Include="Features\NetMessage.cpp">
@@ -223,25 +163,13 @@
     <ClCompile Include="Utils\Math.cpp">
       <Filter>p2fx\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="Features\DataMapDumper.cpp">
-      <Filter>p2fx\Features</Filter>
-    </ClCompile>
     <ClCompile Include="Features\FovChanger.cpp">
       <Filter>p2fx\Features</Filter>
     </ClCompile>
     <ClCompile Include="Features\Camera.cpp">
       <Filter>p2fx\Features</Filter>
     </ClCompile>
-    <ClCompile Include="Features\ConfigPlus.cpp">
-      <Filter>p2fx\Features</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Stats\StatsCounter.cpp">
-      <Filter>p2fx\Features\Stats</Filter>
-    </ClCompile>
     <ClCompile Include="Features\Hud\Crosshair.cpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Hud\CheatWarn.cpp">
       <Filter>p2fx\Features\Hud</Filter>
     </ClCompile>
     <ClCompile Include="Utils\json11.cpp">
@@ -262,77 +190,11 @@
     <ClCompile Include="Features\Demo\DemoGhostEntity.cpp">
       <Filter>p2fx\Features\Demo</Filter>
     </ClCompile>
-    <ClCompile Include="Features\Stats\Sync.cpp">
-      <Filter>p2fx\Features\Stats</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Hud\StrafeSyncHud.cpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Hud\StrafeQuality.cpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Hud\ScrollSpeed.cpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Hud\VphysHud.cpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Hud\PortalgunHud.cpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Hud\LPHud.cpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Hud\Toasts.cpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Hud\Minimap.cpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Hud\AimPointHud.cpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClCompile>
     <ClCompile Include="Features\Hud\Watermark.cpp">
       <Filter>p2fx\Features\Hud</Filter>
     </ClCompile>
-    <ClCompile Include="Features\SegmentedTools.cpp">
-      <Filter>p2fx\Features</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Routing\SeamshotFind.cpp">
-      <Filter>p2fx\Features\Routing</Filter>
-    </ClCompile>
     <ClCompile Include="Modules\MaterialSystem.cpp">
       <Filter>p2fx\Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\GroundFramesCounter.cpp">
-      <Filter>p2fx\Features</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\PlacementScanner.cpp">
-      <Filter>p2fx\Features</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Tas\TasController.cpp">
-      <Filter>p2fx\Features\Tas</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Tas\TasServer.cpp">
-      <Filter>p2fx\Features\Tas</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Tas\TasTool.cpp">
-      <Filter>p2fx\Features\Tas</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Tas\TasTools\AutoJumpTool.cpp">
-      <Filter>p2fx\Features\Tas\TasTools</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Tas\TasTools\StrafeTool.cpp">
-      <Filter>p2fx\Features\Tas\TasTools</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Tas\TasParser.cpp">
-      <Filter>p2fx\Features\Tas</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Tas\TasTools\AbsoluteMoveTool.cpp">
-      <Filter>p2fx\Features\Tas\TasTools</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Tas\TasTools\TasUtils.cpp">
-      <Filter>p2fx\Features\Tas\TasTools</Filter>
     </ClCompile>
     <ClCompile Include="Features\Camera.cpp">
       <Filter>p2fx\Features</Filter>
@@ -382,38 +244,11 @@
     <ClCompile Include="Features\GroundFramesCounter.cpp">
       <Filter>p2fx\Features</Filter>
     </ClCompile>
-    <ClCompile Include="Features\Tas\TasTools\AutoAimTool.cpp">
-      <Filter>p2fx\Features\Tas\TasTools</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Tas\TasTools\SetAngleTool.cpp">
-      <Filter>p2fx\Features\Tas\TasTools</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Tas\TasTools\CheckTool.cpp">
-      <Filter>p2fx\Features\Tas\TasTools</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\ReloadedFix.cpp">
-      <Filter>p2fx\Features</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Hud\VelocityGraph.cpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Tas\TasTools\DecelTool.cpp">
-      <Filter>p2fx\Features\Tas\TasTools</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Routing\Ruler.cpp">
-      <Filter>p2fx\Features\Routing</Filter>
-    </ClCompile>
     <ClCompile Include="Features\Demo\GhostRenderer.cpp">
       <Filter>p2fx\Features\Demo</Filter>
     </ClCompile>
     <ClCompile Include="Features\Demo\GhostLeaderboard.cpp">
       <Filter>p2fx\Features\Demo</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\WindowResizer.cpp">
-      <Filter>p2fx\Features</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\SeasonalASCII.cpp">
-      <Filter>p2fx\Features</Filter>
     </ClCompile>
     <ClCompile Include="Modules\FileSystem.cpp">
       <Filter>p2fx\Modules</Filter>
@@ -474,21 +309,6 @@
     </ClCompile>
     <ClCompile Include="Utils\ed25519\seed.cpp">
       <Filter>p2fx\Utils\ed25519</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\AchievementTracker.cpp">
-      <Filter>p2fx\Features</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Hud\StrafeHud.cpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Tas\TasTools\AngleToolsUtils.cpp">
-      <Filter>p2fx\Features\Tas\TasTools</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Tas\TasPlayer.cpp">
-      <Filter>p2fx\Features\Tas</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Tas\TasScript.cpp">
-      <Filter>p2fx\Features\Tas</Filter>
     </ClCompile>
     <ClCompile Include="Features\Hud\DemoHud.cpp">
       <Filter>p2fx\Features\Hud</Filter>
@@ -558,18 +378,6 @@
     <ClInclude Include="Utils\Memory.hpp">
       <Filter>p2fx\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="Features\Hud\InspectionHud.hpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Hud\PortalPlacement.hpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Hud\InputHud.hpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Hud\SpeedrunHud.hpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClInclude>
     <ClInclude Include="Features\Hud\Hud.hpp">
       <Filter>p2fx\Features\Hud</Filter>
     </ClInclude>
@@ -630,24 +438,6 @@
     <ClInclude Include="Modules\VGui.hpp">
       <Filter>p2fx\Modules</Filter>
     </ClInclude>
-    <ClInclude Include="Features\Stats\JumpStats.hpp">
-      <Filter>p2fx\Features\Stats</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Stats\Stats.hpp">
-      <Filter>p2fx\Features\Stats</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Stats\StatsResultType.hpp">
-      <Filter>p2fx\Features\Stats</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Stats\StepStats.hpp">
-      <Filter>p2fx\Features\Stats</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Stats\VelocityStats.hpp">
-      <Filter>p2fx\Features\Stats</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Routing\EntityInspector.hpp">
-      <Filter>p2fx\Features\Routing</Filter>
-    </ClInclude>
     <ClInclude Include="Features\Timer\Timer.hpp">
       <Filter>p2fx\Features\Timer</Filter>
     </ClInclude>
@@ -656,12 +446,6 @@
     </ClInclude>
     <ClInclude Include="Features\Timer\TimerCheckPoints.hpp">
       <Filter>p2fx\Features\Timer</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\TimescaleDetect.hpp">
-      <Filter>p2fx\Features</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\ClassDumper.hpp">
-      <Filter>p2fx\Features</Filter>
     </ClInclude>
     <ClInclude Include="Features\Cvars.hpp">
       <Filter>p2fx\Features</Filter>
@@ -675,25 +459,7 @@
     <ClInclude Include="Features\Session.hpp">
       <Filter>p2fx\Features</Filter>
     </ClInclude>
-    <ClInclude Include="Features\StepCounter.hpp">
-      <Filter>p2fx\Features</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Stitcher.hpp">
-      <Filter>p2fx\Features</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Summary.hpp">
-      <Filter>p2fx\Features</Filter>
-    </ClInclude>
     <ClInclude Include="Features\Updater.hpp">
-      <Filter>p2fx\Features</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\AutoSubmit.hpp">
-      <Filter>p2fx\Features</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Teleporter.hpp">
-      <Filter>p2fx\Features</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\WorkshopList.hpp">
       <Filter>p2fx\Features</Filter>
     </ClInclude>
     <ClInclude Include="Features\NetMessage.hpp">
@@ -756,26 +522,11 @@
     <ClInclude Include="Features.hpp">
       <Filter>p2fx</Filter>
     </ClInclude>
-    <ClInclude Include="Features\DataMapDumper.hpp">
-      <Filter>p2fx\Features</Filter>
-    </ClInclude>
     <ClInclude Include="Features\FovChanger.hpp">
       <Filter>p2fx\Features</Filter>
     </ClInclude>
     <ClInclude Include="Features\Camera.hpp">
       <Filter>p2fx\Features</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\PlayerTrace.hpp">
-      <Filter>p2fx\Features</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\FCPS.hpp">
-      <Filter>p2fx\Features</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\RNGManip.hpp">
-      <Filter>p2fx\Features</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Stats\StatsCounter.hpp">
-      <Filter>p2fx\Features\Stats</Filter>
     </ClInclude>
     <ClInclude Include="Features\Hud\Crosshair.hpp">
       <Filter>p2fx\Features\Hud</Filter>
@@ -909,65 +660,8 @@
     <ClInclude Include="Features\Demo\DemoGhostEntity.hpp">
       <Filter>p2fx\Features\Demo</Filter>
     </ClInclude>
-    <ClInclude Include="Features\Stats\Sync.hpp">
-      <Filter>p2fx\Features\Stats</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Hud\StrafeSyncHud.hpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Hud\StrafeQuality.hpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Hud\ScrollSpeed.hpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\SegmentedTools.hpp">
-      <Filter>p2fx\Features</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Hud\VphysHud.hpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Hud\PortalgunHud.hpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Hud\LPHud.hpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Hud\Toasts.hpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Routing\SeamshotFind.hpp">
-      <Filter>p2fx\Features\Routing</Filter>
-    </ClInclude>
     <ClInclude Include="Modules\MaterialSystem.hpp">
       <Filter>p2fx\Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\GroundFramesCounter.hpp">
-      <Filter>p2fx\Features</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Tas\TasController.hpp">
-      <Filter>p2fx\Features\Tas</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Tas\TasServer.hpp">
-      <Filter>p2fx\Features\Tas</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Tas\TasTool.hpp">
-      <Filter>p2fx\Features\Tas</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Tas\TasTools\AutoJumpTool.hpp">
-      <Filter>p2fx\Features\Tas\TasTools</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Tas\TasTools\StrafeTool.hpp">
-      <Filter>p2fx\Features\Tas\TasTools</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Tas\TasParser.hpp">
-      <Filter>p2fx\Features\Tas</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Tas\TasTools\AbsoluteMoveTool.hpp">
-      <Filter>p2fx\Features\Tas\TasTools</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Tas\TasTools\TasUtils.hpp">
-      <Filter>p2fx\Features\Tas\TasTools</Filter>
     </ClInclude>
     <ClInclude Include="Features\Camera.hpp">
       <Filter>p2fx\Features</Filter>
@@ -1125,38 +819,11 @@
     <ClInclude Include="Features\GroundFramesCounter.hpp">
       <Filter>p2fx\Features</Filter>
     </ClInclude>
-    <ClInclude Include="Features\Tas\TasTools\AutoAimTool.hpp">
-      <Filter>p2fx\Features\Tas\TasTools</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Tas\TasTools\SetAngleTool.hpp">
-      <Filter>p2fx\Features\Tas\TasTools</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Tas\TasTools\CheckTool.hpp">
-      <Filter>p2fx\Features\Tas\TasTools</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\ReloadedFix.hpp">
-      <Filter>p2fx\Features</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Hud\VelocityGraph.hpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Tas\TasTools\DecelTool.hpp">
-      <Filter>p2fx\Features\Tas\TasTools</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Routing\Ruler.hpp">
-      <Filter>p2fx\Features\Routing</Filter>
-    </ClInclude>
     <ClInclude Include="Features\Demo\GhostRenderer.hpp">
       <Filter>p2fx\Features\Demo</Filter>
     </ClInclude>
     <ClInclude Include="Features\Demo\GhostLeaderboard.hpp">
       <Filter>p2fx\Features\Demo</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\WindowResizer.hpp">
-      <Filter>p2fx\Features</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\SeasonalASCII.hpp">
-      <Filter>p2fx\Features</Filter>
     </ClInclude>
     <ClInclude Include="OffsetsData.hpp">
       <Filter>p2fx</Filter>
@@ -1287,21 +954,6 @@
     <ClInclude Include="Utils\ed25519\sha512.h">
       <Filter>p2fx\Utils\ed25519</Filter>
     </ClInclude>
-    <ClInclude Include="Features\AchievementTracker.hpp">
-      <Filter>p2fx\Features</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Hud\StrafeHud.hpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Tas\TasTools\AngleToolsUtils.hpp">
-      <Filter>p2fx\Features\Tas\TasTools</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Tas\TasPlayer.hpp">
-      <Filter>p2fx\Features\Tas</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Tas\TasScript.hpp">
-      <Filter>p2fx\Features\Tas</Filter>
-    </ClInclude>
     <ClInclude Include="Features\Hud\DemoHud.hpp">
       <Filter>p2fx\Features\Hud</Filter>
     </ClInclude>
@@ -1382,23 +1034,11 @@
     <Filter Include="p2fx\Features\Demo">
       <UniqueIdentifier>{274d8264-59f6-4e07-880f-672c8c26c1f7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="p2fx\Features\Stats">
-      <UniqueIdentifier>{d85b9369-515b-4810-bfce-0bc962742d18}</UniqueIdentifier>
-    </Filter>
     <Filter Include="p2fx\Features\Speedrun">
       <UniqueIdentifier>{68aa521b-4809-41c1-9070-2b9f95b802bd}</UniqueIdentifier>
     </Filter>
     <Filter Include="p2fx\Features\Timer">
       <UniqueIdentifier>{7417ee07-2df2-415e-a102-e7e90830ec16}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="p2fx\Features\Tas">
-      <UniqueIdentifier>{d662a603-82c9-4401-9b5e-a46e1a3a71da}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="p2fx\Features\Tas\TasTools">
-      <UniqueIdentifier>{56f0ee93-915f-4619-ba95-b1897f0bc83e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="p2fx\Features\Routing">
-      <UniqueIdentifier>{74d18c35-2424-4dab-bb78-11a5aefde796}</UniqueIdentifier>
     </Filter>
     <Filter Include="p2fx\Games">
       <UniqueIdentifier>{56b78df4-db1c-44a5-9243-10415ba45a25}</UniqueIdentifier>

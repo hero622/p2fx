@@ -5,7 +5,6 @@
 #include "Features/EntityList.hpp"
 #include "Features/OverlayRender.hpp"
 #include "Features/Timer/PauseTimer.hpp"
-#include "Features/Tas/TasPlayer.hpp"
 #include "Modules/Client.hpp"
 #include "Modules/Console.hpp"
 #include "Modules/Engine.hpp"
@@ -489,7 +488,7 @@ void Camera::OverrideView(CViewSetup *m_View) {
 				}
 				if (manualActive) {
 					//even junkier hack. lock mouse movement using fake in_forceuser 2 LMAO
-					if (engine->hoststate->m_activeGame && !tasPlayer->IsActive())
+					if (engine->hoststate->m_activeGame)
 						in_forceuser.ThisPtr()->m_nValue = 2;
 
 					//getting mouse movement and resetting the cursor position
@@ -598,7 +597,7 @@ void Camera::RequestCameraRefresh() {
 
 void Camera::OverrideMovement(CUserCmd *cmd) {
 	//blocking keyboard inputs on manual mode
-	if (IsDriving() && !tasPlayer->IsActive()) {
+	if (IsDriving()) {
 		cmd->buttons = 0;
 		cmd->forwardmove = 0;
 		cmd->sidemove = 0;

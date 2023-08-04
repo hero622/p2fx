@@ -1,7 +1,6 @@
 #include "DemoGhostEntity.hpp"
 
 #include "DemoGhostPlayer.hpp"
-#include "Features/Hud/Toasts.hpp"
 #include "Features/Session.hpp"
 #include "Modules/Client.hpp"
 #include "NetworkGhostPlayer.hpp"
@@ -45,20 +44,12 @@ void DemoGhostEntity::NextDemo() {
 	if (++this->currentDemo != this->datasByLevel.size()) {
 		this->ChangeDemo();
 		this->LevelReset();
-		if (ghost_show_advancement.GetInt() >= 3) {
-			std::string msg = Utils::ssprintf("%s is now on %s", this->name.c_str(), this->currentMap.c_str());
-			toastHud.AddToast(GHOST_TOAST_TAG, msg);
-		}
 		if (this->IsBeingFollowed()) {
 			auto cmd = Utils::ssprintf("changelevel %s", this->currentMap.c_str());
 			engine->ExecuteCommand(cmd.c_str());
 		}
 	} else {
 		this->hasFinished = true;
-		if (ghost_show_advancement.GetInt() >= 2 || (this->sameMap && ghost_show_advancement.GetInt() >= 1)) {
-			std::string msg = Utils::ssprintf("%s has finished", this->name.c_str());
-			toastHud.AddToast(GHOST_TOAST_TAG, msg);
-		}
 		this->sameMap = false;  //Make the ghost to disappear
 	}
 }

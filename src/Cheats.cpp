@@ -3,18 +3,10 @@
 #include "Event.hpp"
 #include "Features/Cvars.hpp"
 #include "Features/Hud/Hud.hpp"
-#include "Features/Hud/InspectionHud.hpp"
-#include "Features/Hud/SpeedrunHud.hpp"
 #include "Features/Listener.hpp"
 #include "Features/OverlayRender.hpp"
-#include "Features/ReloadedFix.hpp"
-#include "Features/Routing/EntityInspector.hpp"
 #include "Features/Speedrun/SpeedrunTimer.hpp"
-#include "Features/Tas/TasParser.hpp"
-#include "Features/Tas/TasTools/AutoJumpTool.hpp"
-#include "Features/Tas/TasTools/StrafeTool.hpp"
 #include "Features/Timer/Timer.hpp"
-#include "Features/WorkshopList.hpp"
 #include "Game.hpp"
 #include "Modules/Client.hpp"
 #include "Modules/Console.hpp"
@@ -291,12 +283,6 @@ void Cheats::Init() {
 
 	p2fx_disable_weapon_sway.UniqueFor(SourceGame_Portal2);
 
-	p2fx_workshop.UniqueFor(SourceGame_Portal2 | SourceGame_ApertureTag);
-	p2fx_workshop_update.UniqueFor(SourceGame_Portal2 | SourceGame_ApertureTag);
-	p2fx_workshop_list.UniqueFor(SourceGame_Portal2 | SourceGame_ApertureTag);
-
-	p2fx_fix_reloaded_cheats.UniqueFor(SourceGame_PortalReloaded);
-
 	cvars->Unlock();
 
 	Variable::RegisterAll();
@@ -311,77 +297,4 @@ void Cheats::Shutdown() {
 
 ON_EVENT(FRAME) {
 	sv_cheats.SetValue(1);
-}
-
-
-// FUN PATCHES :))))))
-
-void Cheats::PatchBhop(int slot, void *player, CUserCmd *cmd) {
-	if (!server->AllowsMovementChanges() || !p2fx_patch_bhop.GetBool()) return;
-
-	TasPlayerInfo info = tasPlayer->GetPlayerInfo(slot, player, cmd);
-
-	float currVel = info.velocity.Length2D();
-	float predictVel = autoStrafeTool[info.slot].GetVelocityAfterMove(info, cmd->forwardmove, cmd->sidemove).Length2D();
-
-	float maxSpeed = autoStrafeTool[info.slot].GetMaxSpeed(info, Vector(0, 1));
-	if (maxSpeed == 0) return;
-
-	// player surpassed max speed through its own movement - limit wishdir
-	if (predictVel > maxSpeed && predictVel > currVel) {
-		float mult = (maxSpeed - currVel) / (predictVel - currVel);
-		mult = fminf(fmaxf(mult, 0.0f), 1.0f);
-		cmd->forwardmove *= mult;
-		cmd->sidemove *= mult;
-	}
-}
-
-ON_EVENT(PROCESS_MOVEMENT) {
-	if (!server->AllowsMovementChanges() || !p2fx_patch_cfg.GetBool()) return;
-
-	auto player = server->GetPlayer(event.slot + 1);
-	if (player == nullptr) return;
-
-	auto portalLocal = server->GetPortalLocal(player);
-
-	void *tbeamHandle = reinterpret_cast<void *>(portalLocal.m_hTractorBeam);
-
-	if (!tbeamHandle || (uint32_t)tbeamHandle == (unsigned)Offsets::INVALID_EHANDLE_INDEX) return;
-
-	for (int i = 0; i < 2; i++) {
-		int hitboxOffset = i == 0 ? Offsets::m_pShadowCrouch : Offsets::m_pShadowStand;
-		auto shadow = *reinterpret_cast<void **>((uintptr_t)player + hitboxOffset);
-
-		// WAKE UP YOU MORON YOU'RE RUINING MY FUNNELS ARGGHHH
-		Memory::VMT<void(__rescall *)(void *)>(shadow, Offsets::Wake)(shadow);
-	}
-}
-
-void Cheats::AutoStrafe(int slot, void *player, CUserCmd *cmd) {
-	if (!server->AllowsMovementChanges() || !p2fx_autostrafe.GetBool()) return;
-
-	if (cmd->forwardmove == 0 && cmd->sidemove == 0) return;
-
-	auto m_MoveType = SE(player)->field<char>("m_MoveType");
-
-	if (m_MoveType == MOVETYPE_NOCLIP) return;
-
-	TasPlayerInfo info = tasPlayer->GetPlayerInfo(slot, player, cmd);
-
-	float angle = Math::AngleNormalize(RAD2DEG(DEG2RAD(info.angles.y) + atan2(-cmd->sidemove, cmd->forwardmove)));
-
-	TasFramebulk fb;
-	tasPlayer->playbackInfo.slots[slot].header.version = MAX_SCRIPT_VERSION;
-	autoJumpTool[info.slot].SetParams(autoJumpTool[info.slot].ParseParams(std::vector<std::string>{p2fx_autojump.GetBool() && (cmd->buttons & IN_JUMP) ? "on" : "off"}));
-	autoStrafeTool[info.slot].SetParams(autoStrafeTool[info.slot].ParseParams(std::vector<std::string> {"vec", "max", std::to_string(angle) + "deg"}));
-	autoStrafeTool[info.slot].Apply(fb, info);
-
-	if (fb.moveAnalog.y > 0.0) {
-		cmd->forwardmove = cl_forwardspeed.GetFloat() * fb.moveAnalog.y;
-	} else {
-		cmd->forwardmove = cl_backspeed.GetFloat() * fb.moveAnalog.y;
-	}
-	cmd->sidemove = cl_sidespeed.GetFloat() * fb.moveAnalog.x;
-
-
 }

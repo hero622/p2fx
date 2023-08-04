@@ -2,7 +2,6 @@
 
 #include "Features/Hud/Hud.hpp"
 #include "Features/Session.hpp"
-#include "Features/Stitcher.hpp"
 #include "Features/Timer/PauseTimer.hpp"
 #include "Features/Demo/NetworkGhostPlayer.hpp"
 #include "Modules/Engine.hpp"
@@ -20,39 +19,8 @@ Variable p2fx_hud_orange_only("p2fx_hud_orange_only", "0", "Only display the P2F
 
 void VGui::Draw(Hud *const &hud) {
 	if (hud->ShouldDraw()) {
-		hud->Paint(this->context.slot);
+		hud->Paint(0);
 	}
-}
-void VGui::Draw(HudElement *const &element) {
-	if (element->ShouldDraw()) {
-		element->Paint(&this->context);
-	}
-}
-
-static void DrawHudBackground(int slot, HudContext &ctx) {
-	if (!p2fx_hud_bg.GetBool()) return;
-
-	int height =
-		ctx.elements == 0 ? 0 : ctx.elements * ctx.fontSize + (ctx.elements - 1) * ctx.spacing + 4;
-
-	static int maxWidths[2][100];
-	memmove(maxWidths[slot], maxWidths[slot] + 1, sizeof maxWidths[slot] - sizeof maxWidths[slot][0]);
-	maxWidths[slot][99] = ctx.maxWidth;
-
-	int width = 0;
-
-	for (size_t i = 0; i < sizeof maxWidths[slot] / sizeof maxWidths[slot][0]; ++i) {
-		if (maxWidths[slot][i] > width) width = maxWidths[slot][i];
-	}
-
-	if (width % 5) width += 5 - width % 5;
-
-	if (width != 0) width += 4;
-
-	int x = ctx.xPadding - 2;
-	int y = ctx.yPadding - 2;
-
-	surface->DrawRect(Color{0, 0, 0, 192}, x, y, x + width, y + height);
 }
 
 // CEngineVGui::Paint
@@ -63,46 +31,14 @@ DETOUR(VGui::Paint, PaintMode_t mode) {
 		surface->FinishDrawing();
 	}
 
-	static HudContext lastCtx[2];
-
 	auto result = VGui::Paint(thisptr, mode);
 
 	surface->StartDrawing(surface->matsurface->ThisPtr());
 
-	auto ctx = &vgui->context;
-
-	ctx->Reset(GET_SLOT());
-
-	if (ctx->slot == 0) {
-		if ((mode & PAINT_UIPANELS) && !p2fx_hud_orange_only.GetBool() && !Stitcher::Paint()) {
-			DrawHudBackground(0, lastCtx[0]);
-
-			for (auto const &hud : vgui->huds) {
-				vgui->Draw(hud);
-			}
-
-			for (auto const &element : vgui->elements) {
-				vgui->Draw(element);
-			}
-
-			lastCtx[0] = *ctx;
-		}
-	} else if (ctx->slot == 1) {
-		DrawHudBackground(1, lastCtx[1]);
-
+	if ((mode & PAINT_UIPANELS)) {
 		for (auto const &hud : vgui->huds) {
-			if (hud->drawSecondSplitScreen) {
-				vgui->Draw(hud);
-			}
+			vgui->Draw(hud);
 		}
-
-		for (auto const &element : vgui->elements) {
-			if (element->drawSecondSplitScreen) {
-				vgui->Draw(element);
-			}
-		}
-
-		lastCtx[1] = *ctx;
 	}
 
 	surface->FinishDrawing();
@@ -143,18 +79,6 @@ bool VGui::Init() {
 				this->huds.push_back(hud);
 			}
 		}
-
-		HudElement::IndexAll();
-
-		for (auto const &element : HudElement::GetList()) {
-			if (element->version == SourceGame_Unknown || p2fx.game->Is(element->version)) {
-				this->elements.push_back(element);
-			}
-		}
-
-		std::sort(this->elements.begin(), this->elements.end(), [](const HudElement *a, const HudElement *b) {
-			return a->orderIndex < b->orderIndex;
-		});
 	}
 
 	return this->hasLoaded = this->enginevgui;

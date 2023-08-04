@@ -8,19 +8,9 @@
 #include "Features/Demo/DemoGhostPlayer.hpp"
 #include "Features/Demo/NetworkGhostPlayer.hpp"
 #include "Features/FovChanger.hpp"
-#include "Features/GroundFramesCounter.hpp"
-#include "Features/Hud/InputHud.hpp"
-#include "Features/Hud/ScrollSpeed.hpp"
-#include "Features/Hud/StrafeHud.hpp"
-#include "Features/Hud/StrafeQuality.hpp"
 #include "Features/NetMessage.hpp"
 #include "Features/OverlayRender.hpp"
-#include "Features/PlayerTrace.hpp"
 #include "Features/Session.hpp"
-#include "Features/Stats/Sync.hpp"
-#include "Features/Stitcher.hpp"
-#include "Features/Tas/TasController.hpp"
-#include "Features/Tas/TasPlayer.hpp"
 #include "Game.hpp"
 #include "Hook.hpp"
 #include "Interface.hpp"
@@ -186,13 +176,6 @@ DETOUR(Client::LevelInitPreEntity, const char *levelName) {
 
 // ClientModeShared::CreateMove
 DETOUR(Client::CreateMove, float flInputSampleTime, CUserCmd *cmd) {
-	if (!in_forceuser.isReference || (in_forceuser.isReference && !in_forceuser.GetBool())) {
-		if (engine->IsCoop() && engine->IsOrange())
-			inputHud.SetInputInfo(1, cmd->buttons, {cmd->sidemove, cmd->forwardmove, cmd->upmove});
-		else
-			inputHud.SetInputInfo(0, cmd->buttons, {cmd->sidemove, cmd->forwardmove, cmd->upmove});
-	}
-
 	if (sv_cheats.GetBool() && engine->hoststate->m_activeGame) {
 		camera->OverrideMovement(cmd);
 	}
@@ -204,47 +187,9 @@ DETOUR(Client::CreateMove, float flInputSampleTime, CUserCmd *cmd) {
 		cmd->upmove = 0;
 	}
 
-	if (engine->hoststate->m_activeGame) {
-		Stitcher::OverrideMovement(cmd);
-	}
-
-	if (p2fx_strafesync.GetBool()) {
-		synchro->UpdateSync(engine->IsOrange() ? 1 : 0, cmd);
-	}
-
-	strafeQuality.OnUserCmd(engine->IsOrange() ? 1 : 0, *cmd);
-
-	if (cmd->buttons & IN_ATTACK) {
-		int slot = engine->IsOrange() ? 1 : 0;
-		g_bluePortalAngles[slot] = engine->GetAngles(slot);
-	}
-
-	if (cmd->buttons & IN_ATTACK2) {
-		int slot = engine->IsOrange() ? 1 : 0;
-		g_orangePortalAngles[slot] = engine->GetAngles(slot);
-	}
-
 	return Client::CreateMove(thisptr, flInputSampleTime, cmd);
 }
 DETOUR(Client::CreateMove2, float flInputSampleTime, CUserCmd *cmd) {
-	if (in_forceuser.GetBool()) {
-		inputHud.SetInputInfo(1, cmd->buttons, {cmd->sidemove, cmd->forwardmove, cmd->upmove});
-	}
-
-	if (p2fx_strafesync.GetBool()) {
-		synchro->UpdateSync(1, cmd);
-	}
-
-	strafeQuality.OnUserCmd(1, *cmd);
-
-	if (cmd->buttons & IN_ATTACK) {
-		g_bluePortalAngles[1] = engine->GetAngles(1);
-	}
-
-	if (cmd->buttons & IN_ATTACK2) {
-		g_orangePortalAngles[1] = engine->GetAngles(1);
-	}
-
 	return Client::CreateMove2(thisptr, flInputSampleTime, cmd);
 }
 
@@ -350,39 +295,10 @@ DETOUR(Client::DecodeUserCmdFromBuffer, int nSlot, int buf, signed int sequence_
 	auto m_pCommands = *reinterpret_cast<uintptr_t *>((uintptr_t)thisptr + nSlot * Offsets::PerUserInput_tSize + Offsets::m_pCommands);
 	auto cmd = reinterpret_cast<CUserCmd *>(m_pCommands + Offsets::CUserCmdSize * (sequence_number % Offsets::MULTIPLAYER_BACKUP));
 
-	Vector cmdMove = {cmd->sidemove, cmd->forwardmove, cmd->upmove};
-	if (nSlot == 0) {
-		// A bit weird - for some reason, when playing back Orange
-		// demos, nSlot is 0 even though the player's actual slot
-		// (including in HUD stuff) is 1. This works as a workaround
-		inputHud.SetInputInfo(0, cmd->buttons, cmdMove);
-		inputHud.SetInputInfo(1, cmd->buttons, cmdMove);
-	} else if (nSlot == 1) {
-		inputHud.SetInputInfo(1, cmd->buttons, cmdMove);
-	}
-
-	if (p2fx_strafesync.GetBool()) {
-		synchro->UpdateSync(nSlot, cmd);
-	}
-
-	strafeQuality.OnUserCmd(nSlot, *cmd);
 	void *player = client->GetPlayer(nSlot + 1);
 	if (player) {
-		bool grounded = CE(player)->ground_entity();
-		groundFramesCounter->HandleMovementFrame(nSlot, grounded);
-		strafeQuality.OnMovement(nSlot, grounded);
-		strafeHud.SetData(nSlot, player, cmd, false);
 		Event::Trigger<Event::PROCESS_MOVEMENT>({nSlot, false});  // There isn't really one, just pretend it's here lol
 	}
-
-	if (cmd->buttons & IN_ATTACK) {
-		g_bluePortalAngles[nSlot] = engine->GetAngles(nSlot);
-	}
-
-	if (cmd->buttons & IN_ATTACK2) {
-		g_orangePortalAngles[nSlot] = engine->GetAngles(nSlot);
-	}
-
 
 	return result;
 }
@@ -403,11 +319,7 @@ DETOUR(Client::GetButtonBits, bool bResetState) {
 
 // CInput::SteamControllerMove
 DETOUR(Client::SteamControllerMove, int nSlot, float flFrametime, CUserCmd *cmd) {
-	auto result = Client::SteamControllerMove(thisptr, nSlot, flFrametime, cmd);
-
-	tasControllers[nSlot]->ControllerMove(nSlot, flFrametime, cmd);
-
-	return result;
+	return Client::SteamControllerMove(thisptr, nSlot, flFrametime, cmd);
 }
 
 DETOUR_COMMAND(Client::playvideo_end_level_transition) {
@@ -421,11 +333,9 @@ DETOUR_T(void, Client::OverrideView, CViewSetup *m_View) {
 	Client::OverrideView(thisptr, m_View);
 
 	camera->OverrideView(m_View);
-	Stitcher::OverrideView(m_View);
 	GhostEntity::FollowPov(m_View);
 	engine->demoplayer->OverrideView(m_View);
 }
-
 
 DETOUR(Client::ProcessMovement, void *player, CMoveData *move) {
 	// This should only be run if prediction is occurring, i.e. if we
@@ -441,21 +351,13 @@ DETOUR(Client::ProcessMovement, void *player, CMoveData *move) {
 		int tick = session->GetTick();
 
 		if (tick != lastTick) {
-			bool grounded = CE(player)->ground_entity();
 			slot = client->GetSplitScreenPlayerSlot(player);
-			groundFramesCounter->HandleMovementFrame(slot, grounded);
-			strafeQuality.OnMovement(slot, grounded);
-			if (move->m_nButtons & IN_JUMP) scrollSpeedHud.OnJump(slot);
 			Event::Trigger<Event::PROCESS_MOVEMENT>({slot, false});
 			lastTick = tick;
 		}
 	}
 
-	auto result = Client::ProcessMovement(thisptr, player, move);
-
-	playerTrace->TweakLatestEyeOffsetForPortalShot(move, slot, true);
-
-	return result;
+	return Client::ProcessMovement(thisptr, player, move);
 }
 
 CON_COMMAND(p2fx_chat, "p2fx_chat - open the chat HUD\n") {

@@ -5,13 +5,11 @@
 #include "Engine.hpp"
 #include "Event.hpp"
 #include "Scheduler.hpp"
-#include "Features/AutoSubmit.hpp"
 #include "Features/EntityList.hpp"
 #include "Features/FovChanger.hpp"
 #include "Features/Session.hpp"
 #include "Features/Speedrun/SpeedrunTimer.hpp"
 #include "Features/Timer/Timer.hpp"
-#include "Features/TimescaleDetect.hpp"
 #include "Offsets.hpp"
 #include "Server.hpp"
 #include "Utils.hpp"
@@ -136,7 +134,6 @@ DETOUR(EngineDemoRecorder::SetSignonState, int state) {
 
 		lastName += ".dem";
 
-		timescaleDetect->Spawn();
 		needToRecordInitialVals = true;
 	}
 
@@ -190,8 +187,6 @@ static void preventOverwrite(const char *filename, int idx) {
 // CDemoRecorder::StartRecording
 DETOUR(EngineDemoRecorder::StartRecording, const char *filename, bool continuously) {
 	fovChanger->needToUpdate = true;
-
-	timescaleDetect->Spawn();
 
 	if (p2fx_demo_overwrite_bak.GetBool()) {
 		preventOverwrite(filename, 0);
@@ -452,8 +447,6 @@ ON_EVENT(CM_FLAGS) {
 						replay_append_if_pb = std::string("_") + time;
 					}
 				}
-
-				AutoSubmit::FinishRun(event.time, demoFile.c_str(), rename_if_pb, replay_append_if_pb);
 			}
 		});
 	}

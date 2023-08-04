@@ -11,18 +11,13 @@ public:
 	Interface *enginevgui = nullptr;
 
 private:
-	HudContext context = HudContext();
 	std::vector<Hud *> huds = std::vector<Hud *>();
 
 	int lastProgressBar = 0;
 	int progressBarCount = 0;
 
-public:
-	std::vector<HudElement *> elements = std::vector<HudElement *>();
-
 private:
 	void Draw(Hud *const &hud);
-	void Draw(HudElement *const &element);
 
 public:
 	using _IsGameUIVisible = bool(__rescall *)(void *thisptr);

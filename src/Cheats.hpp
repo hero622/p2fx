@@ -6,9 +6,6 @@ class Cheats {
 public:
 	void Init();
 	void Shutdown();
-
-	static void PatchBhop(int slot, void *player, CUserCmd *cmd);
-	static void AutoStrafe(int slot, void *player, CUserCmd *cmd);
 };
 
 extern Variable p2fx_autorecord;

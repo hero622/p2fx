@@ -6,7 +6,6 @@
 #include "EngineDemoRecorder.hpp"
 #include "Event.hpp"
 #include "InputSystem.hpp"
-#include "Features/AchievementTracker.hpp"
 #include "Features/Camera.hpp"
 #include "Features/Cvars.hpp"
 #include "Features/Demo/DemoParser.hpp"
@@ -14,11 +13,8 @@
 #include "Features/NetMessage.hpp"
 #include "Features/OverlayRender.hpp"
 #include "Features/Renderer.hpp"
-#include "Features/SegmentedTools.hpp"
 #include "Features/Session.hpp"
 #include "Features/Speedrun/SpeedrunTimer.hpp"
-#include "Features/Stitcher.hpp"
-#include "Features/Tas/TasPlayer.hpp"
 #include "Game.hpp"
 #include "Hook.hpp"
 #include "Interface.hpp"
@@ -337,7 +333,6 @@ DETOUR(Engine::ChangeLevel, const char *s1, const char *s2) {
 
 // CVEngineServer::ClientCommandKeyValues
 DETOUR(Engine::ClientCommandKeyValues, void* pEdict, KeyValues* pKeyValues) {
-	AchievementTracker::CheckKeyValuesForAchievement(pKeyValues);
 	return Engine::ClientCommandKeyValues(thisptr, pEdict, pKeyValues);
 }
 
@@ -402,11 +397,6 @@ DETOUR(Engine::Frame) {
 	if (!engine->IsSkipping() && session->isRunning) Event::Trigger<Event::RENDER>({});
 
 	NetMessage::Update();
-
-	// stopping TAS player if outside of the game
-	if (!engine->hoststate->m_activeGame && tasPlayer->IsRunning()) {
-		tasPlayer->Stop(true);
-	}
 
 	return Engine::Frame(thisptr);
 }
@@ -921,7 +911,6 @@ bool Engine::Init() {
 		uintptr_t VideoMode_Create = Memory::Read(Init + Offsets::VideoMode_Create);
 		void **videomode = *(void ***)(VideoMode_Create + Offsets::videomode);
 		Renderer::Init(videomode);
-		Stitcher::Init(videomode);
 
 		Interface::Delete(s_EngineAPI);
 	}

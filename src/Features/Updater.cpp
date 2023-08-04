@@ -4,7 +4,6 @@ extern "C" {
 
 #include "Command.hpp"
 #include "Event.hpp"
-#include "Features/Hud/Toasts.hpp"
 #include "Modules/Console.hpp"
 #include "Modules/Engine.hpp"
 #include "Updater.hpp"
@@ -297,7 +296,6 @@ void doUpdate(bool allowPre, bool exitOnSuccess, bool force) {
 
 	if (exitOnSuccess) {
 		Scheduler::OnMainThread([]() {
-			toastHud.AddToast("update", "P2FX has been updated. Your game will now exit.\n");
 			Scheduler::InHostTicks(120, []() {
 				engine->ExecuteCommand("quit");
 			});

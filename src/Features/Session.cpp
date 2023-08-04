@@ -6,14 +6,8 @@
 #include "Features/Hud/Hud.hpp"
 #include "Features/Listener.hpp"
 #include "Features/NetMessage.hpp"
-#include "Features/SegmentedTools.hpp"
 #include "Features/Speedrun/SpeedrunTimer.hpp"
-#include "Features/Stats/Stats.hpp"
-#include "Features/Stats/StatsCounter.hpp"
-#include "Features/StepCounter.hpp"
-#include "Features/Summary.hpp"
 #include "Features/Timer/Timer.hpp"
-#include "Features/TimescaleDetect.hpp"
 #include "Modules/Client.hpp"
 #include "Modules/Console.hpp"
 #include "Modules/Engine.hpp"
@@ -114,11 +108,6 @@ void Session::Ended() {
 		this->lastSession = tick;
 	}
 
-	if (summary->isRunning) {
-		summary->Add(tick, engine->ToTime(tick), engine->GetCurrentMapName().c_str());
-		console->Print("Total: %i (%.3f)\n", summary->totalTicks, engine->ToTime(summary->totalTicks));
-	}
-
 	if (timer->isRunning) {
 		if (p2fx_timer_always_running.GetBool()) {
 			timer->Save(engine->GetTick());
@@ -127,11 +116,6 @@ void Session::Ended() {
 			timer->Stop(engine->GetTick());
 			console->Print("Timer stopped!\n");
 		}
-	}
-
-	auto reset = p2fx_stats_auto_reset.GetInt();
-	if ((reset == 1 && !*engine->m_bLoadgame) || reset >= 2) {
-		stats->ResetAll();
 	}
 
 	engine->demorecorder->currentDemo = "";
@@ -151,8 +135,6 @@ void Session::Ended() {
 	if (listener) {
 		listener->Reset();
 	}
-
-	statsCounter->RecordDatas(tick);
 
 	demoGhostPlayer.DeleteAllGhostModels();
 	networkManager.DeleteAllGhosts();
@@ -189,7 +171,6 @@ void Session::Changed(int state) {
 
 	// Demo recorder starts syncing from this tick
 	if (state == SIGNONSTATE_FULL) {
-		timescaleDetect->Spawn();
 		this->Started();
 		this->loadEnd = NOW();
 
@@ -226,29 +207,4 @@ void Session::ResetLoads() {
 	if (p2fx_loads_norender.GetBool()) {
 		mat_norendering.SetValue(0);
 	}
-}
-
-// HUD
-
-HUD_ELEMENT2(session, "0", "Draws current session tick.\n", HudType_InGame | HudType_Paused | HudType_Menu | HudType_LoadingScreen) {
-	auto tick = (session->isRunning) ? session->GetTick() : 0;
-	ctx->DrawElement("session: %i (%.3f)", tick, engine->ToTime(tick));
-}
-HUD_ELEMENT2(last_session, "0", "Draws value of latest completed session.\n", HudType_InGame | HudType_Paused | HudType_Menu | HudType_LoadingScreen) {
-	ctx->DrawElement("last session: %i (%.3f)", session->lastSession, engine->ToTime(session->lastSession));
-}
-HUD_ELEMENT2(sum, "0", "Draws summary value of sessions.\n", HudType_InGame | HudType_Paused | HudType_Menu | HudType_LoadingScreen) {
-	if (summary->isRunning && p2fx_sum_during_session.GetBool()) {
-		auto tick = (session->isRunning) ? session->GetTick() : 0;
-		auto time = engine->ToTime(tick);
-		ctx->DrawElement("sum: %i (%.3f)", summary->totalTicks + tick, engine->ToTime(summary->totalTicks) + time);
-	} else {
-		ctx->DrawElement("sum: %i (%.3f)", summary->totalTicks, engine->ToTime(summary->totalTicks));
-	}
-}
-HUD_ELEMENT2(frame, "0", "Draws current frame count.\n", HudType_InGame | HudType_Paused | HudType_Menu | HudType_LoadingScreen) {
-	ctx->DrawElement("frame: %i", session->currentFrame);
-}
-HUD_ELEMENT2(last_frame, "0", "Draws last saved frame value.\n", HudType_InGame | HudType_Paused | HudType_Menu | HudType_LoadingScreen) {
-	ctx->DrawElement("last frame: %i", session->lastFrame);
 }

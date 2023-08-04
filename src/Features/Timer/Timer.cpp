@@ -4,7 +4,6 @@
 #include "Event.hpp"
 #include "Features/Hud/Hud.hpp"
 #include "Features/Session.hpp"
-#include "Features/Stats/Stats.hpp"
 #include "Modules/Console.hpp"
 #include "Modules/Engine.hpp"
 #include "PauseTimer.hpp"
@@ -70,10 +69,6 @@ CON_COMMAND(p2fx_timer_start, "p2fx_timer_start - starts timer\n") {
 	}
 
 	timer->Start(engine->GetTick());
-
-	if (p2fx_stats_auto_reset.GetInt() >= 2) {
-		stats->ResetAll();
-	}
 }
 CON_COMMAND(p2fx_timer_stop, "p2fx_timer_stop - stops timer\n") {
 	if (!timer->isRunning) {
@@ -158,20 +153,6 @@ CON_COMMAND(p2fx_cps_result, "p2fx_cps_result - prints result of timer checkpoin
 		auto time = engine->ToTime(tick);
 		console->Print("Result: %i (%.3f)\n", tick, time);
 	}
-}
-
-// HUD
-
-HUD_ELEMENT2(timer, "0", "Draws current value of timer.\n", HudType_InGame | HudType_Paused) {
-	auto tick = (!timer->isPaused) ? timer->GetTick(engine->GetTick()) : timer->totalTicks;
-	auto time = engine->ToTime(tick);
-	ctx->DrawElement("timer: %i (%.3f)", tick, time);
-}
-HUD_ELEMENT2(avg, "0", "Draws calculated average of timer.\n", HudType_InGame | HudType_Paused) {
-	ctx->DrawElement("avg: %i (%.3f)", timer->avg->averageTicks, timer->avg->averageTime);
-}
-HUD_ELEMENT2(cps, "0", "Draws latest checkpoint of timer.\n", HudType_InGame | HudType_Paused) {
-	ctx->DrawElement("last cp: %i (%.3f)", timer->cps->latestTick, timer->cps->latestTime);
 }
 
 ON_EVENT(PRE_TICK) {

@@ -4,7 +4,6 @@
 #include "GhostLeaderboard.hpp"
 #include "Event.hpp"
 #include "Scheduler.hpp"
-#include "Features/Hud/Toasts.hpp"
 #include "Features/Session.hpp"
 #include "Features/Speedrun/SpeedrunTimer.hpp"
 #include "GhostEntity.hpp"
@@ -318,12 +317,10 @@ NetworkManager::NetworkManager()
 
 void NetworkManager::Connect(sf::IpAddress ip, unsigned short int port, bool spectator) {
 	if (this->tcpSocket.connect(ip, port, sf::seconds(5))) {
-		toastHud.AddToast(GHOST_TOAST_TAG, Utils::ssprintf("Connection timed out! Cannot connect to the server at %s:%d", ip.toString().c_str(), port));
 		return;
 	}
 
 	if (this->udpSocket.bind(sf::Socket::AnyPort) != sf::Socket::Done) {
-		toastHud.AddToast(GHOST_TOAST_TAG, Utils::ssprintf("Connection timed out! Cannot connect to the server at %s:%d", ip.toString().c_str(), port));
 		return;
 	}
 
@@ -345,12 +342,10 @@ void NetworkManager::Connect(sf::IpAddress ip, unsigned short int port, bool spe
 
 		sf::Packet confirm_connection;
 		if (!tcpSelector.wait(sf::seconds(30))) {
-			toastHud.AddToast(GHOST_TOAST_TAG, Utils::ssprintf("Handshake timed out! Cannot connect to the server at %s:%d", ip.toString().c_str(), port));
 			return;
 		}
 
 		if (this->tcpSocket.receive(confirm_connection) != sf::Socket::Done) {
-			toastHud.AddToast(GHOST_TOAST_TAG, Utils::ssprintf("Transfer timed out! Cannot connect to the server at %s:%d", ip.toString().c_str(), port));
 			return;
 		}
 
@@ -390,12 +385,6 @@ void NetworkManager::Connect(sf::IpAddress ip, unsigned short int port, bool spe
 		if (engine->isRunning()) {
 			this->SpawnAllGhosts();
 		}
-
-		if (this->spectator) {
-			toastHud.AddToast(GHOST_TOAST_TAG, Utils::ssprintf("Successfully connected to the server as a spectator!\n%d players and %d other spectators connected\n", nb_players, nb_spectators));
-		} else {
-			toastHud.AddToast(GHOST_TOAST_TAG, Utils::ssprintf("Successfully connected to the server!\n%d other players connected\n", nb_players));
-		}
 	}  //End of the scope. Will kill the Selector
 
 	this->isConnected = true;
@@ -428,10 +417,6 @@ void NetworkManager::Disconnect() {
 		this->selector.clear();
 		this->tcpSocket.disconnect();
 		this->udpSocket.unbind();
-
-		Scheduler::OnMainThread([=]() {
-			toastHud.AddToast(GHOST_TOAST_TAG, "You have been disconnected");
-		});
 	}
 }
 
@@ -518,19 +503,6 @@ void NetworkManager::SendPlayerData() {
 void NetworkManager::NotifyMapChange() {
 	sf::Packet packet;
 
-	if (ghost_show_advancement.GetInt() >= 3 && AcknowledgeGhost(nullptr)) {
-		if (this->splitTicks != (sf::Uint32)-1) {
-			auto ipt = *engine->interval_per_tick;
-			std::string time = SpeedrunTimer::Format(this->splitTicks * ipt);
-			std::string totalTime = SpeedrunTimer::Format(this->splitTicksTotal * ipt);
-			std::string msg = Utils::ssprintf("%s is now on %s (%s -> %s)", this->name.c_str(), engine->GetCurrentMapName().c_str(), time.c_str(), totalTime.c_str());
-			toastHud.AddToast(GHOST_TOAST_TAG, msg);
-		} else {
-			std::string msg = Utils::ssprintf("%s is now on %s", this->name.c_str(), engine->GetCurrentMapName().c_str());
-			toastHud.AddToast(GHOST_TOAST_TAG, msg);
-		}
-	}
-
 	addToNetDump("send-map-change", engine->GetCurrentMapName().c_str());
 	ghostLeaderboard.GhostLoad(this->ID, this->splitTicksTotal, ghost_sync.GetBool());
 
@@ -553,7 +525,6 @@ void NetworkManager::NotifySpeedrunFinished(const bool CM) {
 
 	std::string time = SpeedrunTimer::Format(totalSecs);
 
-	if (ghost_show_advancement.GetInt() >= 1 && AcknowledgeGhost(nullptr)) toastHud.AddToast(GHOST_TOAST_TAG, Utils::ssprintf("%s has finished on %s in %s", this->name.c_str(), engine->GetCurrentMapName().c_str(), time.c_str()));
 	ghostLeaderboard.GhostFinished(this->ID, (int)roundf(totalSecs/ipt));
 
 	addToNetDump("send-speedrun-finish", time.c_str());
@@ -703,14 +674,6 @@ void NetworkManager::Treat(sf::Packet &packet, bool udp) {
 		this->ghostPoolLock.unlock();
 
 		Scheduler::OnMainThread([=]() {
-			if (this->AcknowledgeGhost(ghost)) {
-				if (!strcmp("", current_map.c_str())) {
-					toastHud.AddToast(GHOST_TOAST_TAG, Utils::ssprintf("%s%s has connected in the menu!", name.c_str(), ghost->spectator ? " (spectator)" : ""));
-				} else {
-					toastHud.AddToast(GHOST_TOAST_TAG, Utils::ssprintf("%s%s has connected in %s!", name.c_str(), ghost->spectator ? " (spectator)" : "", current_map.c_str()));
-				}
-			}
-
 			if (!spectator) ghostLeaderboard.AddNew(ghost->ID, ghost->name);
 
 			this->UpdateGhostsSameMap();
@@ -731,9 +694,6 @@ void NetworkManager::Treat(sf::Packet &packet, bool udp) {
 			if (this->ghostPool[i]->ID == ID) {
 				auto ghost = this->ghostPool[i];
 				Scheduler::OnMainThread([=]() {
-					if (this->AcknowledgeGhost(ghost)) {
-						toastHud.AddToast(GHOST_TOAST_TAG, Utils::ssprintf("%s%s has disconnected!", ghost->name.c_str(), ghost->spectator ? " (spectator)" : ""));
-					}
 					ghost->DeleteGhost();
 				});
 				this->ghostPool[i]->isDestroyed = true;
@@ -773,18 +733,6 @@ void NetworkManager::Treat(sf::Packet &packet, bool udp) {
 					return;  // FIXME: this probably works in practice, but it isn't entirely thread-safe
 
 				this->UpdateGhostsSameMap();
-				if (ghost_show_advancement.GetInt() >= 3 && this->AcknowledgeGhost(ghost)) {
-					if (ticksIL == (sf::Uint32)-1) {
-						std::string msg = Utils::ssprintf("%s is now on %s", ghost->name.c_str(), ghost->currentMap.c_str());
-						toastHud.AddToast(GHOST_TOAST_TAG, msg);
-					} else {
-						auto ipt = *engine->interval_per_tick;
-						std::string time = SpeedrunTimer::Format(ticksIL * ipt);
-						std::string timeTotal = SpeedrunTimer::Format(ticksTotal * ipt);
-						std::string msg = Utils::ssprintf("%s is now on %s (%s -> %s)", ghost->name.c_str(), ghost->currentMap.c_str(), time.c_str(), timeTotal.c_str());
-						toastHud.AddToast(GHOST_TOAST_TAG, msg);
-					}
-				}
 
 				if (old_map != map) ghostLeaderboard.GhostLoad(ID, ticksTotal, ghost_sync.GetBool());
 
@@ -868,9 +816,6 @@ void NetworkManager::Treat(sf::Packet &packet, bool udp) {
 		addToNetDump("recv-speedrun-finish", Utils::ssprintf("%d;%s", ID, timer.c_str()).c_str());
 		if (ghost) {
 			Scheduler::OnMainThread([=]() {
-				if (ghost_show_advancement.GetInt() >= 2 || (ghost->sameMap && ghost_show_advancement.GetInt() >= 1)) {
-					toastHud.AddToast(GHOST_TOAST_TAG, Utils::ssprintf("%s has finished on %s in %s", ghost->name.c_str(), ghost->currentMap.c_str(), timer.c_str()));
-				}
 				// whose fucking idea was it to send a string?!
 				float totalSecs = SpeedrunTimer::UnFormat(timer);
 				auto ipt = *engine->interval_per_tick;

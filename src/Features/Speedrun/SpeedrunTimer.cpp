@@ -16,10 +16,8 @@
 #include "Scheduler.hpp"
 #include "Features/Demo/NetworkGhostPlayer.hpp"
 #include "Features/Demo/GhostLeaderboard.hpp"
-#include "Features/Hud/Toasts.hpp"
 #include "Features/NetMessage.hpp"
 #include "Features/Session.hpp"
-#include "Features/Stats/StatsCounter.hpp"
 #include "Features/Timer/PauseTimer.hpp"
 #include "Modules/Client.hpp"
 #include "Modules/Engine.hpp"
@@ -469,12 +467,6 @@ void SpeedrunTimer::Start() {
 	g_speedrun.visitedMaps.push_back(map);
 
 	sendCoopPacket(PacketType::START);
-	if (!p2fx_mtrigger_legacy.GetBool()) {
-		toastHud.AddToast(SPEEDRUN_TOAST_TAG, "Speedrun started!");
-	} else {
-		auto color = Utils::GetColor(p2fx_mtrigger_legacy_textcolor.GetString());
-		client->Chat(color.value_or(Color{255, 176, 0}), "Speedrun started!");
-	}
 
 	ghostLeaderboard.SpeedrunStart(g_speedrun.saved);
 }
@@ -543,8 +535,6 @@ void SpeedrunTimer::Stop(std::string segName) {
 	}
 
 	int total = SpeedrunTimer::GetTotalTicks();
-
-	statsCounter->IncrementRunFinished(total);
 
 	SpeedrunTimer::Split(true, segName, false);
 
@@ -656,24 +646,6 @@ void SpeedrunTimer::Split(bool newSplit, std::string segName, bool requested) {
 
 	if (newSplit) {
 		setTimerAction(TimerAction::SPLIT);
-		float totalTime = SpeedrunTimer::GetTotalTicks() * *engine->interval_per_tick;
-		float splitTime = g_speedrun.splits.back().ticks * *engine->interval_per_tick;
-		if (!p2fx_mtrigger_legacy.GetBool()) {
-			std::string text = Utils::ssprintf("%s\n%s (%s)", segName.c_str(), SpeedrunTimer::Format(totalTime).c_str(), SpeedrunTimer::Format(splitTime).c_str());
-			toastHud.AddToast(SPEEDRUN_TOAST_TAG, text);
-		} else {
-			std::string cleanSegName = segName;
-			replace(cleanSegName, GetCategoryName() + " - ", "");
-
-			std::string formattedString = p2fx_mtrigger_legacy_format.GetString();
-			replace(formattedString, "!map", GetCategoryName());
-			replace(formattedString, "!seg", cleanSegName);
-			replace(formattedString, "!tt", SpeedrunTimer::Format(totalTime));
-			replace(formattedString, "!st", SpeedrunTimer::Format(splitTime));
-
-			auto color = Utils::GetColor(p2fx_mtrigger_legacy_textcolor.GetString());
-			client->Chat(color.value_or(Color{255, 176, 0}), formattedString.c_str());
-		}
 	}
 }
 
@@ -681,7 +653,6 @@ void SpeedrunTimer::Reset(bool requested) {
 	SpeedrunTimer::ResetCategory();
 
 	if (g_speedrun.isRunning) {
-		statsCounter->IncrementReset(SpeedrunTimer::GetTotalTicks());
 		g_runs.push_back(g_activeRun);
 	}
 
@@ -1043,51 +1014,8 @@ CON_COMMAND(p2fx_speedrun_reset_export, "p2fx_speedrun_reset_export - reset the 
 	g_runs.clear();
 }
 
-static std::vector<int> g_autoreset_ticks;
-
-DECL_COMMAND_FILE_COMPLETION(p2fx_speedrun_autoreset_load, ".txt", ".", 1)
-
-CON_COMMAND_F_COMPLETION(p2fx_speedrun_autoreset_load, "p2fx_speedrun_autoreset_load <file> - load the given file of autoreset timestamps and use it while the speedrun timer is active\n", 0, AUTOCOMPLETION_FUNCTION(p2fx_speedrun_autoreset_load)) {
-	if (args.ArgC() != 2) return console->Print(p2fx_speedrun_autoreset_load.ThisPtr()->m_pszHelpString);
-
-	std::string name = args[1];
-	name += ".txt";
-
-	std::ifstream file(name);
-	if (!file) return console->Print("Failed to open %s\n", name.c_str());
-
-	g_autoreset_ticks.clear();
-	std::string line;
-	int last_tick = 30; // Block low tick numbers to prevent getting stuck in an infinite reset loop
-	while (std::getline(file, line)) {
-		int tick = atoi(line.c_str());
-		if (tick < last_tick) {
-			console->Print("Error: autoreset ticks must be increasing, but %d < %d\n. Giving up", tick, last_tick);
-			g_autoreset_ticks.clear();
-			return;
-		}
-		g_autoreset_ticks.push_back(tick);
-		last_tick = tick;
-	}
-
-	console->Print("Successfully loaded %d autoreset ticks\n", g_autoreset_ticks.size());
-}
-
-CON_COMMAND(p2fx_speedrun_autoreset_clear, "p2fx_speedrun_autoreset_clear - stop using the autoreset file\n") {
-	g_autoreset_ticks.clear();
-}
-
 ON_EVENT(PRE_TICK) {
 	if (!SpeedrunTimer::IsRunning()) return;
 	if (engine->IsOrange()) return;
 	if (engine->IsGamePaused()) return;
-
-	size_t next_split_idx = g_speedrun.splits.size();
-	if (next_split_idx >= g_autoreset_ticks.size()) return;
-
-	int ticks = SpeedrunTimer::GetTotalTicks();
-	if (ticks > g_autoreset_ticks[next_split_idx]) {
-		SpeedrunTimer::Reset(false);
-		engine->ExecuteCommand("restart_level");
-	}
 }

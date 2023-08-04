@@ -15,8 +15,6 @@
 #include "CrashHandler.hpp"
 #include "Event.hpp"
 #include "Features.hpp"
-#include "Features/Stats/StatsCounter.hpp"
-#include "Features/SeasonalASCII.hpp"
 #include "Game.hpp"
 #include "Hook.hpp"
 #include "Interface.hpp"
@@ -68,31 +66,13 @@ bool P2FX::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServer
 		if (tier1->Init()) {
 			this->features->AddFeature<Cvars>(&cvars);
 			this->features->AddFeature<Session>(&session);
-			this->features->AddFeature<StepCounter>(&stepCounter);
-			this->features->AddFeature<Summary>(&summary);
-			this->features->AddFeature<Teleporter>(&teleporter);
 			SpeedrunTimer::Init();
-			this->features->AddFeature<Stats>(&stats);
-			this->features->AddFeature<StatsCounter>(&statsCounter);
-			this->features->AddFeature<Sync>(&synchro);
-			this->features->AddFeature<ReloadedFix>(&reloadedFix);
 			this->features->AddFeature<Timer>(&timer);
-			this->features->AddFeature<EntityInspector>(&inspector);
-			this->features->AddFeature<SeamshotFind>(&seamshotFind);
-			this->features->AddFeature<ClassDumper>(&classDumper);
 			this->features->AddFeature<EntityList>(&entityList);
-			this->features->AddFeature<TasController>(&tasControllers[0]);
-			this->features->AddFeature<TasController>(&tasControllers[1]);
-			this->features->AddFeature<TasPlayer>(&tasPlayer);
 			this->features->AddFeature<PauseTimer>(&pauseTimer);
-			this->features->AddFeature<DataMapDumper>(&dataMapDumper);
 			this->features->AddFeature<FovChanger>(&fovChanger);
 			this->features->AddFeature<Camera>(&camera);
-			this->features->AddFeature<GroundFramesCounter>(&groundFramesCounter);
-			this->features->AddFeature<TimescaleDetect>(&timescaleDetect);
-			this->features->AddFeature<PlayerTrace>(&playerTrace);
 			this->features->AddFeature<DemoViewer>(&demoViewer);
-			toastHud.InitMessageHandler();
 
 			this->modules->AddModule<InputSystem>(&inputSystem);
 			this->modules->AddModule<Scheme>(&scheme);
@@ -116,10 +96,6 @@ bool P2FX::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServer
 
 				this->features->AddFeature<Listener>(&listener);
 
-				if (this->game->Is(SourceGame_Portal2 | SourceGame_ApertureTag)) {
-					this->features->AddFeature<WorkshopList>(&workshop);
-				}
-
 				if (listener) {
 					listener->Init();
 				}
@@ -128,8 +104,6 @@ bool P2FX::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServer
 
 				console->PrintActive("Loaded p2fx, Version %s\n", P2FX_VERSION);
 				
-				SeasonalASCII::Init();
-
 				return true;
 			} else {
 				console->Warning("P2FX: Failed to load engine module!\n");
@@ -206,8 +180,6 @@ void P2FX::Unload() {
 	unloading = true;
 
 	curl_global_cleanup();
-	statsCounter->RecordDatas(session->GetTick());
-	statsCounter->ExportToFile(p2fx_statcounter_filePath.GetString());
 
 	networkManager.Disconnect();
 

@@ -36,14 +36,6 @@ int PauseTimer::GetTotal() {
 	return this->ticks;
 }
 
-// HUD
-
-HUD_ELEMENT(pause_timer, "0", "Draws current value of pause timer.\n", HudType_InGame | HudType_Paused) {
-	auto tick = pauseTimer->GetTotal();
-	auto time = engine->ToTime(tick);
-	ctx->DrawElement("pause: %i (%.3f)", tick, time);
-}
-
 ON_EVENT(PRE_TICK) {
 	if (engine->IsOrange() || engine->demoplayer->IsPlaying()) {
 		return;
