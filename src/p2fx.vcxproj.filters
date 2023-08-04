@@ -79,15 +79,6 @@
     <ClCompile Include="Modules\VGui.cpp">
       <Filter>p2fx\Modules</Filter>
     </ClCompile>
-    <ClCompile Include="Features\Timer\Timer.cpp">
-      <Filter>p2fx\Features\Timer</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Timer\TimerAverage.cpp">
-      <Filter>p2fx\Features\Timer</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Timer\TimerCheckPoints.cpp">
-      <Filter>p2fx\Features\Timer</Filter>
-    </ClCompile>
     <ClCompile Include="Features\Cvars.cpp">
       <Filter>p2fx\Features</Filter>
     </ClCompile>
@@ -156,9 +147,6 @@
     </ClCompile>
     <ClCompile Include="Utils.cpp">
       <Filter>p2fx</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Timer\PauseTimer.cpp">
-      <Filter>p2fx\Features\Timer</Filter>
     </ClCompile>
     <ClCompile Include="Utils\Math.cpp">
       <Filter>p2fx\Utils</Filter>
@@ -438,15 +426,6 @@
     <ClInclude Include="Modules\VGui.hpp">
       <Filter>p2fx\Modules</Filter>
     </ClInclude>
-    <ClInclude Include="Features\Timer\Timer.hpp">
-      <Filter>p2fx\Features\Timer</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Timer\TimerAverage.hpp">
-      <Filter>p2fx\Features\Timer</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Timer\TimerCheckPoints.hpp">
-      <Filter>p2fx\Features\Timer</Filter>
-    </ClInclude>
     <ClInclude Include="Features\Cvars.hpp">
       <Filter>p2fx\Features</Filter>
     </ClInclude>
@@ -512,9 +491,6 @@
     </ClInclude>
     <ClInclude Include="Features\Renderer.hpp">
       <Filter>p2fx\Features</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Timer\PauseTimer.hpp">
-      <Filter>p2fx\Features\Timer</Filter>
     </ClInclude>
     <ClInclude Include="Modules.hpp">
       <Filter>p2fx</Filter>
@@ -1036,9 +1012,6 @@
     </Filter>
     <Filter Include="p2fx\Features\Speedrun">
       <UniqueIdentifier>{68aa521b-4809-41c1-9070-2b9f95b802bd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="p2fx\Features\Timer">
-      <UniqueIdentifier>{7417ee07-2df2-415e-a102-e7e90830ec16}</UniqueIdentifier>
     </Filter>
     <Filter Include="p2fx\Games">
       <UniqueIdentifier>{56b78df4-db1c-44a5-9243-10415ba45a25}</UniqueIdentifier>

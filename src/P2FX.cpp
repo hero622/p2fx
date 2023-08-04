@@ -67,9 +67,7 @@ bool P2FX::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServer
 			this->features->AddFeature<Cvars>(&cvars);
 			this->features->AddFeature<Session>(&session);
 			SpeedrunTimer::Init();
-			this->features->AddFeature<Timer>(&timer);
 			this->features->AddFeature<EntityList>(&entityList);
-			this->features->AddFeature<PauseTimer>(&pauseTimer);
 			this->features->AddFeature<FovChanger>(&fovChanger);
 			this->features->AddFeature<Camera>(&camera);
 			this->features->AddFeature<DemoViewer>(&demoViewer);
@@ -224,18 +222,6 @@ void P2FX::Unload() {
 	CrashHandler::Cleanup();
 }
 
-CON_COMMAND(p2fx_session, "p2fx_session - prints the current tick of the server since it has loaded\n") {
-	auto tick = session->GetTick();
-	console->Print("Session Tick: %i (%.3f)\n", tick, engine->ToTime(tick));
-	if (*engine->demorecorder->m_bRecording) {
-		tick = engine->demorecorder->GetTick();
-		console->Print("Demo Recorder Tick: %i (%.3f)\n", tick, engine->ToTime(tick));
-	}
-	if (engine->demoplayer->IsPlaying()) {
-		tick = engine->demoplayer->GetTick();
-		console->Print("Demo Player Tick: %i (%.3f)\n", tick, engine->ToTime(tick));
-	}
-}
 CON_COMMAND(p2fx_about, "p2fx_about - prints info about P2FX plugin\n") {
 	console->Print("p2fx is a speedrun plugin for Source Engine games.\n");
 	console->Print("More information at: https://github.com/Zyntex1/p2fx or https://wiki.portal2.sr/P2FX\n");
@@ -265,18 +251,6 @@ CON_COMMAND(p2fx_cvars_unlock, "p2fx_cvars_unlock - unlocks all special cvars\n"
 }
 CON_COMMAND(p2fx_cvarlist, "p2fx_cvarlist - lists all P2FX cvars and unlocked engine cvars\n") {
 	cvars->ListAll();
-}
-CON_COMMAND(p2fx_rename, "p2fx_rename <name> - changes your name\n") {
-	if (args.ArgC() != 2) {
-		return console->Print(p2fx_rename.ThisPtr()->m_pszHelpString);
-	}
-
-	Variable name("name");
-	if (!!name) {
-		name.DisableChange();
-		name.SetValue(args[1]);
-		name.EnableChange();
-	}
 }
 CON_COMMAND(p2fx_exit, "p2fx_exit - removes all function hooks, registered commands and unloads the module\n") {
 	p2fx.Unload();

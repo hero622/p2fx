@@ -54,6 +54,7 @@ public:
 	CEntInfo *m_EntPtrArray = nullptr;
 
 	int tickCount = 0;
+	bool isSimulating = false;
 
 private:
 	bool jumpedLastTime = false;

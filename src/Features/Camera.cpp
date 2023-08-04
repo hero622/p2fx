@@ -4,7 +4,6 @@
 #include "Event.hpp"
 #include "Features/EntityList.hpp"
 #include "Features/OverlayRender.hpp"
-#include "Features/Timer/PauseTimer.hpp"
 #include "Modules/Client.hpp"
 #include "Modules/Console.hpp"
 #include "Modules/Engine.hpp"

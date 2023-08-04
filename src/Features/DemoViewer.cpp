@@ -160,8 +160,8 @@ void DemoViewer::PauseAtEnd() {
 	if (!(g_demoPlaybackTicks > 0))
 		return;
 
-	if (engine->demoplayer->GetTick() == g_demoPlaybackTicks - 5) {
-		engine->ExecuteCommand("demo_pause");
+	if (!engine->demoplayer->IsPaused() && engine->demoplayer->GetTick() == g_demoPlaybackTicks - 5) {
+		engine->ExecuteCommand("demo_pause", true);
 		Event::Trigger<Event::DEMO_STOP>({});
 	}
 }

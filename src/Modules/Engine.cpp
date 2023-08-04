@@ -44,16 +44,10 @@ Variable sv_portal_players;
 Variable fps_max;
 Variable mat_norendering;
 
-Variable p2fx_record_at("p2fx_record_at", "-1", -1, "Start recording a demo at the tick specified. Will use p2fx_record_at_demo_name.\n", 0);
-Variable p2fx_record_at_demo_name("p2fx_record_at_demo_name", "chamber", "Name of the demo automatically recorded.\n", 0);
-Variable p2fx_record_at_increment("p2fx_record_at_increment", "0", "Increment automatically the demo name.\n");
-
 Variable p2fx_pause_at("p2fx_pause_at", "-1", -1, "Pause at the specified tick. -1 to deactivate it.\n");
 Variable p2fx_pause_for("p2fx_pause_for", "0", 0, "Pause for this amount of ticks.\n");
 
 Variable p2fx_tick_debug("p2fx_tick_debug", "0", 0, 3, "Output debugging information to the console related to ticks and frames.\n");
-
-Variable p2fx_cm_rightwarp("p2fx_cm_rightwarp", "0", "Fix CM wrongwarp.\n");
 
 float g_cur_fps = 0.0f;
 
@@ -524,9 +518,6 @@ DETOUR_COMMAND(Engine::load) {
 	// list for this game
 	if (Game::mapNames.empty() && networkManager.isConnected) {
 		networkManager.disableSyncForLoad = true;
-	}
-	if (p2fx_cm_rightwarp.GetBool() && sv_bonus_challenge.GetBool()) {
-		sv_bonus_challenge.SetValue(false);
 	}
 	engine->tickLoadStarted = engine->GetTick();
 	Engine::load_callback(args);

@@ -18,7 +18,6 @@
 #include "Features/Demo/GhostLeaderboard.hpp"
 #include "Features/NetMessage.hpp"
 #include "Features/Session.hpp"
-#include "Features/Timer/PauseTimer.hpp"
 #include "Modules/Client.hpp"
 #include "Modules/Engine.hpp"
 #include "Modules/Server.hpp"
@@ -357,11 +356,11 @@ void SpeedrunTimer::Update() {
 	std::string map = getEffectiveMapName();
 
 	if (engine->IsCoop() && !engine->IsOrange() && SpeedrunTimer::IsRunning() && !p2fx_speedrun_time_pauses.GetBool()) {
-		if (pauseTimer->IsActive() && !g_speedrun.inCoopPause) {
+		if (!server->isSimulating && !g_speedrun.inCoopPause) {
 			// I don't understand how any of this works but I think we're off-by-one here
 			g_speedrun.saved = SpeedrunTimer::GetTotalTicks() + 1;
 			g_speedrun.inCoopPause = true;
-		} else if (!pauseTimer->IsActive() && g_speedrun.inCoopPause) {
+		} else if (server->isSimulating && g_speedrun.inCoopPause) {
 			g_speedrun.base = getCurrentTick();
 			g_speedrun.inCoopPause = false;
 		}
@@ -415,7 +414,7 @@ void SpeedrunTimer::Update() {
 }
 
 ON_EVENT(PRE_TICK) {
-	if (!session->isRunning || !pauseTimer->IsActive()) {
+	if (!session->isRunning || server->isSimulating) {
 		return;
 	}
 
@@ -784,10 +783,6 @@ Variable p2fx_speedrun_stop_in_menu("p2fx_speedrun_stop_in_menu", "0", "Automati
 Variable p2fx_speedrun_start_on_load("p2fx_speedrun_start_on_load", "0", 0, 2, "Automatically start the speedrun timer when a map is loaded. 2 = restart if active.\n");
 Variable p2fx_speedrun_offset("p2fx_speedrun_offset", "0", 0, "Start speedruns with this time on the timer.\n", 0);
 Variable p2fx_speedrun_autostop("p2fx_speedrun_autostop", "0", 0, 2, "Automatically stop recording demos when a speedrun finishes. If 2, automatically append the run time to the demo name.\n");
-
-Variable p2fx_mtrigger_legacy("p2fx_mtrigger_legacy", "0", 0, 1, "\n");
-Variable p2fx_mtrigger_legacy_format("p2fx_mtrigger_legacy_format", "!seg -> !tt (!st)", "Formatting of the text that is displayed in the chat (!map - for map name, !seg - for segment name, !tt - for total time, !st - for split time).\n", 0);
-Variable p2fx_mtrigger_legacy_textcolor("p2fx_mtrigger_legacy_textcolor", "255 176 0", "The color of the text that is displayed in the chat.\n", 0);
 
 CON_COMMAND(p2fx_speedrun_start, "p2fx_speedrun_start - start the speedrun timer\n") {
 	SpeedrunTimer::Start();

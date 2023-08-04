@@ -255,8 +255,6 @@ public:
 	void GetCursorPos(int &x, int &y);
 	void SetCursorPos(int x, int y);
 
-	void DPIScaleDeltas(int &x, int &y);
-
 	void UnlockCursor();
 	void LockCursor();
 

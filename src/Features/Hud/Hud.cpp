@@ -2,7 +2,6 @@
 
 #include "Features/Demo/GhostEntity.hpp"
 #include "Features/Session.hpp"
-#include "Features/Timer/PauseTimer.hpp"
 #include "Features/EntityList.hpp"
 #include "Modules/Client.hpp"
 #include "Modules/Engine.hpp"
@@ -37,7 +36,7 @@ bool BaseHud::ShouldDraw() {
 		return this->type & HudType_Menu;
 	}
 
-	if (pauseTimer->IsActive()) {
+	if (!server->isSimulating) {
 		return this->type & HudType_Paused;
 	}
 

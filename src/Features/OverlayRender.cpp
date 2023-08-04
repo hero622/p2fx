@@ -5,7 +5,6 @@
 #include "Modules/Scheme.hpp"
 #include "Event.hpp"
 #include "Features/Session.hpp"
-#include "Features/Timer/PauseTimer.hpp"
 #include "Utils/FontAtlas.hpp"
 
 #include <array>

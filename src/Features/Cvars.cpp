@@ -163,7 +163,6 @@ void Cvars::Lock() {
 		net_showmsg.Lock();
 
 		sv_bonus_challenge.Lock();
-		sv_laser_cube_autoaim.Lock();
 		ui_loadingscreen_transition_time.Lock();
 		ui_loadingscreen_fadein_time.Lock();
 		ui_loadingscreen_mintransition_time.Lock();
@@ -194,7 +193,6 @@ void Cvars::Unlock() {
 
 		// Don't find a way to abuse this, ok?
 		sv_bonus_challenge.Unlock(false);
-		sv_laser_cube_autoaim.Unlock();
 		ui_loadingscreen_transition_time.Unlock(false);
 		ui_loadingscreen_fadein_time.Unlock(false);
 		ui_loadingscreen_mintransition_time.Unlock(false);

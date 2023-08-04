@@ -7,7 +7,6 @@
 #include "Features/Listener.hpp"
 #include "Features/NetMessage.hpp"
 #include "Features/Speedrun/SpeedrunTimer.hpp"
-#include "Features/Timer/Timer.hpp"
 #include "Modules/Client.hpp"
 #include "Modules/Console.hpp"
 #include "Modules/Engine.hpp"
@@ -19,8 +18,6 @@
 
 Variable p2fx_loads_uncap("p2fx_loads_uncap", "0", 0, 1, "Temporarily set fps_max to 0 during loads\n");
 Variable p2fx_loads_norender("p2fx_loads_norender", "0", 0, 1, "Temporarily set mat_norendering to 1 during loads\n");
-
-Variable p2fx_load_delay("p2fx_load_delay", "0", 0, "Delay for this number of milliseconds at the end of a load.\n");
 
 Session *session;
 
@@ -74,7 +71,6 @@ void Session::Start() {
 	auto tick = engine->GetTick();
 
 	this->Rebase(tick);
-	timer->Rebase(tick);
 
 	Event::Trigger<Event::SESSION_START>({ engine->isLevelTransition, engine->tickLoadStarted == -2 });
 	engine->isLevelTransition = false;
@@ -106,16 +102,6 @@ void Session::Ended() {
 	if (tick != 0) {
 		console->Print("Session: %i (%.3f)\n", tick, engine->ToTime(tick));
 		this->lastSession = tick;
-	}
-
-	if (timer->isRunning) {
-		if (p2fx_timer_always_running.GetBool()) {
-			timer->Save(engine->GetTick());
-			console->Print("Timer paused: %i (%.3f)!\n", timer->totalTicks, engine->ToTime(timer->totalTicks));
-		} else {
-			timer->Stop(engine->GetTick());
-			console->Print("Timer stopped!\n");
-		}
 	}
 
 	engine->demorecorder->currentDemo = "";
@@ -176,10 +162,6 @@ void Session::Changed(int state) {
 
 		auto time = std::chrono::duration_cast<std::chrono::milliseconds>(this->loadEnd - this->loadStart).count();
 		console->DevMsg("Load took: %dms\n", time);
-
-		if (p2fx_load_delay.GetInt()) {
-			std::this_thread::sleep_for(std::chrono::milliseconds(p2fx_load_delay.GetInt()));
-		}
 	} else if (state == SIGNONSTATE_PRESPAWN) {
 		this->ResetLoads();
 		SpeedrunTimer::FinishLoad();

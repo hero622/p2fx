@@ -11,8 +11,6 @@
 #include "Features/NetMessage.hpp"
 #include "Features/Session.hpp"
 #include "Features/Speedrun/SpeedrunTimer.hpp"
-#include "Features/Timer/PauseTimer.hpp"
-#include "Features/Timer/Timer.hpp"
 #include "Game.hpp"
 #include "Hook.hpp"
 #include "Interface.hpp"
@@ -117,17 +115,11 @@ DETOUR_T(bool, Server::CheckJumpButton) {
 	if (server->AllowsMovementChanges()) {
 		auto mv = *reinterpret_cast<CHLMoveData **>((uintptr_t)thisptr + Offsets::mv);
 
-		if (p2fx_autojump.GetBool() && !server->jumpedLastTime) {
-			mv->m_nOldButtons &= ~IN_JUMP;
-		}
-
 		server->jumpedLastTime = false;
 		server->savedVerticalVelocity = mv->m_vecVelocity[2];
 
 		server->callFromCheckJumpButton = true;
-		jumped = (p2fx_duckjump.isRegistered && p2fx_duckjump.GetBool())
-			? Server::CheckJumpButtonBase(thisptr)
-			: Server::CheckJumpButton(thisptr);
+		jumped = Server::CheckJumpButton(thisptr);
 		server->callFromCheckJumpButton = false;
 
 		if (jumped) {
@@ -177,21 +169,8 @@ DETOUR_T(Vector*, Server::GetPlayerViewOffset, bool ducked) {
 	return Server::GetPlayerViewOffset(thisptr, ducked);
 }
 
-Variable p2fx_always_transmit_heavy_ents("p2fx_always_transmit_heavy_ents", "0", "Always transmit large but seldom changing edicts to clients to prevent lag spikes.\n");
-
 extern Hook g_IsInPVS_Hook;
 DETOUR_T(bool, Server::IsInPVS, void *info) {
-	if (p2fx_always_transmit_heavy_ents.GetBool()) {
-		edict_t *m_pClientEnt = *(edict_t **)((uintptr_t)thisptr + 12);
-		if (m_pClientEnt->m_fStateFlags & FL_EDICT_FULL) {
-			ServerEnt *ent = (ServerEnt *)m_pClientEnt->m_pUnk;
-			const char *cn = ent->classname();
-			if (!strcmp(cn, "prop_dynamic")) return true;
-			if (!strcmp(cn, "phys_bone_follower")) return true;
-			if (!strcmp(cn, "func_portal_bumper")) return true;
-		}
-	}
-
 	g_IsInPVS_Hook.Disable();
 	auto res = Server::IsInPVS(thisptr, info);
 	g_IsInPVS_Hook.Enable();
@@ -256,93 +235,12 @@ Hook g_flagStartTouchHook(&Server::StartTouchChallengeNode_Hook);
 
 // CGameMovement::FinishGravity
 DETOUR(Server::FinishGravity) {
-	if (server->callFromCheckJumpButton) {
-		if (p2fx_duckjump.GetBool()) {
-			auto player = *reinterpret_cast<uintptr_t *>((uintptr_t)thisptr + Offsets::player);
-			auto mv = *reinterpret_cast<CHLMoveData **>((uintptr_t)thisptr + Offsets::mv);
-
-			auto m_pSurfaceData = *reinterpret_cast<uintptr_t *>(player + Offsets::m_pSurfaceData);
-			auto m_bDucked = SE(player)->ducked();
-			auto m_fFlags = SE(player)->field<int>("m_fFlags");
-
-			auto flGroundFactor = (m_pSurfaceData) ? *reinterpret_cast<float *>(m_pSurfaceData + Offsets::jumpFactor) : 1.0f;
-			auto flMul = std::sqrt(2 * sv_gravity.GetFloat() * GAMEMOVEMENT_JUMP_HEIGHT);
-
-			if (m_bDucked || m_fFlags & FL_DUCKING) {
-				mv->m_vecVelocity[2] = flGroundFactor * flMul;
-			} else {
-				mv->m_vecVelocity[2] = server->savedVerticalVelocity + flGroundFactor * flMul;
-			}
-		}
-
-		if (p2fx_jumpboost.GetBool()) {
-			auto player = *reinterpret_cast<uintptr_t *>((uintptr_t)thisptr + Offsets::player);
-			auto mv = *reinterpret_cast<CHLMoveData **>((uintptr_t)thisptr + Offsets::mv);
-
-			auto m_bDucked = SE(player)->ducked();
-
-			Vector vecForward;
-			Math::AngleVectors(mv->m_vecViewAngles, &vecForward);
-			vecForward.z = 0;
-			Math::VectorNormalize(vecForward);
-
-			float flSpeedBoostPerc = (!mv->m_bIsSprinting && !m_bDucked) ? 0.5f : 0.1f;
-			float flSpeedAddition = std::fabs(mv->m_flForwardMove * flSpeedBoostPerc);
-			float flMaxSpeed = mv->m_flMaxSpeed + (mv->m_flMaxSpeed * flSpeedBoostPerc);
-			float flNewSpeed = flSpeedAddition + mv->m_vecVelocity.Length2D();
-
-			if (p2fx_jumpboost.GetInt() == 1) {
-				if (flNewSpeed > flMaxSpeed) {
-					flSpeedAddition -= flNewSpeed - flMaxSpeed;
-				}
-
-				if (mv->m_flForwardMove < 0.0f) {
-					flSpeedAddition *= -1.0f;
-				}
-			}
-
-			Math::VectorAdd(vecForward * flSpeedAddition, mv->m_vecVelocity, mv->m_vecVelocity);
-		}
-	}
-
 	return Server::FinishGravity(thisptr);
 }
 
 // CGameMovement::AirMove
 DETOUR_B(Server::AirMove) {
-	if (p2fx_aircontrol.GetInt() >= 2 && server->AllowsMovementChanges()) {
-		return Server::AirMoveBase(thisptr);
-	}
-
 	return Server::AirMove(thisptr);
-}
-static void setAircontrol(int val) {
-	switch (val) {
-	case 0:
-		*server->aircontrol_fling_speed_addr = 300.0f * 300.0f;
-		break;
-	default:
-		*server->aircontrol_fling_speed_addr = INFINITY;
-		break;
-	}
-}
-static void setPortalsThruPortals(bool val) {
-	uintptr_t tfp = (uintptr_t)server->TraceFirePortal;
-#ifdef _WIN32
-	*(uint8_t *)(tfp + 391) = val ? 0x00 : 0x0A;
-#else
-	if (p2fx.game->Is(SourceGame_EIPRelPIC)) {
-		*(uint8_t *)(tfp + 388) = val ? 0x82 : 0x85;
-	} else {
-		*(uint8_t *)(tfp + 462) = val ? 0xEB : 0x74;
-	}
-#endif
-}
-Variable p2fx_portals_thru_portals("p2fx_portals_thru_portals", "0", "Allow firing portals through portals.\n");
-// cvar callbacks dont want to fucking work so we'll just do this bs
-ON_EVENT(PRE_TICK) {
-	setAircontrol(server->AllowsMovementChanges() ? p2fx_aircontrol.GetInt() : 0);
-	setPortalsThruPortals(sv_cheats.GetBool() && p2fx_portals_thru_portals.GetBool());
 }
 
 extern Hook g_AcceptInputHook;
@@ -395,10 +293,6 @@ static void __cdecl AcceptInput_Hook(void *thisptr, const char *inputName, void 
 		strcpy(data1 + 4 + entNameLen + classNameLen + inputNameLen, paramStr);
 		engine->demorecorder->RecordData(data, len);
 		free(data);
-	}
-
-	if (p2fx_show_entinp.GetBool() && sv_cheats.GetBool()) {
-		console->Print("%.4d %s.%s(%s)\n", session->GetTick(), server->GetEntityName(thisptr), inputName, parameter.ToString());
 	}
 
 	// HACKHACK
@@ -474,6 +368,8 @@ DETOUR(Server::GameFrame, bool simulating)
 
 	int tick = session->GetTick();
 
+	server->isSimulating = simulating;
+
 	Event::Trigger<Event::PRE_TICK>({simulating, tick});
 
 	auto result = Server::GameFrame(thisptr, simulating);
@@ -500,14 +396,6 @@ DETOUR_T(void, Server::OnRemoveEntity, IHandleEntity *ent, CBaseHandle handle) {
 			info->m_SerialNumber = g_ent_slot_serial[i].serial - 1;
 			console->Print("Serial number of slot %d has been set to %d.\n", g_ent_slot_serial[i].slot, g_ent_slot_serial[i].serial);
 			g_ent_slot_serial[i].done = true;
-		}
-	}
-	if (!hasSerialChanged && p2fx_prevent_ehm.GetBool()) {
-		// we're about to increment this entity's serial - if it's about to hit
-		// 0x4000, double-increment it so that can't happen
-		if (info->m_SerialNumber == 0x3FFF) {
-			info->m_SerialNumber += 1;
-			console->Print("Prevented EHM on slot %d!\n", handle.GetEntryIndex());
 		}
 	}
 
@@ -735,33 +623,6 @@ bool Server::Init() {
 
 	return this->hasLoaded = this->g_GameMovement && this->g_ServerGameDLL;
 }
-CON_COMMAND(p2fx_coop_reset_progress, "p2fx_coop_reset_progress - resets all coop progress\n") {
-	if (engine->IsCoop()) {
-		NetMessage::SendMsg(RESET_COOP_PROGRESS_MESSAGE_TYPE, nullptr, 0);
-		resetCoopProgress();
-		if (engine->IsSplitscreen()) Event::Trigger<Event::COOP_RESET_DONE>({});
-	}
-}
-CON_COMMAND(p2fx_give_fly, "p2fx_give_fly [n] - gives the player in slot n (0 by default) preserved crouchfly.\n") {
-	if (args.ArgC() > 2) return console->Print(p2fx_give_fly.ThisPtr()->m_pszHelpString);
-	if (!sv_cheats.GetBool()) return console->Print("p2fx_give_fly requires sv_cheats.\n");
-	int slot = args.ArgC() == 2 ? atoi(args[1]) : 0;
-	void *player = server->GetPlayer(slot + 1);
-	if (player) {
-		SE(player)->field<float>("m_flGravity") = FLT_MIN;
-		console->Print("Gave fly to player %d\n", slot);
-	}
-}
-CON_COMMAND(p2fx_give_betsrighter, "p2fx_give_betsrighter [n] - gives the player in slot n (0 by default) betsrighter.\n") {
-	if (args.ArgC() > 2) return console->Print(p2fx_give_betsrighter.ThisPtr()->m_pszHelpString);
-	if (!sv_cheats.GetBool()) return console->Print("p2fx_give_betsrighter requires sv_cheats.\n");
-	int slot = args.ArgC() == 2 ? atoi(args[1]) : 0;
-	ServerEnt *player = server->GetPlayer(slot + 1);
-	if (player) {
-		player->field<char>("m_takedamage") = 0;
-		console->Print("Gave betsrighter to player %d\n", slot);
-	}
-}
 DETOUR_COMMAND(Server::say) {
 	if (args.ArgC() != 2 || Utils::StartsWith(args[1], "!SAR:") || !networkManager.HandleGhostSay(args[1])) {
 		Server::say_callback(args);
@@ -769,8 +630,6 @@ DETOUR_COMMAND(Server::say) {
 }
 void Server::Shutdown() {
 	Command::Unhook("say", Server::say_callback);
-	setAircontrol(0);
-	setPortalsThruPortals(false);
 	if (g_check_stuck_code) memcpy(g_check_stuck_code, g_orig_check_stuck_code, sizeof g_orig_check_stuck_code);
 	Interface::Delete(this->gEntList);
 	Interface::Delete(this->g_GameMovement);
@@ -778,38 +637,3 @@ void Server::Shutdown() {
 }
 
 Server *server;
-
-CON_COMMAND(p2fx_paint_reseed, "p2fx_paint_reseed <seed> - re-seed all paint sprayers in the map to the given value (-9999 to 9999 inclusive)\n") {
-	if (args.ArgC() != 2) {
-		console->Print(p2fx_paint_reseed.ThisPtr()->m_pszHelpString);
-		return;
-	}
-
-	int seed = atoi(args[1]);
-	if (seed < -9999 || seed > 9999) {
-		// the game can only give seeds in this range so this is the only
-		// way this can be even remotely legitimate
-		console->Print("Seed must be in range -9999 to 9999\n");
-		return;
-	}
-
-	if (!sv_cheats.GetBool()) {
-		console->Print("p2fx_paint_reseed requires sv_cheats\n");
-		return;
-	}
-
-	unsigned count = 0;
-
-	for (int i = 0; i < Offsets::NUM_ENT_ENTRIES; ++i) {
-		void *ent = server->m_EntPtrArray[i].m_pEntity;
-		if (!ent) continue;
-
-		auto classname = server->GetEntityClassName(ent);
-		if (!classname || strcmp(classname, "info_paint_sprayer")) continue;
-
-		SE(ent)->field<int>("m_nBlobRandomSeed") = seed;
-		++count;
-	}
-
-	console->Print("Re-seeded %u paint sprayers\n", count);
-}

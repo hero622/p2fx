@@ -226,10 +226,6 @@ extern Variable sv_portal_players;
 extern Variable fps_max;
 extern Variable mat_norendering;
 
-extern Variable p2fx_record_at;
-extern Variable p2fx_record_at_demo_name;
-extern Variable p2fx_record_at_increment;
-
 extern Variable p2fx_pause_at;
 extern Variable p2fx_pause_for;
 

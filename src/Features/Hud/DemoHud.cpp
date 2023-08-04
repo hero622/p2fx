@@ -23,7 +23,7 @@
 DemoHud demoHud;
 
 DemoHud::DemoHud()
-	: Hud(HudType_InGame | HudType_Paused | HudType_Menu, false) {
+	: Hud(HudType_InGame, false) {
 }
 
 bool DemoHud::ShouldDraw() {

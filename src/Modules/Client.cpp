@@ -360,10 +360,6 @@ DETOUR(Client::ProcessMovement, void *player, CMoveData *move) {
 	return Client::ProcessMovement(thisptr, player, move);
 }
 
-CON_COMMAND(p2fx_chat, "p2fx_chat - open the chat HUD\n") {
-	client->OpenChat();
-}
-
 extern Hook g_DrawTranslucentRenderablesHook;
 DETOUR(Client::DrawTranslucentRenderables, bool inSkybox, bool shadowDepth) {
 	g_DrawTranslucentRenderablesHook.Disable();

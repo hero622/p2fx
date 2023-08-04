@@ -6,6 +6,4 @@
 #include "Features/Listener.hpp"
 #include "Features/Session.hpp"
 #include "Features/Speedrun/SpeedrunTimer.hpp"
-#include "Features/Timer/PauseTimer.hpp"
-#include "Features/Timer/Timer.hpp"
 #include "Features/DemoViewer.hpp"

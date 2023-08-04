@@ -2,7 +2,6 @@
 
 #include "Features/Hud/Hud.hpp"
 #include "Features/Session.hpp"
-#include "Features/Timer/PauseTimer.hpp"
 #include "Features/Demo/NetworkGhostPlayer.hpp"
 #include "Modules/Engine.hpp"
 #include "Modules/Server.hpp"
@@ -13,9 +12,6 @@
 
 REDECL(VGui::Paint);
 REDECL(VGui::UpdateProgressBar);
-
-Variable p2fx_hud_bg("p2fx_hud_bg", "0", "Enable the P2FX HUD background.\n", FCVAR_NEVER_AS_STRING | FCVAR_DONTRECORD);
-Variable p2fx_hud_orange_only("p2fx_hud_orange_only", "0", "Only display the P2FX HUD for orange, for solo coop (fullscreen PIP).\n", FCVAR_NEVER_AS_STRING | FCVAR_DONTRECORD);
 
 void VGui::Draw(Hud *const &hud) {
 	if (hud->ShouldDraw()) {

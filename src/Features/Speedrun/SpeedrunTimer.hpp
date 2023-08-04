@@ -46,10 +46,6 @@ extern Variable p2fx_speedrun_start_on_load;
 extern Variable p2fx_speedrun_offset;
 extern Variable p2fx_speedrun_autostop;
 
-extern Variable p2fx_mtrigger_legacy;
-extern Variable p2fx_mtrigger_legacy_format;
-extern Variable p2fx_mtrigger_legacy_textcolor;
-
 extern Command p2fx_speedrun_start;
 extern Command p2fx_speedrun_stop;
 extern Command p2fx_speedrun_split;

@@ -9,7 +9,6 @@
 #include "Features/FovChanger.hpp"
 #include "Features/Session.hpp"
 #include "Features/Speedrun/SpeedrunTimer.hpp"
-#include "Features/Timer/Timer.hpp"
 #include "Offsets.hpp"
 #include "Server.hpp"
 #include "Utils.hpp"
@@ -78,19 +77,13 @@ static void RecordTimestamp() {
 	engine->demorecorder->RecordData(buf, sizeof buf);
 }
 
-ON_EVENT(SESSION_END) {
-	if (*engine->demorecorder->m_bRecording && p2fx_autorecord.GetInt() == -1) {
-		engine->demorecorder->Stop();
-	}
-}
-
 // CDemoRecorder::SetSignonState
 DETOUR(EngineDemoRecorder::SetSignonState, int state) {
 	bool wasRecording = engine->demorecorder->isRecordingDemo;
 
 	//SIGNONSTATE_FULL is set twice during first CM load. Using SINGONSTATE_SPAWN for demo number increase instead
 	if (state == SIGNONSTATE_SPAWN) {
-		if (engine->demorecorder->isRecordingDemo || *engine->demorecorder->m_bRecording || p2fx_record_at_increment.GetBool()) {
+		if (engine->demorecorder->isRecordingDemo || *engine->demorecorder->m_bRecording) {
 			engine->demorecorder->lastDemoNumber++;
 		}
 	}
@@ -210,16 +203,8 @@ DETOUR(EngineDemoRecorder::StopRecording) {
 	//   m_nDemoNumber = 0
 	auto result = EngineDemoRecorder::StopRecording(thisptr);
 
-	if (engine->demorecorder->isRecordingDemo && p2fx_autorecord.GetInt() == 1 && !engine->demorecorder->requestedStop) {
-		*engine->demorecorder->m_nDemoNumber = engine->demorecorder->lastDemoNumber;
-		*engine->demorecorder->m_bRecording = true;
-	} else if (p2fx_record_at_increment.GetBool()) {
-		*engine->demorecorder->m_nDemoNumber = engine->demorecorder->lastDemoNumber;
-		engine->demorecorder->isRecordingDemo = false;
-	} else {
-		engine->demorecorder->isRecordingDemo = false;
-		engine->demorecorder->lastDemoNumber = 1;
-	}
+	engine->demorecorder->isRecordingDemo = false;
+	engine->demorecorder->lastDemoNumber = 1;
 
 	if (!engine->demorecorder->isRecordingDemo) {
 		// only set replay name once the autorecord chain is done
@@ -250,44 +235,12 @@ DETOUR_COMMAND(EngineDemoRecorder::stop) {
 	engine->demorecorder->requestedStop = false;
 }
 
-Variable p2fx_record_prefix("p2fx_record_prefix", "", "A string to prepend to recorded demo names. Can include strftime format codes.\n", 0);
-Variable p2fx_record_mkdir("p2fx_record_mkdir", "1", "Automatically create directories for demos if necessary.\n");
-
 DETOUR_COMMAND(EngineDemoRecorder::record) {
 	CCommand newArgs = args;
 	bool prefixed = false;
 	bool suppress = false;
 
-	if (args.ArgC() >= 2 && p2fx_record_prefix.GetString()[0]) {
-		time_t t = time(nullptr);
-		struct tm *tm = localtime(&t);
-		char *buf = new char[MAX_PATH + 1];
-		size_t timelen = strftime(buf, MAX_PATH + 1, p2fx_record_prefix.GetString(), tm);
-		if (timelen) {
-			strncat(buf, args[1], MAX_PATH - timelen);
-			newArgs.m_ppArgv[1] = buf;
-			prefixed = true;
-		} else {
-			console->Print("failed to add p2fx_record_prefix\n");
-			delete[] buf;
-		}
-	}
-
 	bool menu = engine->GetCurrentMapName() == "" && engine->hoststate->m_currentState == HS_RUN;
-
-	if (newArgs.ArgC() >= 2 && p2fx_record_mkdir.GetBool() && !menu && !engine->demorecorder->isRecordingDemo) {
-		try {
-			std::string pStr = engine->GetGameDirectory();
-			pStr += '/';
-			pStr += newArgs[1];
-			std::filesystem::path p(pStr);
-			auto dir = p.parent_path();
-			if (!std::filesystem::exists(dir)) {
-				std::filesystem::create_directories(dir);
-			}
-		} catch (std::filesystem::filesystem_error &e) {
-		}
-	}
 
 	if (newArgs.ArgC() >= 2 && !menu && !engine->demorecorder->isRecordingDemo) {
 		try {
@@ -389,66 +342,10 @@ ON_EVENT(PRE_TICK) {
 	}
 }
 
-ON_EVENT(PRE_TICK) {
-	if (!engine->demoplayer->IsPlaying()) {
-		if (p2fx_record_at.GetInt() == -1) {
-			engine->hasRecorded = true;  // We don't want to randomly start recording if the user sets p2fx_record_at in this session
-		} else if (!engine->hasRecorded && session->isRunning && event.tick >= p2fx_record_at.GetInt()) {
-			std::string cmd = std::string("record \"") + p2fx_record_at_demo_name.GetString() + "\"";
-			engine->ExecuteCommand(cmd.c_str(), true);
-			engine->hasRecorded = true;
-		}
-	}
-}
-
 ON_EVENT(CM_FLAGS) {
 	if (engine->demorecorder->isRecordingDemo && event.end) {
 		char data[2] = {0x06, (char)event.slot};
 		engine->demorecorder->RecordData(data, sizeof data);
-
-		Scheduler::InHostTicks(DEMO_AUTOSTOP_DELAY, [=]() {
-			if (!engine->demorecorder->isRecordingDemo) return; // manual stop before autostop
-			if (p2fx_challenge_autostop.GetInt() > 0) {
-				std::string demoFile = engine->demorecorder->GetDemoFilename();
-
-				engine->demorecorder->Stop();
-
-				std::optional<std::string> rename_if_pb = {};
-				std::optional<std::string> replay_append_if_pb = {};
-
-				if (p2fx_challenge_autostop.GetInt() == 2 || p2fx_challenge_autostop.GetInt() == 3) {
-					unsigned total = floor(event.time * 100);
-					unsigned cs = total % 100;
-					total /= 100;
-					unsigned secs = total % 60;
-					total /= 60;
-					unsigned mins = total % 60;
-					total /= 60;
-					unsigned hrs = total;
-
-					std::string time;
-
-					if (hrs) {
-						time = Utils::ssprintf("%d-%02d-%02d-%02d", hrs, mins, secs, cs);
-					} else if (mins) {
-						time = Utils::ssprintf("%d-%02d-%02d", mins, secs, cs);
-					} else {
-						time = Utils::ssprintf("%d-%02d", secs, cs);
-					}
-
-					auto newName = Utils::ssprintf("%s_%s.dem", demoFile.substr(0, demoFile.size() - 4).c_str(), time.c_str());
-					if (p2fx_challenge_autostop.GetInt() == 2) {
-						std::filesystem::rename(demoFile, newName);
-						demoFile = newName;
-						engine->demoplayer->replayName += "_";
-						engine->demoplayer->replayName += time;
-					} else { // autostop 3
-						rename_if_pb = newName;
-						replay_append_if_pb = std::string("_") + time;
-					}
-				}
-			}
-		});
 	}
 }
 
@@ -460,22 +357,4 @@ void EngineDemoRecorder::Stop() {
 	this->StopRecording_Hook(this->s_ClientDemoRecorder->ThisPtr());
 #endif
 	this->requestedStop = false;
-}
-
-CON_COMMAND(p2fx_stop, "p2fx_stop <name> - stop recording the current demo and rename it to 'name' (not considering p2fx_record_prefix)\n") {
-	if (args.ArgC() != 2) return console->Print(p2fx_stop.ThisPtr()->m_pszHelpString);
-
-	std::string name = args[1];
-	if (name.size() == 0) return console->Print("Demo name cannot be blank\n");
-	name += ".dem";
-
-	if (!engine->demorecorder->isRecordingDemo) return console->Print("Demo recording not active\n");
-
-	std::string cur_name = engine->demorecorder->GetDemoFilename();
-	engine->demorecorder->Stop();
-	try {
-		std::filesystem::rename(cur_name, name);
-	} catch (...) {
-		console->Print("An error occurred renaming the demo. Saved as %s\n", cur_name.c_str());
-	}
 }

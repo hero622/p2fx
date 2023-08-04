@@ -177,10 +177,6 @@
     <ClCompile Include="Features\Speedrun\CategoryCreator.cpp" />
     <ClCompile Include="Features\Updater.cpp" />
     <ClCompile Include="Features\Renderer.cpp" />
-    <ClCompile Include="Features\Timer\PauseTimer.cpp" />
-    <ClCompile Include="Features\Timer\Timer.cpp" />
-    <ClCompile Include="Features\Timer\TimerAverage.cpp" />
-    <ClCompile Include="Features\Timer\TimerCheckPoints.cpp" />
     <ClCompile Include="Features\NetMessage.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Interface.cpp" />
@@ -317,10 +313,6 @@
     <ClInclude Include="Features\Speedrun\CategoriesPreset.hpp" />
     <ClInclude Include="Features\Updater.hpp" />
     <ClInclude Include="Features\Renderer.hpp" />
-    <ClInclude Include="Features\Timer\PauseTimer.hpp" />
-    <ClInclude Include="Features\Timer\Timer.hpp" />
-    <ClInclude Include="Features\Timer\TimerAverage.hpp" />
-    <ClInclude Include="Features\Timer\TimerCheckPoints.hpp" />
     <ClInclude Include="Features\NetMessage.hpp" />
     <ClInclude Include="Game.hpp" />
     <ClInclude Include="Interface.hpp" />

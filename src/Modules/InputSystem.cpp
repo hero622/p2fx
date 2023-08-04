@@ -38,32 +38,6 @@ void InputSystem::SetCursorPos(int x, int y) {
 	return this->SetCursorPosition(this->g_InputSystem->ThisPtr(), x, y);
 }
 
-Variable p2fx_dpi_scale("p2fx_dpi_scale", "1", 1, "Fraction to scale mouse DPI down by.\n");
-void InputSystem::DPIScaleDeltas(int &x, int &y) {
-	static int saved_x = 0;
-	static int saved_y = 0;
-
-	static int last_dpi_scale = 1;
-
-	int scale = p2fx_dpi_scale.GetInt();
-	if (scale < 1) scale = 1;
-
-	if (scale != last_dpi_scale) {
-		saved_x = 0;
-		saved_y = 0;
-		last_dpi_scale = scale;
-	}
-
-	saved_x += x;
-	saved_y += y;
-
-	x = saved_x / scale;
-	y = saved_y / scale;
-
-	saved_x %= scale;
-	saved_y %= scale;
-}
-
 void InputSystem::UnlockCursor() {
 	if (!this->g_Context)
 		this->g_Context = this->PushInputContext(this->g_InputStackSystem->ThisPtr());
@@ -95,7 +69,6 @@ DETOUR(InputSystem::SleepUntilInput, int nMaxSleepTimeMS) {
 // CInputSystem::GetRawMouseAccumulators
 DETOUR_T(void, InputSystem::GetRawMouseAccumulators, int &x, int &y) {
 	InputSystem::GetRawMouseAccumulators(thisptr, x, y);
-	inputSystem->DPIScaleDeltas(x, y);
 }
 #endif
 
