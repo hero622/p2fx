@@ -53,5 +53,4 @@ CON_COMMAND_COMPLETION(p2fx_force_fov, "p2fx_force_fov <fov> - forces player FOV
 	}
 
 	fovChanger->SetFov(fov);
-	console->Print("Enabled forcing FOV: %i\n", fov);
 }

@@ -31,17 +31,34 @@ namespace CImGui {
 		Variable(var).SetValue(val);
 	}
 
+	inline void Slider2(const char *label, const char *var, const char *cmd, int min, int max, const char *format = "%d") {
+		int val = std::clamp(Variable(var).GetInt(), min, max);
+		ImGui::SliderInt(label, &val, min, max, format);
+		engine->ExecuteCommand(Utils::ssprintf("%s %d", cmd, val).c_str());
+	}
+
 	inline void Sliderf(const char *label, const char *var, float min, float max, const char *format = "%.2f") {
 		float val = std::clamp(Variable(var).GetFloat(), min, max);
 		ImGui::SliderFloat(label, &val, min, max, format);
 		Variable(var).SetValue(val);
 	}
 
-	inline void Colorpicker3(const char *label, const char *var) {
+	inline void Colorpicker(const char *label, const char *var) {
 		auto val = Utils::GetColor(Variable(var).GetString());
 		float col[3] = {val->r / 255.0f, val->g / 255.0f, val->b / 255.0f};
 		ImGui::ColorEdit3(label, col, ImGuiColorEditFlags_NoInputs);
 		Variable(var).SetValue(Utils::ssprintf("%.0f %.0f %.0f", col[0] * 255.0f, col[1] * 255.0f, col[2] * 255.0f).c_str());
+	}
+
+	inline void Colorpickerf2(const char *label, const char *var1, const char *var2, const char *var3) {
+		auto r = Variable(var1).GetFloat();
+		auto g = Variable(var2).GetFloat();
+		auto b = Variable(var3).GetFloat();
+		float col[3] = {r, g, b};
+		ImGui::ColorEdit3(label, col, ImGuiColorEditFlags_NoInputs);
+		Variable(var1).SetValue(col[0]);
+		Variable(var2).SetValue(col[1]);
+		Variable(var3).SetValue(col[2]);
 	}
 
 	inline void Combo(const char *label, const char *var, const char *items) {
