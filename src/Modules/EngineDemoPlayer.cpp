@@ -182,8 +182,6 @@ void EngineDemoPlayer::CustomDemoData(char *data, size_t length) {
 
 		//console->Print("[%4d] %s.%s(%s)\n", this->GetTick(), targetname, inputname, parameter);
 
-		SpeedrunTimer::TestInputRules(targetname, classname, inputname, parameter, slot);
-
 		return;
 	}
 
@@ -195,23 +193,17 @@ void EngineDemoPlayer::CustomDemoData(char *data, size_t length) {
 		pos.y = *(float *)(data + 7);
 		pos.z = *(float *)(data + 11);
 
-		SpeedrunTimer::TestPortalRules(pos, slot, portal);
-
 		return;
 	}
 
 	if (data[0] == 0x06) {  // CM flags
 		int slot = data[1];
 
-		SpeedrunTimer::TestFlagRules(slot);
-
 		return;
 	}
 
 	if (data[0] == 0x07) {  // Crouch fly
 		int slot = data[1];
-
-		SpeedrunTimer::TestFlyRules(slot);
 
 		return;
 	}

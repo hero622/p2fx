@@ -144,8 +144,6 @@
     <ClCompile Include="Features\Hud\DemoHud.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="Event.cpp" />
-    <ClCompile Include="Features\Demo\GhostRenderer.cpp" />
-    <ClCompile Include="Features\Demo\GhostLeaderboard.cpp" />
     <ClCompile Include="Games\ApertureTag.cpp" />
     <ClCompile Include="Games\Portal2.cpp" />
     <ClCompile Include="Games\PortalReloaded.cpp" />
@@ -157,11 +155,7 @@
     <ClCompile Include="Features\Cvars.cpp" />
     <ClCompile Include="Features\Camera.cpp" />
     <ClCompile Include="Features\Demo\Demo.cpp" />
-    <ClCompile Include="Features\Demo\DemoGhostEntity.cpp" />
-    <ClCompile Include="Features\Demo\DemoGhostPlayer.cpp" />
     <ClCompile Include="Features\Demo\DemoParser.cpp" />
-    <ClCompile Include="Features\Demo\GhostEntity.cpp" />
-    <ClCompile Include="Features\Demo\NetworkGhostPlayer.cpp" />
     <ClCompile Include="Features\EntityList.cpp" />
     <ClCompile Include="Features\Feature.cpp" />
     <ClCompile Include="Features\FovChanger.cpp" />
@@ -171,11 +165,6 @@
     <ClCompile Include="Features\Listener.cpp" />
     <ClCompile Include="Features\OverlayRender.cpp" />
     <ClCompile Include="Features\Session.cpp" />
-    <ClCompile Include="Features\Speedrun\SpeedrunTimer.cpp" />
-    <ClCompile Include="Features\Speedrun\Rules.cpp" />
-    <ClCompile Include="Features\Speedrun\Categories.cpp" />
-    <ClCompile Include="Features\Speedrun\CategoriesPreset.cpp" />
-    <ClCompile Include="Features\Speedrun\CategoryCreator.cpp" />
     <ClCompile Include="Features\Updater.cpp" />
     <ClCompile Include="Features\Renderer.cpp" />
     <ClCompile Include="Features\NetMessage.cpp" />
@@ -185,7 +174,6 @@
     <ClCompile Include="Modules\Console.cpp" />
     <ClCompile Include="Modules\Engine.cpp" />
     <ClCompile Include="Modules\EngineDemoPlayer.cpp" />
-    <ClCompile Include="Modules\EngineDemoRecorder.cpp" />
     <ClCompile Include="Modules\InputSystem.cpp" />
     <ClCompile Include="Modules\MaterialSystem.cpp" />
     <ClCompile Include="Modules\Module.cpp" />
@@ -281,8 +269,6 @@
     <ClInclude Include="Features\Hud\DemoHud.hpp" />
     <ClInclude Include="Entity.hpp" />
     <ClInclude Include="Event.hpp" />
-    <ClInclude Include="Features\Demo\GhostRenderer.hpp" />
-    <ClInclude Include="Features\Demo\GhostLeaderboard.hpp" />
     <ClInclude Include="Games\ApertureTag.hpp" />
     <ClInclude Include="Games\Portal2.hpp" />
     <ClInclude Include="Games\PortalReloaded.hpp" />
@@ -296,11 +282,7 @@
     <ClInclude Include="Features\Cvars.hpp" />
     <ClInclude Include="Features\Camera.hpp" />
     <ClInclude Include="Features\Demo\Demo.hpp" />
-    <ClInclude Include="Features\Demo\DemoGhostEntity.hpp" />
-    <ClInclude Include="Features\Demo\DemoGhostPlayer.hpp" />
     <ClInclude Include="Features\Demo\DemoParser.hpp" />
-    <ClInclude Include="Features\Demo\GhostEntity.hpp" />
-    <ClInclude Include="Features\Demo\NetworkGhostPlayer.hpp" />
     <ClInclude Include="Features\EntityList.hpp" />
     <ClInclude Include="Features\Feature.hpp" />
     <ClInclude Include="Features\FovChanger.hpp" />
@@ -309,10 +291,6 @@
     <ClInclude Include="Features\Listener.hpp" />
     <ClInclude Include="Features\OverlayRender.hpp" />
     <ClInclude Include="Features\Session.hpp" />
-    <ClInclude Include="Features\Speedrun\SpeedrunTimer.hpp" />
-    <ClInclude Include="Features\Speedrun\Rules.hpp" />
-    <ClInclude Include="Features\Speedrun\Categories.hpp" />
-    <ClInclude Include="Features\Speedrun\CategoriesPreset.hpp" />
     <ClInclude Include="Features\Updater.hpp" />
     <ClInclude Include="Features\Renderer.hpp" />
     <ClInclude Include="Features\NetMessage.hpp" />
@@ -323,7 +301,6 @@
     <ClInclude Include="Modules\Console.hpp" />
     <ClInclude Include="Modules\Engine.hpp" />
     <ClInclude Include="Modules\EngineDemoPlayer.hpp" />
-    <ClInclude Include="Modules\EngineDemoRecorder.hpp" />
     <ClInclude Include="Modules\InputSystem.hpp" />
     <ClInclude Include="Modules\MaterialSystem.hpp" />
     <ClInclude Include="Modules\Module.hpp" />

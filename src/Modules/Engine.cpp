@@ -3,18 +3,15 @@
 #include "Client.hpp"
 #include "Console.hpp"
 #include "EngineDemoPlayer.hpp"
-#include "EngineDemoRecorder.hpp"
 #include "Event.hpp"
 #include "InputSystem.hpp"
 #include "Features/Camera.hpp"
 #include "Features/Cvars.hpp"
 #include "Features/Demo/DemoParser.hpp"
-#include "Features/Demo/NetworkGhostPlayer.hpp"
 #include "Features/NetMessage.hpp"
 #include "Features/OverlayRender.hpp"
 #include "Features/Renderer.hpp"
 #include "Features/Session.hpp"
-#include "Features/Speedrun/SpeedrunTimer.hpp"
 #include "Game.hpp"
 #include "Hook.hpp"
 #include "Interface.hpp"
@@ -364,10 +361,6 @@ DETOUR(Engine::Frame) {
 	}
 	session->prevState = engine->hoststate->m_currentState;
 
-	if (engine->hoststate->m_activeGame || std::strlen(engine->m_szLevelName) == 0) {
-		SpeedrunTimer::Update();
-	}
-
 	if ((engine->demoplayer->IsPlaying() || engine->IsOrange()) && engine->lastTick != session->GetTick()) {
 		Event::Trigger<Event::PRE_TICK>({false, session->GetTick()});
 		Event::Trigger<Event::POST_TICK>({false, session->GetTick()});
@@ -499,10 +492,6 @@ DETOUR_COMMAND(Engine::gameui_activate) {
 	Engine::gameui_activate_callback(args);
 }
 DETOUR_COMMAND(Engine::playvideo_end_level_transition) {
-	if (engine->GetMaxClients() >= 2 && !engine->IsOrange() && client->GetChallengeStatus() != CMStatus::CHALLENGE) {
-		SpeedrunTimer::Pause();
-	}
-
 	if (engine->GetMaxClients() >= 2) {
 		engine->isLevelTransition = true;
 	}
@@ -514,11 +503,6 @@ DETOUR_COMMAND(Engine::stop_transition_videos_fadeout) {
 	Engine::stop_transition_videos_fadeout_callback(args);
 }
 DETOUR_COMMAND(Engine::load) {
-	// Loading a save should bypass ghost_sync if there's no map
-	// list for this game
-	if (Game::mapNames.empty() && networkManager.isConnected) {
-		networkManager.disableSyncForLoad = true;
-	}
 	engine->tickLoadStarted = engine->GetTick();
 	Engine::load_callback(args);
 }
@@ -550,8 +534,6 @@ DECL_CVAR_CALLBACK(ss_force_primary_fullscreen) {
 	if (engine->GetMaxClients() >= 2 && client->GetChallengeStatus() != CMStatus::CHALLENGE && ss_force_primary_fullscreen.GetInt() == 0) {
 		if (engine->startedTransitionFadeout && !engine->forcedPrimaryFullscreen && !engine->IsOrange()) {
 			engine->forcedPrimaryFullscreen = true;
-			SpeedrunTimer::Resume();
-			SpeedrunTimer::OnLoad();
 		}
 	}
 }
@@ -844,8 +826,6 @@ bool Engine::Init() {
 		if (this->cl = Interface::Create(clPtr)) {
 			if (!this->demoplayer)
 				this->demoplayer = new EngineDemoPlayer();
-			if (!this->demorecorder)
-				this->demorecorder = new EngineDemoRecorder();
 
 			this->cl->Hook(Engine::SetSignonState_Hook, Engine::SetSignonState, Offsets::Disconnect - 1);
 			this->cl->Hook(Engine::Disconnect_Hook, Engine::Disconnect, Offsets::Disconnect);
@@ -862,7 +842,6 @@ bool Engine::Init() {
 			tickcount = Memory::Deref<int *>(ProcessTick + Offsets::tickcount);
 
 			interval_per_tick = Memory::Deref<float *>(ProcessTick + Offsets::interval_per_tick);
-			SpeedrunTimer::SetIpt(*interval_per_tick);
 
 			auto SetSignonState = this->cl->Original(Offsets::Disconnect - 1);
 			auto HostState_OnClientConnected = Memory::Read(SetSignonState + Offsets::HostState_OnClientConnected);
@@ -1044,7 +1023,7 @@ bool Engine::Init() {
 		Memory::CloseModuleHandle(bink_mod);
 	}
 
-	return this->hasLoaded = this->engineClient && this->s_ServerPlugin && this->demoplayer && this->demorecorder && this->engineTrace;
+	return this->hasLoaded = this->engineClient && this->s_ServerPlugin && this->demoplayer && this->engineTrace;
 }
 void Engine::Shutdown() {
 	if (this->engineClient) {
@@ -1099,12 +1078,8 @@ void Engine::Shutdown() {
 	if (this->demoplayer) {
 		this->demoplayer->Shutdown();
 	}
-	if (this->demorecorder) {
-		this->demorecorder->Shutdown();
-	}
 
 	SAFE_DELETE(this->demoplayer)
-	SAFE_DELETE(this->demorecorder)
 }
 
 Engine *engine;

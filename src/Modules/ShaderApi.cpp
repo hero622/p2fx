@@ -83,19 +83,19 @@ bool ShaderApi::Init() {
 	uintptr_t d3dDevicePtr = Memory::Scan(this->Name(), "89 1D ? ? ? ? E8 ? ? ? ? 8B 55", 2);
 	void *g_d3dDeviceAddr = Memory::DerefDeref<void *>(d3dDevicePtr);
 
-	g_d3dDevice = reinterpret_cast<IDirect3DDevice9 *>(g_d3dDeviceAddr);
+	this->g_d3dDevice = reinterpret_cast<IDirect3DDevice9 *>(g_d3dDeviceAddr);
 
-	Reset = Memory::VMT<long(__stdcall *)(IDirect3DDevice9 *, D3DPRESENT_PARAMETERS *)>(g_d3dDevice, 16);
+	Reset = Memory::VMT<long(__stdcall *)(IDirect3DDevice9 *, D3DPRESENT_PARAMETERS *)>(this->g_d3dDevice, 16);
 	Reset_Hook.SetFunc(Reset);
 
-	Present = Memory::VMT<long(__stdcall *)(IDirect3DDevice9 *, const RECT *, const RECT *, HWND, const RGNDATA *)>(g_d3dDevice, 17);
+	Present = Memory::VMT<long(__stdcall *)(IDirect3DDevice9 *, const RECT *, const RECT *, HWND, const RGNDATA *)>(this->g_d3dDevice, 17);
 	Present_Hook.SetFunc(Present);
 
 	return this->hasLoaded;
 }
 
 void ShaderApi::Shutdown() {
-
+	SAFE_DELETE(this->g_d3dDevice);
 }
 
 ShaderApi *shaderApi;

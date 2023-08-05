@@ -66,7 +66,6 @@ bool P2FX::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServer
 		if (tier1->Init()) {
 			this->features->AddFeature<Cvars>(&cvars);
 			this->features->AddFeature<Session>(&session);
-			SpeedrunTimer::Init();
 			this->features->AddFeature<EntityList>(&entityList);
 			this->features->AddFeature<FovChanger>(&fovChanger);
 			this->features->AddFeature<Camera>(&camera);
@@ -88,7 +87,6 @@ bool P2FX::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServer
 				Input::Init();
 
 				engine->demoplayer->Init();
-				engine->demorecorder->Init();
 
 				this->cheats->Init();
 
@@ -178,8 +176,6 @@ void P2FX::Unload() {
 	unloading = true;
 
 	curl_global_cleanup();
-
-	networkManager.Disconnect();
 
 	Variable::ClearAllCallbacks();
 

@@ -4,13 +4,11 @@
 #include "Engine.hpp"
 #include "Event.hpp"
 #include "Features/Camera.hpp"
-#include "Features/Demo/NetworkGhostPlayer.hpp"
 #include "Features/EntityList.hpp"
 #include "Features/FovChanger.hpp"
 #include "Features/Hud/Crosshair.hpp"
 #include "Features/NetMessage.hpp"
 #include "Features/Session.hpp"
-#include "Features/Speedrun/SpeedrunTimer.hpp"
 #include "Game.hpp"
 #include "Hook.hpp"
 #include "Interface.hpp"
@@ -263,36 +261,6 @@ static void __cdecl AcceptInput_Hook(void *thisptr, const char *inputName, void 
 
 	if (activator && server->IsPlayer(activator)) {
 		activatorSlot = server->GetSplitScreenPlayerSlot(activator);
-	}
-
-	SpeedrunTimer::TestInputRules(entName, className, inputName, parameter.ToString(), activatorSlot);
-
-	if (engine->demorecorder->isRecordingDemo) {
-		size_t entNameLen = strlen(entName);
-		size_t classNameLen = strlen(className);
-		size_t inputNameLen = strlen(inputName);
-
-		const char *paramStr = parameter.ToString();
-
-		size_t len = entNameLen + classNameLen + inputNameLen + strlen(paramStr) + 5;
-		if (activatorSlot) {
-			len += 1;
-		}
-		char *data = (char *)malloc(len);
-		char *data1 = data;
-		if (!activatorSlot) {
-			data[0] = 0x03;
-		} else {
-			data[0] = 0x04;
-			data[1] = *activatorSlot;
-			++data1;
-		}
-		strcpy(data1 + 1, entName);
-		strcpy(data1 + 2 + entNameLen, className);
-		strcpy(data1 + 3 + entNameLen + classNameLen, inputName);
-		strcpy(data1 + 4 + entNameLen + classNameLen + inputNameLen, paramStr);
-		engine->demorecorder->RecordData(data, len);
-		free(data);
 	}
 
 	// HACKHACK
@@ -624,7 +592,7 @@ bool Server::Init() {
 	return this->hasLoaded = this->g_GameMovement && this->g_ServerGameDLL;
 }
 DETOUR_COMMAND(Server::say) {
-	if (args.ArgC() != 2 || Utils::StartsWith(args[1], "!SAR:") || !networkManager.HandleGhostSay(args[1])) {
+	if (args.ArgC() != 2 || Utils::StartsWith(args[1], "!SAR:")) {
 		Server::say_callback(args);
 	}
 }

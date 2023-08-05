@@ -1,6 +1,5 @@
 #include "Hud.hpp"
 
-#include "Features/Demo/GhostEntity.hpp"
 #include "Features/Session.hpp"
 #include "Features/EntityList.hpp"
 #include "Modules/Client.hpp"

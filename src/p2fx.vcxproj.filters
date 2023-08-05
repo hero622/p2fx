@@ -22,21 +22,6 @@
     <ClCompile Include="Features\Hud\Hud.cpp">
       <Filter>p2fx\Features\Hud</Filter>
     </ClCompile>
-    <ClCompile Include="Features\Speedrun\SpeedrunTimer.cpp">
-      <Filter>p2fx\Features\Speedrun</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Speedrun\Rules.cpp">
-      <Filter>p2fx\Features\Speedrun</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Speedrun\Categories.cpp">
-      <Filter>p2fx\Features\Speedrun</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Speedrun\CategoriesPreset.cpp">
-      <Filter>p2fx\Features\Speedrun</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Speedrun\CategoryCreator.cpp">
-      <Filter>p2fx\Features\Speedrun</Filter>
-    </ClCompile>
     <ClCompile Include="Features\Demo\Demo.cpp">
       <Filter>p2fx\Features\Demo</Filter>
     </ClCompile>
@@ -53,9 +38,6 @@
       <Filter>p2fx\Modules</Filter>
     </ClCompile>
     <ClCompile Include="Modules\EngineDemoPlayer.cpp">
-      <Filter>p2fx\Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\EngineDemoRecorder.cpp">
       <Filter>p2fx\Modules</Filter>
     </ClCompile>
     <ClCompile Include="Modules\InputSystem.cpp">
@@ -166,18 +148,6 @@
     <ClCompile Include="Utils\lodepng.cpp">
       <Filter>p2fx\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="Features\Demo\GhostEntity.cpp">
-      <Filter>p2fx\Features\Demo</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Demo\NetworkGhostPlayer.cpp">
-      <Filter>p2fx\Features\Demo</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Demo\DemoGhostPlayer.cpp">
-      <Filter>p2fx\Features\Demo</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Demo\DemoGhostEntity.cpp">
-      <Filter>p2fx\Features\Demo</Filter>
-    </ClCompile>
     <ClCompile Include="Features\Hud\Watermark.cpp">
       <Filter>p2fx\Features\Hud</Filter>
     </ClCompile>
@@ -207,12 +177,6 @@
     </ClCompile>
     <ClCompile Include="Modules\MaterialSystem.cpp">
       <Filter>p2fx\Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Demo\GhostRenderer.cpp">
-      <Filter>p2fx\Features\Demo</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Demo\GhostLeaderboard.cpp">
-      <Filter>p2fx\Features\Demo</Filter>
     </ClCompile>
     <ClCompile Include="Modules\FileSystem.cpp">
       <Filter>p2fx\Modules</Filter>
@@ -351,18 +315,6 @@
     <ClInclude Include="Utils\Platform.hpp">
       <Filter>p2fx\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="Features\Speedrun\SpeedrunTimer.hpp">
-      <Filter>p2fx\Features\Speedrun</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Speedrun\Rules.hpp">
-      <Filter>p2fx\Features\Speedrun</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Speedrun\Categories.hpp">
-      <Filter>p2fx\Features\Speedrun</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Speedrun\CategoriesPreset.hpp">
-      <Filter>p2fx\Features\Speedrun</Filter>
-    </ClInclude>
     <ClInclude Include="Features\Demo\Demo.hpp">
       <Filter>p2fx\Features\Demo</Filter>
     </ClInclude>
@@ -379,9 +331,6 @@
       <Filter>p2fx\Modules</Filter>
     </ClInclude>
     <ClInclude Include="Modules\EngineDemoPlayer.hpp">
-      <Filter>p2fx\Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="Modules\EngineDemoRecorder.hpp">
       <Filter>p2fx\Modules</Filter>
     </ClInclude>
     <ClInclude Include="Modules\InputSystem.hpp">
@@ -495,12 +444,6 @@
     <ClInclude Include="Utils\FontAtlas.hpp">
       <Filter>p2fx\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="Features\Demo\GhostEntity.hpp">
-      <Filter>p2fx\Features\Demo</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Demo\NetworkGhostPlayer.hpp">
-      <Filter>p2fx\Features\Demo</Filter>
-    </ClInclude>
     <ClInclude Include="..\lib\SFML\include\SFML\Network\Export.hpp">
       <Filter>lib\SFML\Network</Filter>
     </ClInclude>
@@ -608,12 +551,6 @@
     </ClInclude>
     <ClInclude Include="..\lib\SFML\include\SFML\System.hpp">
       <Filter>lib\SFML</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Demo\DemoGhostPlayer.hpp">
-      <Filter>p2fx\Features\Demo</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Demo\DemoGhostEntity.hpp">
-      <Filter>p2fx\Features\Demo</Filter>
     </ClInclude>
     <ClInclude Include="Modules\MaterialSystem.hpp">
       <Filter>p2fx\Modules</Filter>
@@ -752,12 +689,6 @@
     </ClInclude>
     <ClInclude Include="Modules\MaterialSystem.hpp">
       <Filter>p2fx\Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Demo\GhostRenderer.hpp">
-      <Filter>p2fx\Features\Demo</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Demo\GhostLeaderboard.hpp">
-      <Filter>p2fx\Features\Demo</Filter>
     </ClInclude>
     <ClInclude Include="OffsetsData.hpp">
       <Filter>p2fx</Filter>
@@ -970,9 +901,6 @@
     </Filter>
     <Filter Include="p2fx\Features\Demo">
       <UniqueIdentifier>{274d8264-59f6-4e07-880f-672c8c26c1f7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="p2fx\Features\Speedrun">
-      <UniqueIdentifier>{68aa521b-4809-41c1-9070-2b9f95b802bd}</UniqueIdentifier>
     </Filter>
     <Filter Include="p2fx\Games">
       <UniqueIdentifier>{56b78df4-db1c-44a5-9243-10415ba45a25}</UniqueIdentifier>

@@ -113,7 +113,7 @@ void DemoViewer::ParseDemoData() {
 	DemoParser parser;
 	Demo demo;
 	auto dir = std::string(engine->GetGameDirectory()) + std::string("/") + std::string(engine->demoplayer->DemoName);
-	if (parser.Parse(dir, &demo, true, &std::map<int, DataGhost>(), &CustomDatas())) {
+	if (parser.Parse(dir, &demo, true)) {
 		parser.Adjust(&demo);
 
 		g_demoPlaybackTicks = demo.playbackTicks;

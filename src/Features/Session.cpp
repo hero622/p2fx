@@ -1,12 +1,9 @@
 #include "Session.hpp"
 
 #include "Event.hpp"
-#include "Features/Demo/DemoGhostPlayer.hpp"
-#include "Features/Demo/NetworkGhostPlayer.hpp"
 #include "Features/Hud/Hud.hpp"
 #include "Features/Listener.hpp"
 #include "Features/NetMessage.hpp"
-#include "Features/Speedrun/SpeedrunTimer.hpp"
 #include "Modules/Client.hpp"
 #include "Modules/Console.hpp"
 #include "Modules/Engine.hpp"
@@ -46,12 +43,6 @@ void Session::Started(bool menu) {
 	if (menu) {
 		console->Print("Session started! (menu)\n");
 		this->Rebase(engine->GetTick());
-
-		if (p2fx_speedrun_stop_in_menu.isRegistered && p2fx_speedrun_stop_in_menu.GetBool()) {
-			SpeedrunTimer::Stop("menu");
-		} else {
-			SpeedrunTimer::Resume();
-		}
 
 		if (!engine->IsOrange()) {
 			this->ResetLoads();
@@ -104,28 +95,14 @@ void Session::Ended() {
 		this->lastSession = tick;
 	}
 
-	engine->demorecorder->currentDemo = "";
 	this->lastFrame = this->currentFrame;
 	this->currentFrame = 0;
 
 	NetMessage::SessionEnded();
 
-	// This pause generally won't do anything in co-op; it will have
-	// already happened in the playvideo_end_level_transition detour.
-	// However, if a level ends prematurely (e.g. restart_level), that
-	// command is never run, so we use session timing to pause instead
-	if (!engine->IsOrange()) {
-		SpeedrunTimer::Pause();
-	}
-
 	if (listener) {
 		listener->Reset();
 	}
-
-	demoGhostPlayer.DeleteAllGhostModels();
-	networkManager.DeleteAllGhosts();
-
-	if (networkManager.isConnected) networkManager.splitTicks = -1;
 
 	this->loadStart = NOW();
 	if (!engine->demoplayer->IsPlaying() && !engine->IsOrange()) {
@@ -147,14 +124,6 @@ void Session::Changed(int state) {
 	console->DevMsg("state = %i\n", state);
 	this->signonState = state;
 
-	// Ghosts are in saves, and just sorta stay there unless we kill
-	// them. We have to do this in prespawn - if we do it at session
-	// start, it kills ghosts that were just spawned and hence
-	// invalidates entity pointers and bad things happen
-	if (state == SIGNONSTATE_PRESPAWN && networkManager.isConnected) {
-		GhostEntity::KillAllGhosts();
-	}
-
 	// Demo recorder starts syncing from this tick
 	if (state == SIGNONSTATE_FULL) {
 		this->Started();
@@ -164,7 +133,6 @@ void Session::Changed(int state) {
 		console->DevMsg("Load took: %dms\n", time);
 	} else if (state == SIGNONSTATE_PRESPAWN) {
 		this->ResetLoads();
-		SpeedrunTimer::FinishLoad();
 	} else {
 		this->Ended();
 	}

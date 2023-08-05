@@ -1,8 +1,6 @@
 #include "DemoParser.hpp"
 
 #include "Command.hpp"
-#include "Demo.hpp"
-#include "Features/Demo/DemoGhostPlayer.hpp"
 #include "Features/Hud/Hud.hpp"
 #include "Modules/Console.hpp"
 #include "Modules/Engine.hpp"
@@ -11,12 +9,6 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-
-Variable p2fx_time_demo_dev("p2fx_time_demo_dev", "0", 0,
-                           "Printing mode when using p2fx_time_demo.\n"
-                           "0 = Default,\n"
-                           "1 = Console commands,\n"
-                           "2 = Console commands & packets.\n");
 
 DemoParser::DemoParser()
 	: headerOnly(false)
@@ -103,7 +95,7 @@ void DemoParser::Adjust(Demo *demo) {
 	demo->playbackTicks = demo->LastTick();
 	demo->playbackTime = ipt * demo->playbackTicks;
 }
-bool DemoParser::Parse(std::string filePath, Demo *demo, bool ghostRequest, std::map<int, DataGhost> *datas, CustomDatas *customDatas) {
+bool DemoParser::Parse(std::string filePath, Demo *demo, bool ghostRequest) {
 	bool gotFirstPositivePacket = false;
 	bool gotSync = false;
 	try {
@@ -166,73 +158,7 @@ bool DemoParser::Parse(std::string filePath, Demo *demo, bool ghostRequest, std:
 						gotFirstPositivePacket = true;
 					}
 
-					if (outputMode == 2 || ghostRequest == true) {
-						for (auto i = 0; i < this->maxSplitScreenClients; ++i) {
-							if (i >= 1) {
-								file.ignore(76);
-								continue;
-							}
-							int32_t flags;
-							float vo_x, vo_y, vo_z;
-							float va_x, va_y, va_z;
-							float lva_x, lva_y, lva_z;
-							float vo2_x, vo2_y, vo2_z;
-							float va2_x, va2_y, va2_z;
-							float lva2_x, lva2_y, lva2_z;
-							file.read((char *)&flags, sizeof(flags));
-							file.read((char *)&vo_x, sizeof(vo_x));
-							file.read((char *)&vo_y, sizeof(vo_y));
-							file.read((char *)&vo_z, sizeof(vo_z));
-							file.read((char *)&va_x, sizeof(va_x));
-							file.read((char *)&va_y, sizeof(va_y));
-							file.read((char *)&va_z, sizeof(va_z));
-							file.read((char *)&lva_x, sizeof(lva_x));
-							file.read((char *)&lva_y, sizeof(lva_y));
-							file.read((char *)&lva_z, sizeof(lva_z));
-							file.read((char *)&vo2_x, sizeof(vo2_x));
-							file.read((char *)&vo2_y, sizeof(vo2_y));
-							file.read((char *)&vo2_z, sizeof(vo2_z));
-							file.read((char *)&va2_x, sizeof(va2_x));
-							file.read((char *)&va2_y, sizeof(va2_y));
-							file.read((char *)&va2_z, sizeof(va2_z));
-							file.read((char *)&lva2_x, sizeof(lva2_x));
-							file.read((char *)&lva2_y, sizeof(lva2_y));
-							file.read((char *)&lva2_z, sizeof(lva2_z));
-
-							if (ghostRequest) {
-								if (tick == 0) {
-									waitForNext = true;
-								}
-
-								if (tick > 0 && waitForNext && lastTick != tick) {
-									lastTick = tick;
-									(*datas)[tick] = DataGhost{{vo_x, vo_y, vo_z}, {va_x, va_y, va_z}, 64, true}; // TODO: is there a way to get this data that's not just a guess?
-								}
-							} else {
-								console->Msg(
-									"[%i] flags: %i | "
-									"view origin: %.3f/%.3f/%.3f | "
-									"view angles: %.3f/%.3f/%.3f | "
-									"local view angles: %.3f/%.3f/%.3f\n",
-									tick,
-									flags,
-									vo_x,
-									vo_y,
-									vo_z,
-									va_x,
-									va_y,
-									va_z,
-									lva_x,
-									lva_y,
-									lva_z);
-							}
-						}
-						int32_t in_seq, out_seq;
-						file.read((char *)&in_seq, sizeof(in_seq));
-						file.read((char *)&out_seq, sizeof(out_seq));
-					} else {
-						file.ignore((this->maxSplitScreenClients * 76) + 4 + 4);
-					}
+					file.ignore((this->maxSplitScreenClients * 76) + 4 + 4);
 
 					int32_t length;
 					file.read((char *)&length, sizeof(length));
@@ -286,12 +212,7 @@ bool DemoParser::Parse(std::string filePath, Demo *demo, bool ghostRequest, std:
 							char *data = new char[length];
 							file.read(data, length);
 							
-							if (customDatas) {
-								std::string str = this->DecodeCustomData(data + 8);
-								if (!str.empty()) {
-									(*customDatas)[str] = std::make_tuple(tick, false);
-								}
-							}
+							this->DecodeCustomData(data + 8);
 						} else {
 							file.ignore(length);
 						}
@@ -326,82 +247,4 @@ bool DemoParser::Parse(std::string filePath, Demo *demo, bool ghostRequest, std:
 		return false;
 	}
 	return true;
-}
-
-// Commands
-
-DECL_COMMAND_FILE_COMPLETION(p2fx_time_demo, ".dem", engine->GetGameDirectory(), 1);
-CON_COMMAND_F_COMPLETION(p2fx_time_demo, "p2fx_time_demo <demo_name> - parses a demo and prints some information about it\n", 0, AUTOCOMPLETION_FUNCTION(p2fx_time_demo)) {
-	if (args.ArgC() != 2) {
-		return console->Print(p2fx_time_demo.ThisPtr()->m_pszHelpString);
-	}
-
-	std::string name;
-	if (args[1][0] == '\0') {
-		if (engine->demoplayer->DemoName[0] != '\0') {
-			name = std::string(engine->demoplayer->DemoName);
-		} else {
-			return console->Print("No demo was recorded or played back!\n");
-		}
-	} else {
-		name = std::string(args[1]);
-	}
-
-	DemoParser parser;
-	parser.outputMode = p2fx_time_demo_dev.GetInt();
-
-	Demo demo;
-	auto dir = std::string(engine->GetGameDirectory()) + std::string("/") + name;
-	if (parser.Parse(dir, &demo)) {
-		parser.Adjust(&demo);
-		console->Print("Demo:     %s\n", name.c_str());
-		console->Print("Client:   %s\n", demo.clientName);
-		console->Print("Map:      %s\n", demo.mapName);
-		console->Print("Ticks:    %i\n", demo.playbackTicks);
-		console->Print("Time:     %.3f\n", demo.playbackTime);
-		console->Print("Tickrate: %.3f\n", demo.Tickrate());
-	} else {
-		console->Print("Could not parse \"%s\"!\n", name.c_str());
-	}
-}
-
-CON_COMMAND_F_COMPLETION(p2fx_time_demos, "p2fx_time_demos <demo_name> [demo_name2]... - parses multiple demos and prints the total sum of them\n", 0, AUTOCOMPLETION_FUNCTION(p2fx_time_demo)) {
-	if (args.ArgC() <= 1) {
-		return console->Print(p2fx_time_demos.ThisPtr()->m_pszHelpString);
-	}
-
-	auto totalTicks = 0;
-	auto totalTime = 0.f;
-	auto printTotal = false;
-
-	DemoParser parser;
-	parser.outputMode = p2fx_time_demo_dev.GetInt();
-
-	auto name = std::string();
-	auto dir = std::string(engine->GetGameDirectory()) + std::string("/");
-	for (auto i = 1; i < args.ArgC(); ++i) {
-		name = std::string(args[i]);
-
-		Demo demo;
-		if (parser.Parse(dir + name, &demo)) {
-			parser.Adjust(&demo);
-			console->Print("Demo:     %s\n", name.c_str());
-			console->Print("Client:   %s\n", demo.clientName);
-			console->Print("Map:      %s\n", demo.mapName);
-			console->Print("Ticks:    %i\n", demo.playbackTicks);
-			console->Print("Time:     %.3f\n", demo.playbackTime);
-			console->Print("Tickrate: %.3f\n", demo.Tickrate());
-			console->Print("---------------\n");
-			totalTicks += demo.playbackTicks;
-			totalTime += demo.playbackTime;
-			printTotal = true;
-		} else {
-			console->Print("Could not parse \"%s\"!\n", name.c_str());
-		}
-	}
-
-	if (printTotal) {
-		console->Print("Total Ticks: %i\n", totalTicks);
-		console->Print("Total Time: %.3f\n", totalTime);
-	}
 }

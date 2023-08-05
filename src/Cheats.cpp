@@ -5,7 +5,6 @@
 #include "Features/Hud/Hud.hpp"
 #include "Features/Listener.hpp"
 #include "Features/OverlayRender.hpp"
-#include "Features/Speedrun/SpeedrunTimer.hpp"
 #include "Game.hpp"
 #include "Modules/Client.hpp"
 #include "Modules/Console.hpp"

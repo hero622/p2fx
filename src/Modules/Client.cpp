@@ -5,8 +5,6 @@
 #include "Engine.hpp"
 #include "Event.hpp"
 #include "Features/Camera.hpp"
-#include "Features/Demo/DemoGhostPlayer.hpp"
-#include "Features/Demo/NetworkGhostPlayer.hpp"
 #include "Features/FovChanger.hpp"
 #include "Features/NetMessage.hpp"
 #include "Features/OverlayRender.hpp"
@@ -180,13 +178,6 @@ DETOUR(Client::CreateMove, float flInputSampleTime, CUserCmd *cmd) {
 		camera->OverrideMovement(cmd);
 	}
 
-	if (GhostEntity::GetFollowTarget()) {
-		cmd->buttons = 0;
-		cmd->forwardmove = 0;
-		cmd->sidemove = 0;
-		cmd->upmove = 0;
-	}
-
 	return Client::CreateMove(thisptr, flInputSampleTime, cmd);
 }
 DETOUR(Client::CreateMove2, float flInputSampleTime, CUserCmd *cmd) {
@@ -333,7 +324,6 @@ DETOUR_T(void, Client::OverrideView, CViewSetup *m_View) {
 	Client::OverrideView(thisptr, m_View);
 
 	camera->OverrideView(m_View);
-	GhostEntity::FollowPov(m_View);
 	engine->demoplayer->OverrideView(m_View);
 }
 

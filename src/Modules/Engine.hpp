@@ -1,7 +1,6 @@
 #pragma once
 #include "Command.hpp"
 #include "EngineDemoPlayer.hpp"
-#include "EngineDemoRecorder.hpp"
 #include "Interface.hpp"
 #include "Module.hpp"
 #include "Utils.hpp"
@@ -99,7 +98,6 @@ public:
 	_DestroyDebugMesh DestroyDebugMesh = nullptr;
 
 	EngineDemoPlayer *demoplayer = nullptr;
-	EngineDemoRecorder *demorecorder = nullptr;
 
 	int *tickcount = nullptr;
 	double *net_time = nullptr;

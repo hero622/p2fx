@@ -8,7 +8,6 @@
 
 #include "Features/DemoViewer.hpp"
 #include "Features/Camera.hpp"
-#include "Features/Speedrun/SpeedrunTimer.hpp"
 
 #include "Variable.hpp"
 

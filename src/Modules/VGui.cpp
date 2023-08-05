@@ -2,7 +2,6 @@
 
 #include "Features/Hud/Hud.hpp"
 #include "Features/Session.hpp"
-#include "Features/Demo/NetworkGhostPlayer.hpp"
 #include "Modules/Engine.hpp"
 #include "Modules/Server.hpp"
 #include "Modules/Surface.hpp"
@@ -21,12 +20,6 @@ void VGui::Draw(Hud *const &hud) {
 
 // CEngineVGui::Paint
 DETOUR(VGui::Paint, PaintMode_t mode) {
-	if ((mode & PAINT_UIPANELS) && GET_SLOT() == 0) {
-		surface->StartDrawing(surface->matsurface->ThisPtr());
-		networkManager.UpdateSyncUi();
-		surface->FinishDrawing();
-	}
-
 	auto result = VGui::Paint(thisptr, mode);
 
 	surface->StartDrawing(surface->matsurface->ThisPtr());
