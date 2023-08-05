@@ -36,6 +36,7 @@ void Menu::Draw() {
 		switch (tab) {
 		case 0:
 			CImGui::Checkbox("Portal Dynamic Lights", "r_portal_use_dlights");
+			CImGui::Sliderf("Bloom Scale", "mat_bloomscale", 0.0f, 10.0f);
 			CImGui::Sliderf("Sun Brightness", "r_flashlightbrightness", 0.0f, 10.0f);
 			CImGui::Colorpickerf2("Ambient Light", "mat_ambient_light_r", "mat_ambient_light_g", "mat_ambient_light_b");
 

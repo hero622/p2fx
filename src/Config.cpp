@@ -11,6 +11,7 @@
 
 std::vector<std::string> cvars = {
 	"r_portal_use_dlights",
+	"mat_bloomscale",
 	"r_flashlightbrightness",
 	"mat_ambient_light_r",
 	"mat_ambient_light_g",
