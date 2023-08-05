@@ -84,6 +84,12 @@ static int g_demoStart;
 void EngineDemoPlayer::HandlePlaybackFix() {
 	if (!g_demoFixing) return;
 
+	if (engine->IsCoop()) {
+		Event::Trigger<Event::DEMO_START>({});
+		g_demoFixing = false;
+		return;
+	}
+
 	// 0 = not done anything
 	// 1 = queued skip
 	// 2 = in skip

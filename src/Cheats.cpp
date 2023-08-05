@@ -29,63 +29,7 @@ Variable ui_transition_time;
 Variable hide_gun_when_holding;
 Variable cl_viewmodelfov;
 Variable r_flashlightbrightness;
-
-DECL_AUTO_COMMAND_COMPLETION(p2fx_fast_load_preset, ({"none", "sla", "normal", "full"}))
-CON_COMMAND_F_COMPLETION(p2fx_fast_load_preset, "p2fx_fast_load_preset <preset> - sets all loading fixes to preset values\n", FCVAR_DONTRECORD, AUTOCOMPLETION_FUNCTION(p2fx_fast_load_preset)) {
-	if (args.ArgC() != 2) {
-		console->Print(p2fx_fast_load_preset.ThisPtr()->m_pszHelpString);
-		return;
-	}
-
-	const char *preset = args.Arg(1);
-
-#define CMD(x) engine->ExecuteCommand(x)
-	if (!strcmp(preset, "none")) {
-		if (!Game::IsSpeedrunMod()) {
-			CMD("ui_loadingscreen_transition_time 1.0");
-			CMD("ui_loadingscreen_fadein_time 1.0");
-			CMD("ui_loadingscreen_mintransition_time 0.5");
-		}
-		CMD("p2fx_disable_progress_bar_update 0");
-		CMD("p2fx_prevent_mat_snapshot_recompute 0");
-		CMD("p2fx_loads_uncap 0");
-		CMD("p2fx_loads_norender 0");
-	} else if (!strcmp(preset, "sla")) {
-		if (!Game::IsSpeedrunMod()) {
-			CMD("ui_loadingscreen_transition_time 0.0");
-			CMD("ui_loadingscreen_fadein_time 0.0");
-			CMD("ui_loadingscreen_mintransition_time 0.0");
-		}
-		CMD("p2fx_disable_progress_bar_update 1");
-		CMD("p2fx_prevent_mat_snapshot_recompute 1");
-		CMD("p2fx_loads_uncap 0");
-		CMD("p2fx_loads_norender 0");
-	} else if (!strcmp(preset, "normal")) {
-		if (!Game::IsSpeedrunMod()) {
-			CMD("ui_loadingscreen_transition_time 0.0");
-			CMD("ui_loadingscreen_fadein_time 0.0");
-			CMD("ui_loadingscreen_mintransition_time 0.0");
-		}
-		CMD("p2fx_disable_progress_bar_update 1");
-		CMD("p2fx_prevent_mat_snapshot_recompute 1");
-		CMD("p2fx_loads_uncap 1");
-		CMD("p2fx_loads_norender 0");
-	} else if (!strcmp(preset, "full")) {
-		if (!Game::IsSpeedrunMod()) {
-			CMD("ui_loadingscreen_transition_time 0.0");
-			CMD("ui_loadingscreen_fadein_time 0.0");
-			CMD("ui_loadingscreen_mintransition_time 0.0");
-		}
-		CMD("p2fx_disable_progress_bar_update 2");
-		CMD("p2fx_prevent_mat_snapshot_recompute 1");
-		CMD("p2fx_loads_uncap 1");
-		CMD("p2fx_loads_norender 1");
-	} else {
-		console->Print("Unknown preset %s!\n", preset);
-		console->Print(p2fx_fast_load_preset.ThisPtr()->m_pszHelpString);
-	}
-#undef CMD
-}
+Variable mat_hdr_level;
 
 void Cheats::Init() {
 	ui_loadingscreen_transition_time = Variable("ui_loadingscreen_transition_time");
@@ -96,6 +40,15 @@ void Cheats::Init() {
 	hide_gun_when_holding = Variable("hide_gun_when_holding");
 	cl_viewmodelfov = Variable("cl_viewmodelfov");
 	r_flashlightbrightness = Variable("r_flashlightbrightness");
+	mat_hdr_level = Variable("mat_hdr_level");
+
+	engine->ExecuteCommand("ui_loadingscreen_transition_time 0.0");
+	engine->ExecuteCommand("ui_loadingscreen_fadein_time 0.0");
+	engine->ExecuteCommand("ui_loadingscreen_mintransition_time 0.0");
+	engine->ExecuteCommand("p2fx_disable_progress_bar_update 2");
+	engine->ExecuteCommand("p2fx_prevent_mat_snapshot_recompute 1");
+	engine->ExecuteCommand("p2fx_loads_uncap 1");
+	engine->ExecuteCommand("p2fx_loads_norender 1");
 
 	p2fx_disable_challenge_stats_hud.UniqueFor(SourceGame_Portal2);
 

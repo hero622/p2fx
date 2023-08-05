@@ -65,6 +65,7 @@ void Menu::Draw() {
 			CImGui::Sliderf("Viewmodel X", "viewmodel_offset_x", 0.0f, 25.0f);
 			CImGui::Sliderf("Viewmodel Y", "viewmodel_offset_y", 0.0f, 25.0f);
 			CImGui::Sliderf("Viewmodel Z", "viewmodel_offset_z", 0.0f, 25.0f);
+			CImGui::Checkbox("Disable weapon sway", "p2fx_disable_weapon_sway");
 
 			ImGui::Separator();
 

@@ -65,7 +65,7 @@ void DemoChooser::Paint(int slot) {
 
 	if (hover)
 		surface->DrawRect(cursorClr, x0, y0, x1, y1);
-	surface->DrawTxt(font, 220 * w / 1920, y, hover ? focusClr : clr, "PLAY DEMO");
+	surface->DrawTxt(font, 220 * w / 1920, y, hover ? focusClr : clr, "DEMO PLAYER");
 }
 
 bool DemoChooser::GetCurrentSize(int &xSize, int &ySize) {

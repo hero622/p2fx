@@ -28,6 +28,7 @@ std::vector<std::string> cvars = {
 	"viewmodel_offset_x",
 	"viewmodel_offset_y",
 	"viewmodel_offset_z",
+	"p2fx_disable_weapon_sway",
 
 	"crosshair",
 	"p2fx_disable_challenge_stats_hud",
