@@ -19,9 +19,17 @@ long __stdcall Input::WndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 
 	switch (Msg) {
 	case WM_KEYDOWN:
+	case WM_SYSKEYDOWN:
+	case WM_LBUTTONDOWN:
+	case WM_MBUTTONDOWN:
+	case WM_RBUTTONDOWN:
 		keys[wParam].state = PRESSED;
 		break;
 	case WM_KEYUP:
+	case WM_SYSKEYUP:
+	case WM_LBUTTONUP:
+	case WM_MBUTTONUP:
+	case WM_RBUTTONUP:
 		keys[wParam].state = IDLE;
 		break;
 	}

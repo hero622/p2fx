@@ -36,15 +36,15 @@ void DemoHud::Paint(int slot) {
 	if (playbackTicks == -1)
 		return;
 
-	int screenX, screenY;
+	int scrW, scrH;
 
-	engine->GetScreenSize(nullptr, screenX, screenY);
+	engine->GetScreenSize(nullptr, scrW, scrH);
 
 	const int w = 600;
 	const int h = 120;
 
-	int x = screenX / 2 - w / 2;
-	int y = screenY - h;
+	int x = scrW / 2 - w / 2;
+	int y = scrH - h;
 
 	auto font = scheme->GetFontByID(62);
 	auto iconFont = scheme->GetFontByID(168);

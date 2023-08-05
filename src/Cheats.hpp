@@ -23,5 +23,3 @@ extern Variable ui_transition_time;
 extern Variable hide_gun_when_holding;
 extern Variable cl_viewmodelfov;
 extern Variable r_flashlightbrightness;
-
-extern Command p2fx_togglewait;

@@ -71,6 +71,11 @@ OFFSET_DEFAULT(DrawTexturedRect, 39, 39)
 OFFSET_DEFAULT(IsTextureIDValid, 40, 40)
 OFFSET_DEFAULT(CreateNewTextureID, 41, 41)
 
+// IPanel
+OFFSET_DEFAULT(SetVisible, 14, 14)
+OFFSET_DEFAULT(IPanelGetName, 36, 36)
+OFFSET_DEFAULT(PaintTraverse, 41, 41)
+
 // CInputSystem
 OFFSET_DEFAULT(StringToButtonCode, 31, 31)
 OFFSET_DEFAULT(SleepUntilInput, 33, 33)
@@ -187,7 +192,7 @@ OFFSET_DEFAULT(ShouldDraw, 11, 12)
 OFFSET_DEFAULT(OnRemoveEntity, 1, 1)
 
 // CHud
-OFFSET_DEFAULT(GetName, 10, 11)
+OFFSET_DEFAULT(CHudGetName, 10, 11)
 
 // CGameEventManager
 OFFSET_DEFAULT(AddListener, 3, 4)

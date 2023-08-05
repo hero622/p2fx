@@ -410,7 +410,7 @@ bool Client::Init() {
 			auto CHUDChallengeStats = FindElement(GetHud(-1), "CHUDChallengeStats");
 
 			if (this->g_HUDChallengeStats = Interface::Create(CHUDChallengeStats)) {
-				this->g_HUDChallengeStats->Hook(Client::GetName_Hook, Client::GetName, Offsets::GetName);
+				this->g_HUDChallengeStats->Hook(Client::GetName_Hook, Client::GetName, Offsets::CHudGetName);
 			}
 
 			auto CHUDQuickInfo = FindElement(GetHud(-1), "CHUDQuickInfo");

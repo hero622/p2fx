@@ -1,8 +1,17 @@
 #include "Menu.hpp"
 
+#include "Modules/Surface.hpp"
+
 #include "Config.hpp"
 
 void Menu::Draw() {
+	g_fileDialog.Display();
+
+	if (g_fileDialog.HasSelected()) {
+		engine->ExecuteCommand(Utils::ssprintf("playdemo \"%s\"", g_fileDialog.GetSelected().string().c_str()).c_str());
+		g_fileDialog.ClearSelected();
+	}
+
 	if (!g_shouldDraw)
 		return;
 
@@ -216,9 +225,6 @@ void Menu::Draw() {
 }
 
 void Menu::Init() {
-	Config::Init();
-	Campath::Init();
-
 	auto &io = ImGui::GetIO();
 
 	io.LogFilename = NULL;
@@ -230,4 +236,10 @@ void Menu::Init() {
 	style.WindowRounding = 0.0f;
 	style.FrameRounding = 0.0f;
 	style.ScrollbarRounding = 0.0f;
+
+	Config::Init();
+	Campath::Init();
+
+	g_fileDialog.SetTitle("P2FX");
+	g_fileDialog.SetTypeFilters({".dem"});
 }

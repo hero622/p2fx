@@ -95,7 +95,6 @@ bool ShaderApi::Init() {
 }
 
 void ShaderApi::Shutdown() {
-	SAFE_DELETE(this->g_d3dDevice);
 }
 
 ShaderApi *shaderApi;

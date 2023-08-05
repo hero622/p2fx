@@ -78,7 +78,7 @@ std::vector<std::string> cvars = {
 	"p2fx_render_skip_coop_videos"};
 
 void Config::Load(std::string filename) {
-	engine->ExecuteCommand(Utils::ssprintf("exec %s", (std::string("p2fx/cfg/") + filename).c_str()).c_str());
+	engine->ExecuteCommand(Utils::ssprintf("exec \"%s\"", (std::string("p2fx/cfg/") + filename).c_str()).c_str());
 }
 
 void Config::Save(std::string filename) {
@@ -123,7 +123,7 @@ void Config::Init() {
 // Campath
 
 void Campath::Load(std::string filename) {
-	engine->ExecuteCommand(Utils::ssprintf("exec %s", (std::string("p2fx/campaths/") + filename).c_str()).c_str());
+	engine->ExecuteCommand(Utils::ssprintf("exec \"%s\"", (std::string("p2fx/campaths/") + filename).c_str()).c_str());
 }
 
 void Campath::Save(std::string filename) {
