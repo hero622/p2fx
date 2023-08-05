@@ -67,6 +67,23 @@ namespace CImGui {
 		Variable(var).SetValue(val);
 	}
 
+	inline void Combo2(const char *label, const char *var, std::vector<const char *> items) {
+		auto val = Variable(var).GetString();
+		if (ImGui::BeginCombo(label, val)) {
+			for (auto &item : items) {
+				const bool isSelected = val == item;
+
+				if (ImGui::Selectable(item, isSelected))
+					val = item;
+
+				if (isSelected)
+					ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndCombo();
+		}
+		Variable(var).SetValue(val);
+	}
+
 	inline void Button(const char *label, const char *cmd, const ImVec2 &size = ImVec2(0, 0)) {
 		if (ImGui::Button(label, size)) {
 			engine->ExecuteCommand(cmd);

@@ -1,5 +1,7 @@
 #include "Menu.hpp"
 
+#include "Config.hpp"
+
 void Menu::Draw() {
 	if (!g_shouldDraw)
 		return;
@@ -9,7 +11,7 @@ void Menu::Draw() {
 	if (ImGui::Begin("P2FX", &g_shouldDraw, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize)) {
 		static int tab = 0;
 
-		if (ImGui::Button("CFG", ImVec2(100.0f, 30.0f))) {
+		if (ImGui::Button("FX", ImVec2(100.0f, 30.0f))) {
 			tab = 0;
 		}
 		ImGui::SameLine();
@@ -21,8 +23,12 @@ void Menu::Draw() {
 			tab = 2;
 		}
 		ImGui::SameLine();
-		if (ImGui::Button("OTHER", ImVec2(100.0f, 30.0f))) {
+		if (ImGui::Button("RENDER", ImVec2(100.0f, 30.0f))) {
 			tab = 3;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("CFG", ImVec2(100.0f, 30.0f))) {
+			tab = 4;
 		}
 
 		ImGui::Separator();
@@ -82,6 +88,70 @@ void Menu::Draw() {
 			CImGui::Slider("Max Blur Radius", "mat_dof_max_blur_radius", 0, 10);
 			break;
 		case 3:
+			CImGui::Checkbox("Autostart", "p2fx_render_autostart");
+			CImGui::Checkbox("Autostop", "p2fx_render_autostop");
+			CImGui::Combo2("Video Codec", "p2fx_render_vcodec", {"h264", "hevc", "vp8", "vp9", "dnxhd"});
+			CImGui::Slider("Video Bitrate", "p2fx_render_vbitrate", 0, 100000, "%dkb/s");
+			CImGui::Slider("Video Bitrate", "p2fx_render_quality", 0, 50);
+			CImGui::Slider("Video FPS", "p2fx_render_fps", 0, 2000);
+			CImGui::Slider("Video Blend", "p2fx_render_blend", 0, 128);
+			CImGui::Combo("Video Blend Mode", "p2fx_render_blend_mode", "Linear\0Gaussian\0");
+			CImGui::Slider("Video Shutter Angle", "p2fx_render_shutter_angle", 30, 360);
+			CImGui::Combo2("Audio Codec", "p2fx_render_acodec", {"aac", "ac3", "vorbis", "opus", "flac"});
+			CImGui::Slider("Audio Bitrate", "p2fx_render_abitrate", 96, 320, "%dkb/s");
+			CImGui::Slider("Audio Sample Rate", "p2fx_render_sample_rate", 1000, 48000, "%dkHz");
+			CImGui::Checkbox("Merge Renders When Finished", "p2fx_render_merge");
+			CImGui::Checkbox("Skip Coop Videos", "p2fx_render_skip_coop_videos");
+			break;
+		case 4:
+			ImGui::Columns(2, "Columns", false);
+
+			ImGui::SetColumnOffset(1, 260.0f);
+			ImGui::PushItemWidth(260.0f);
+
+			static std::string selectedCfg = std::string();
+			if (ImGui::BeginListBox("##Configs")) {
+				for (auto &cfg : Config::g_Cfgs) {
+					const bool isSelected = (selectedCfg == cfg);
+
+					if (ImGui::Selectable(cfg.c_str(), isSelected))
+						selectedCfg = cfg;
+
+					// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+					if (isSelected)
+						ImGui::SetItemDefaultFocus();
+				}
+
+				ImGui::EndListBox();
+			}
+			static char cfgName[32];
+			ImGui::InputText("##Config name", cfgName, IM_ARRAYSIZE(cfgName));
+
+			ImGui::PopItemWidth();
+
+			ImGui::NextColumn();
+			
+			if (ImGui::Button("Create", ImVec2(60.0f, 20.0f))) {
+				if (strlen(cfgName) != 0)
+					Config::g_Cfgs.push_back(cfgName);
+			}
+			if (ImGui::Button("Save", ImVec2(60.0f, 20.0f))) {
+				if (!selectedCfg.empty())
+					Config::Save(selectedCfg);
+			}
+			if (ImGui::Button("Load", ImVec2(60.0f, 20.0f))) {
+				if (!selectedCfg.empty())
+					Config::Load(selectedCfg);
+			}
+			if (ImGui::Button("Delete", ImVec2(60.0f, 20.0f))) {
+				if (!selectedCfg.empty()) {
+					Config::Delete(selectedCfg);
+					selectedCfg = "";
+				}
+			}
+			if (ImGui::Button("Refresh", ImVec2(60.0f, 20.0f))) {
+				Config::EnumerateCfgs();
+			}
 			break;
 		}
 
@@ -90,6 +160,8 @@ void Menu::Draw() {
 }
 
 void Menu::Init() {
+	Config::EnumerateCfgs();
+
 	auto &io = ImGui::GetIO();
 
 	io.LogFilename = NULL;

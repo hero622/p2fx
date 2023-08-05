@@ -187,13 +187,7 @@
     <ClCompile Include="Features\Camera.cpp">
       <Filter>p2fx\Features</Filter>
     </ClCompile>
-    <ClCompile Include="Features\Stats\StatsCounter.cpp">
-      <Filter>p2fx\Features\Stats</Filter>
-    </ClCompile>
     <ClCompile Include="Features\Hud\Crosshair.cpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Hud\CheatWarn.cpp">
       <Filter>p2fx\Features\Hud</Filter>
     </ClCompile>
     <ClCompile Include="Utils\lodepng.cpp">
@@ -211,26 +205,8 @@
     <ClCompile Include="Features\Demo\DemoGhostEntity.cpp">
       <Filter>p2fx\Features\Demo</Filter>
     </ClCompile>
-    <ClCompile Include="Features\Stats\Sync.cpp">
-      <Filter>p2fx\Features\Stats</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Hud\StrafeSyncHud.cpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Hud\VphysHud.cpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\SegmentedTools.cpp">
-      <Filter>p2fx\Features</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\Routing\SeamshotFind.cpp">
-      <Filter>p2fx\Features\Routing</Filter>
-    </ClCompile>
     <ClCompile Include="Modules\MaterialSystem.cpp">
       <Filter>p2fx\Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\GroundFramesCounter.cpp">
-      <Filter>p2fx\Features</Filter>
     </ClCompile>
     <ClCompile Include="Features\Demo\GhostRenderer.cpp">
       <Filter>p2fx\Features\Demo</Filter>
@@ -332,6 +308,9 @@
       <Filter>p2fx</Filter>
     </ClCompile>
     <ClCompile Include="Menu.cpp">
+      <Filter>p2fx</Filter>
+    </ClCompile>
+    <ClCompile Include="Config.cpp">
       <Filter>p2fx</Filter>
     </ClCompile>
   </ItemGroup>
@@ -642,9 +621,6 @@
     <ClInclude Include="Features\Camera.hpp">
       <Filter>p2fx\Features</Filter>
     </ClInclude>
-    <ClInclude Include="Features\Stats\StatsCounter.hpp">
-      <Filter>p2fx\Features\Stats</Filter>
-    </ClInclude>
     <ClInclude Include="Features\Hud\Crosshair.hpp">
       <Filter>p2fx\Features\Hud</Filter>
     </ClInclude>
@@ -774,26 +750,8 @@
     <ClInclude Include="Features\Demo\DemoGhostEntity.hpp">
       <Filter>p2fx\Features\Demo</Filter>
     </ClInclude>
-    <ClInclude Include="Features\Stats\Sync.hpp">
-      <Filter>p2fx\Features\Stats</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Hud\StrafeSyncHud.hpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\SegmentedTools.hpp">
-      <Filter>p2fx\Features</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Hud\VphysHud.hpp">
-      <Filter>p2fx\Features\Hud</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Routing\SeamshotFind.hpp">
-      <Filter>p2fx\Features\Routing</Filter>
-    </ClInclude>
     <ClInclude Include="Modules\MaterialSystem.hpp">
       <Filter>p2fx\Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\GroundFramesCounter.hpp">
-      <Filter>p2fx\Features</Filter>
     </ClInclude>
     <ClInclude Include="Features\Demo\GhostRenderer.hpp">
       <Filter>p2fx\Features\Demo</Filter>
@@ -967,6 +925,9 @@
       <Filter>p2fx</Filter>
     </ClInclude>
     <ClInclude Include="Menu.hpp">
+      <Filter>p2fx</Filter>
+    </ClInclude>
+    <ClInclude Include="Config.hpp">
       <Filter>p2fx</Filter>
     </ClInclude>
   </ItemGroup>
