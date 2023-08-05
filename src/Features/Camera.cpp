@@ -25,10 +25,6 @@ Variable p2fx_cam_control("p2fx_cam_control", "0", 0, 3,
                          "2 = Cinematic mode (camera is controlled by predefined path).\n"
                          "3 = Follow mode (Camera is following the player but not rotating, useful when strafing on gel).\n");
 
-Variable p2fx_cam_drive("p2fx_cam_drive", "1", 0, 1,
-                       "Enables or disables camera drive mode in-game "
-                       "(turning it on is not required for demo player)\n");
-
 Variable p2fx_cam_ortho("p2fx_cam_ortho", "0", 0, 1, "Enables or disables camera orthographic projection.\n");
 Variable p2fx_cam_ortho_scale("p2fx_cam_ortho_scale", "1", 0.001, "Changes the scale of orthographic projection (how many units per pixel).\n");
 Variable p2fx_cam_ortho_nearz("p2fx_cam_ortho_nearz", "1", -10000, 10000, "Changes the near Z plane of orthographic projection.\n");
@@ -74,12 +70,11 @@ ON_EVENT(P2FX_UNLOAD) {
 //if in drive mode, checks if player wants to control the camera
 //for now it requires LMB input (as in demo drive mode)
 bool Camera::IsDriving() {
-	bool drivingInGame = p2fx_cam_drive.GetBool() && sv_cheats.GetBool() && engine->hoststate->m_activeGame;
 	bool drivingInDemo = engine->demoplayer->IsPlaying();
 	bool wantingToDrive = inputSystem->IsKeyDown(ButtonCode_t::MOUSE_LEFT);
 	bool isUI = vgui->IsUIVisible();
 
-	return (camera->controlType == Drive || camera->controlType == Follow) && wantingToDrive && (drivingInGame || drivingInDemo) && !isUI;
+	return (camera->controlType == Drive || camera->controlType == Follow) && wantingToDrive && drivingInDemo && !isUI;
 }
 
 //used by camera state interpolation function. all the math is here.

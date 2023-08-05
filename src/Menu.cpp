@@ -27,11 +27,18 @@ void Menu::Draw() {
 			tab = 3;
 		}
 		ImGui::SameLine();
-		if (ImGui::Button("CFG", ImVec2(100.0f, 30.0f))) {
+		if (ImGui::Button("CAM", ImVec2(100.0f, 30.0f))) {
 			tab = 4;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("CFG", ImVec2(100.0f, 30.0f))) {
+			tab = 5;
 		}
 
 		ImGui::Separator();
+
+		static std::string selectedCampath = std::string();
+		static std::string selectedCfg = std::string();
 
 		switch (tab) {
 		case 0:
@@ -54,11 +61,6 @@ void Menu::Draw() {
 			CImGui::Checkbox("Disable Challenge Mode Leaderboard", "p2fx_disable_challenge_stats_hud");
 			CImGui::Checkbox("Disable Challenge Mode Timer", "hidehud", 16);
 			CImGui::Checkbox("Disable Coop Score Hud", "p2fx_disable_coop_score_hud");
-
-			ImGui::Separator();
-
-			CImGui::Combo("Camera Interpolation", "p2fx_cam_path_interp", "Linear\0Cubic Spline\0");
-			CImGui::Button("Remove All Camera Markers", "p2fx_cam_path_remkfs");
 			break;
 		case 1:
 			CImGui::Checkbox("Override", "fog_override");
@@ -105,12 +107,65 @@ void Menu::Draw() {
 			CImGui::Checkbox("Skip Coop Videos", "p2fx_render_skip_coop_videos");
 			break;
 		case 4:
+			CImGui::Combo("Camera Interpolation", "p2fx_cam_path_interp", "Linear\0Cubic Spline\0");
+			CImGui::Button("Remove All Camera Markers", "p2fx_cam_path_remkfs");
+
+			ImGui::Separator();
+
 			ImGui::Columns(2, "Columns", false);
 
 			ImGui::SetColumnOffset(1, 240.0f);
 			ImGui::PushItemWidth(240.0f);
 
-			static std::string selectedCfg = std::string();
+			if (ImGui::BeginListBox("##Campaths")) {
+				for (auto &cfg : Campath::g_Campaths) {
+					const bool isSelected = (selectedCampath == cfg);
+
+					if (ImGui::Selectable(cfg.c_str(), isSelected))
+						selectedCampath = cfg;
+
+					// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+					if (isSelected)
+						ImGui::SetItemDefaultFocus();
+				}
+
+				ImGui::EndListBox();
+			}
+			static char campathName[32];
+			ImGui::InputText("##Campath name", campathName, IM_ARRAYSIZE(campathName));
+
+			ImGui::PopItemWidth();
+
+			ImGui::NextColumn();
+
+			if (ImGui::Button("Create", ImVec2(80.0f, 27.0f))) {
+				if (strlen(campathName) != 0)
+					Campath::g_Campaths.push_back(campathName);
+			}
+			if (ImGui::Button("Save", ImVec2(80.0f, 27.0f))) {
+				if (!selectedCampath.empty())
+					Campath::Save(selectedCampath);
+			}
+			if (ImGui::Button("Load", ImVec2(80.0f, 27.0f))) {
+				if (!selectedCampath.empty())
+					Campath::Load(selectedCampath);
+			}
+			if (ImGui::Button("Delete", ImVec2(80.0f, 27.0f))) {
+				if (!selectedCampath.empty()) {
+					Campath::Delete(selectedCampath);
+					selectedCampath = "";
+				}
+			}
+			if (ImGui::Button("Refresh", ImVec2(80.0f, 27.0f))) {
+				Campath::EnumerateCfgs();
+			}
+			break;
+		case 5:
+			ImGui::Columns(2, "Columns", false);
+
+			ImGui::SetColumnOffset(1, 240.0f);
+			ImGui::PushItemWidth(240.0f);
+
 			if (ImGui::BeginListBox("##Configs")) {
 				for (auto &cfg : Config::g_Cfgs) {
 					const bool isSelected = (selectedCfg == cfg);
@@ -161,7 +216,8 @@ void Menu::Draw() {
 }
 
 void Menu::Init() {
-	Config::EnumerateCfgs();
+	Config::Init();
+	Campath::Init();
 
 	auto &io = ImGui::GetIO();
 

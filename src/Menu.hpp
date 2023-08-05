@@ -1,16 +1,14 @@
 #pragma once
-#include "Variable.hpp"
-
-#include "Modules/Engine.hpp"
-
 #include "../lib/imgui/imgui.h"
+#include "Modules/Engine.hpp"
+#include "Variable.hpp"
 
 namespace Menu {
 	inline bool g_shouldDraw = false;
 
 	void Draw();
 	void Init();
-};
+};  // namespace Menu
 
 namespace CImGui {
 	inline void Checkbox(const char *label, const char *var, int onvalue = 1) {
@@ -89,4 +87,4 @@ namespace CImGui {
 			engine->ExecuteCommand(cmd);
 		}
 	}
-}
+}  // namespace CImGui

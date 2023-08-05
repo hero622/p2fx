@@ -14,7 +14,6 @@
 #include <type_traits>
 
 extern Variable p2fx_cam_control;
-extern Variable p2fx_cam_drive;
 extern Variable p2fx_cam_ortho;
 extern Variable p2fx_cam_ortho_scale;
 extern Variable p2fx_cam_ortho_nearz;

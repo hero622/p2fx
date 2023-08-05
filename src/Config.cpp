@@ -7,7 +7,14 @@
 #include <fstream>
 #include <filesystem>
 
-#define CFG_DIR "portal2/cfg/p2fx"
+#define CFG_DIR "portal2/cfg/p2fx/cfg"
+#define CAMPATH_DIR "portal2/cfg/p2fx/campaths"
+
+const char *getPath(std::string filename, bool cfg = true) {
+	return (std::string(cfg ? CFG_DIR : CAMPATH_DIR) + std::string("/") + filename + std::string(".cfg")).c_str();
+}
+
+// Config
 
 std::vector<std::string> cvars = {
 	"r_portal_use_dlights",
@@ -70,12 +77,8 @@ std::vector<std::string> cvars = {
 	"p2fx_render_merge",
 	"p2fx_render_skip_coop_videos"};
 
-const char *getPath(std::string filename) {
-	return (std::string(CFG_DIR) + std::string("/") + filename + std::string(".cfg")).c_str();
-}
-
 void Config::Load(std::string filename) {
-	engine->ExecuteCommand(Utils::ssprintf("exec %s", (std::string("p2fx/") + filename).c_str()).c_str());
+	engine->ExecuteCommand(Utils::ssprintf("exec %s", (std::string("p2fx/cfg/") + filename).c_str()).c_str());
 }
 
 void Config::Save(std::string filename) {
@@ -106,4 +109,49 @@ void Config::EnumerateCfgs() {
 	}
 
 	Config::g_Cfgs = paths;
+}
+
+void Config::Init() {
+	if (!std::filesystem::is_directory(CFG_DIR)) {
+		std::filesystem::create_directories(CFG_DIR);
+		return;
+	}
+
+	Config::EnumerateCfgs();
+}
+
+// Campath
+
+void Campath::Load(std::string filename) {
+	engine->ExecuteCommand(Utils::ssprintf("exec %s", (std::string("p2fx/campaths/") + filename).c_str()).c_str());
+}
+
+void Campath::Save(std::string filename) {
+	engine->ExecuteCommand(Utils::ssprintf("p2fx_cam_path_export %s", getPath(filename, false)).c_str());
+}
+
+void Campath::Delete(std::string filename) {
+	remove(getPath(filename, false));
+	g_Campaths.erase(std::remove(g_Campaths.begin(), g_Campaths.end(), filename), g_Campaths.end());
+}
+
+void Campath::EnumerateCfgs() {
+	std::vector<std::string> paths;
+
+	for (const auto &entry : std::filesystem::directory_iterator(CAMPATH_DIR)) {
+		auto path = entry.path();
+
+		paths.push_back(path.stem().string());
+	}
+
+	Campath::g_Campaths = paths;
+}
+
+void Campath::Init() {
+	if (!std::filesystem::is_directory(CAMPATH_DIR)) {
+		std::filesystem::create_directories(CAMPATH_DIR);
+		return;
+	}
+
+	Config::EnumerateCfgs();
 }
