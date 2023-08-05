@@ -8,7 +8,7 @@
 namespace Menu {
 	inline bool g_shouldDraw = false;
 
-	inline ImGui::FileBrowser g_fileDialog(ImGuiFileBrowserFlags_NoModal | ImGuiFileBrowserFlags_CloseOnEsc);
+	inline ImGui::FileBrowser g_fileDialog(ImGuiFileBrowserFlags_CloseOnEsc);
 
 	void Draw();
 	void Init();

@@ -230,6 +230,7 @@ void Menu::Init() {
 	io.LogFilename = NULL;
 	io.IniFilename = NULL;
 	io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
+	io.ConfigWindowsMoveFromTitleBarOnly = true;
 
 	ImGuiStyle &style = ImGui::GetStyle();
 
