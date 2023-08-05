@@ -9,26 +9,6 @@
 #include "Utils/SDK.hpp"
 #include "Utils/Math.hpp"
 
-#include <atomic>
-#include <cinttypes>
-#include <condition_variable>
-#include <cstdint>
-#include <cstdio>
-#include <cstdlib>
-#include <mutex>
-#include <string>
-#include <thread>
-
-extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libavutil/avutil.h>
-#include <libavutil/opt.h>
-#include <libavutil/pixdesc.h>
-#include <libswresample/swresample.h>
-#include <libswscale/swscale.h>
-};
-
 // Stuff pulled from the engine
 static void **g_videomode;
 static int *g_snd_linear_count;
@@ -60,10 +40,10 @@ static Variable p2fx_render_acodec("p2fx_render_acodec", "aac", "Audio codec use
 static Variable p2fx_render_quality("p2fx_render_quality", "35", 0, 50, "Render output quality, higher is better (50=lossless)\n");
 static Variable p2fx_render_fps("p2fx_render_fps", "60", 1, "Render output FPS\n");
 static Variable p2fx_render_sample_rate("p2fx_render_sample_rate", "44100", 1000, "Audio output sample rate\n");
-static Variable p2fx_render_blend("p2fx_render_blend", "0", 0, "How many frames to blend for each output frame; 1 = do not blend, 0 = automatically determine based on host_framerate\n");
+static Variable p2fx_render_blend("p2fx_render_blend", "1", 0, "How many frames to blend for each output frame; 1 = do not blend, 0 = automatically determine based on host_framerate\n");
 static Variable p2fx_render_blend_mode("p2fx_render_blend_mode", "1", 0, 1, "What type of frameblending to use. 0 = linear, 1 = Gaussian\n");
 static Variable p2fx_render_autostart("p2fx_render_autostart", "0", "Whether to automatically start when demo playback begins\n");
-static Variable p2fx_render_autostart_extension("p2fx_render_autostart_extension", "mp4", "The file extension (and hence container format) to use for automatically started renders.\n", 0);
+static Variable p2fx_render_autostart_extension("p2fx_render_autostart_extension", "avi", "The file extension (and hence container format) to use for automatically started renders.\n", 0);
 static Variable p2fx_render_autostop("p2fx_render_autostop", "1", "Whether to automatically stop when __END__ is seen in demo playback\n");
 static Variable p2fx_render_shutter_angle("p2fx_render_shutter_angle", "360", 30, 360, "The shutter angle to use for rendering in degrees.\n");
 static Variable p2fx_render_merge("p2fx_render_merge", "0", "When set, merge all the renders until p2fx_render_finish is entered\n");
@@ -85,73 +65,14 @@ static inline void ReadScreenPixels(int x, int y, int w, int h, void *buf, Image
 
 // }}}
 
-struct Stream {
-	AVStream *stream;
-	AVCodecContext *enc;
-	AVCodec *codec;
-	AVFrame *frame, *tmpFrame;
-	SwsContext *swsCtx;
-	SwrContext *swrCtx;
-	int nextPts;
-};
-
-enum class WorkerMsg {
-	NONE,
-	VIDEO_FRAME_READY,
-	AUDIO_FRAME_READY,
-	STOP_RENDERING_ERROR,
-	STOP_RENDERING_REQUESTED,
-};
-
-// The global renderer state
-static struct
-{
-	std::atomic<bool> isRendering;
-	std::atomic<bool> isPaused;
-	int fps;
-	int samplerate;
-	int channels;
-	Stream videoStream;
-	Stream audioStream;
-	std::string filename;
-	AVFormatContext *outCtx;
-	int width, height;
-
-	// The audio stream's temporary frame needs nb_samples worth of
-	// audio before we resample and submit, so we keep track of how far
-	// in we are with this
-	int16_t *audioBuf[8];  // Temporary buffer - contains the planar audio info from the game
-	size_t audioBufSz;
-	size_t audioBufIdx;
-
-	// This buffer stores the image data
-	uint8_t *imageBuf;  // Temporary buffer - contains the raw pixel data read from the screen
-
-	int toBlend;
-	int toBlendStart;       // Inclusive
-	int toBlendEnd;         // Exclusive
-	int nextBlendIdx;       // How many frames in this blend have we seen so far?
-	uint32_t *blendSumBuf;  // Blending buffer - contains the sum of the pixel values during blending (we only divide at the end of the blend to prevent rounding errors). Not allocated if toBlend == 1.
-	uint32_t totalBlendWeight;
-
-	// Synchronisation
-	std::thread worker;
-	std::mutex workerUpdateLock;
-	std::condition_variable workerUpdate;
-	std::atomic<WorkerMsg> workerMsg;
-	std::mutex imageBufLock;
-	std::mutex audioBufLock;
-	std::atomic<bool> workerFailedToStart;
-} g_render;
-
 ON_EVENT(P2FX_UNLOAD) {
-	if (g_render.worker.joinable()) g_render.worker.detach();
+	if (Renderer::g_render.worker.joinable()) Renderer::g_render.worker.detach();
 }
 
 static inline void msgStopRender(bool error) {
-	std::lock_guard<std::mutex> lock(g_render.workerUpdateLock);
-	g_render.workerMsg.store(error ? WorkerMsg::STOP_RENDERING_ERROR : WorkerMsg::STOP_RENDERING_REQUESTED);
-	g_render.workerUpdate.notify_all();
+	std::lock_guard<std::mutex> lock(Renderer::g_render.workerUpdateLock);
+	Renderer::g_render.workerMsg.store(error ? Renderer::WorkerMsg::STOP_RENDERING_ERROR : Renderer::WorkerMsg::STOP_RENDERING_REQUESTED);
+	Renderer::g_render.workerUpdate.notify_all();
 }
 
 // Utilities {{{
@@ -210,14 +131,14 @@ static uint16_t calcFrameWeight(double position) {
 static _CommandCallback startmovie_origCbk;
 static _CommandCallback endmovie_origCbk;
 static void startmovie_cbk(const CCommand &args) {
-	if (g_render.isRendering.load()) {
+	if (Renderer::g_render.isRendering.load()) {
 		console->Print("Cannot startmovie while a P2FX render is active! Stop the render with p2fx_render_finish.\n");
 		return;
 	}
 	startmovie_origCbk(args);
 }
 static void endmovie_cbk(const CCommand &args) {
-	if (g_render.isRendering.load()) {
+	if (Renderer::g_render.isRendering.load()) {
 		console->Print("Cannot endmovie while a P2FX render is active! Did you mean p2fx_render_finish?\n");
 		return;
 	}
@@ -269,10 +190,10 @@ static AVFrame *allocAudioFrame(AVSampleFormat sampleFmt, uint64_t channelLayout
 
 // }}}
 
-// Stream creation and destruction {{{
+// Renderer::Stream creation and destruction {{{
 
 // framerate is sample rate for audio streams
-static bool addStream(Stream *out, AVFormatContext *outputCtx, AVCodecID codecId, int64_t bitrate, int framerate, int ptsOff, int width = 0, int height = 0) {
+static bool addStream(Renderer::Stream *out, AVFormatContext *outputCtx, AVCodecID codecId, int64_t bitrate, int framerate, int ptsOff, int width = 0, int height = 0) {
 	out->codec = avcodec_find_encoder(codecId);
 	if (!out->codec) {
 		console->Print("Failed to find encoder for '%s'!\n", avcodec_get_name(codecId));
@@ -443,7 +364,7 @@ static bool addStream(Stream *out, AVFormatContext *outputCtx, AVCodecID codecId
 	return true;
 }
 
-static void closeStream(Stream *s) {
+static void closeStream(Renderer::Stream *s) {
 	avcodec_free_context(&s->enc);
 	av_frame_free(&s->frame);
 	av_frame_free(&s->tmpFrame);
@@ -455,7 +376,7 @@ static void closeStream(Stream *s) {
 
 // Flushing streams {{{
 
-static bool flushStream(Stream *s, bool isEnd = false) {
+static bool flushStream(Renderer::Stream *s, bool isEnd = false) {
 	if (isEnd) {
 		avcodec_send_frame(s->enc, NULL);
 	}
@@ -470,7 +391,7 @@ static bool flushStream(Stream *s, bool isEnd = false) {
 		}
 		av_packet_rescale_ts(&pkt, s->enc->time_base, s->stream->time_base);
 		pkt.stream_index = s->stream->index;
-		av_interleaved_write_frame(g_render.outCtx, &pkt);
+		av_interleaved_write_frame(Renderer::g_render.outCtx, &pkt);
 		av_packet_unref(&pkt);
 	}
 }
@@ -479,7 +400,7 @@ static bool flushStream(Stream *s, bool isEnd = false) {
 
 // Opening streams {{{
 
-static bool openVideo(AVFormatContext *outputCtx, Stream *s, AVDictionary **options) {
+static bool openVideo(AVFormatContext *outputCtx, Renderer::Stream *s, AVDictionary **options) {
 	if (avcodec_open2(s->enc, s->codec, options) < 0) {
 		console->Print("Failed to open video codec\n");
 		return false;
@@ -511,7 +432,7 @@ static bool openVideo(AVFormatContext *outputCtx, Stream *s, AVDictionary **opti
 	return true;
 }
 
-static bool openAudio(AVFormatContext *outputCtx, Stream *s, AVDictionary **options) {
+static bool openAudio(AVFormatContext *outputCtx, Renderer::Stream *s, AVDictionary **options) {
 	if (avcodec_open2(s->enc, s->codec, options) < 0) {
 		console->Print("Failed to open audio codec\n");
 		return false;
@@ -553,76 +474,76 @@ static bool openAudio(AVFormatContext *outputCtx, Stream *s, AVDictionary **opti
 // workerStartRender {{{
 
 static void workerStartRender(AVCodecID videoCodec, AVCodecID audioCodec, int64_t videoBitrate, int64_t audioBitrate, AVDictionary *options) {
-	if (avformat_alloc_output_context2(&g_render.outCtx, NULL, NULL, g_render.filename.c_str()) == AVERROR(EINVAL)) {
-		console->Print("Failed to deduce output format from file extension - using MP4\n");
-		avformat_alloc_output_context2(&g_render.outCtx, NULL, "mp4", g_render.filename.c_str());
+	if (avformat_alloc_output_context2(&Renderer::g_render.outCtx, NULL, NULL, Renderer::g_render.filename.c_str()) == AVERROR(EINVAL)) {
+		console->Print("Failed to deduce output format from file extension - using AVI\n");
+		avformat_alloc_output_context2(&Renderer::g_render.outCtx, NULL, "avi", Renderer::g_render.filename.c_str());
 	}
 
-	if (!g_render.outCtx) {
+	if (!Renderer::g_render.outCtx) {
 		console->Print("Failed to allocate output context\n");
 		return;
 	}
 
-	if (!addStream(&g_render.videoStream, g_render.outCtx, videoCodec, videoBitrate, g_render.fps, 0, g_render.width, g_render.height)) {
+	if (!addStream(&Renderer::g_render.videoStream, Renderer::g_render.outCtx, videoCodec, videoBitrate, Renderer::g_render.fps, 0, Renderer::g_render.width, Renderer::g_render.height)) {
 		console->Print("Failed to create video stream\n");
-		avformat_free_context(g_render.outCtx);
+		avformat_free_context(Renderer::g_render.outCtx);
 		return;
 	}
 
-	if (!addStream(&g_render.audioStream, g_render.outCtx, audioCodec, audioBitrate, g_render.samplerate, g_render.samplerate / 10)) {  // offset the start by 0.1s because idk
+	if (!addStream(&Renderer::g_render.audioStream, Renderer::g_render.outCtx, audioCodec, audioBitrate, Renderer::g_render.samplerate, Renderer::g_render.samplerate / 10)) {  // offset the start by 0.1s because idk
 		console->Print("Failed to create audio stream\n");
-		closeStream(&g_render.videoStream);
-		avformat_free_context(g_render.outCtx);
+		closeStream(&Renderer::g_render.videoStream);
+		avformat_free_context(Renderer::g_render.outCtx);
 		return;
 	}
 
-	if (!openVideo(g_render.outCtx, &g_render.videoStream, &options)) {
+	if (!openVideo(Renderer::g_render.outCtx, &Renderer::g_render.videoStream, &options)) {
 		console->Print("Failed to open video stream\n");
-		closeStream(&g_render.audioStream);
-		closeStream(&g_render.videoStream);
-		avformat_free_context(g_render.outCtx);
+		closeStream(&Renderer::g_render.audioStream);
+		closeStream(&Renderer::g_render.videoStream);
+		avformat_free_context(Renderer::g_render.outCtx);
 		return;
 	}
 
-	if (!openAudio(g_render.outCtx, &g_render.audioStream, &options)) {
+	if (!openAudio(Renderer::g_render.outCtx, &Renderer::g_render.audioStream, &options)) {
 		console->Print("Failed to open audio stream\n");
-		closeStream(&g_render.audioStream);
-		closeStream(&g_render.videoStream);
-		avformat_free_context(g_render.outCtx);
+		closeStream(&Renderer::g_render.audioStream);
+		closeStream(&Renderer::g_render.videoStream);
+		avformat_free_context(Renderer::g_render.outCtx);
 		return;
 	}
 
-	if (avio_open(&g_render.outCtx->pb, g_render.filename.c_str(), AVIO_FLAG_WRITE) < 0) {
+	if (avio_open(&Renderer::g_render.outCtx->pb, Renderer::g_render.filename.c_str(), AVIO_FLAG_WRITE) < 0) {
 		console->Print("Failed to open output file\n");
-		closeStream(&g_render.audioStream);
-		closeStream(&g_render.videoStream);
-		avformat_free_context(g_render.outCtx);
+		closeStream(&Renderer::g_render.audioStream);
+		closeStream(&Renderer::g_render.videoStream);
+		avformat_free_context(Renderer::g_render.outCtx);
 		return;
 	}
 
-	if (avformat_write_header(g_render.outCtx, &options) < 0) {
+	if (avformat_write_header(Renderer::g_render.outCtx, &options) < 0) {
 		console->Print("Failed to write output file\n");
-		closeStream(&g_render.audioStream);
-		closeStream(&g_render.videoStream);
-		avio_closep(&g_render.outCtx->pb);
-		avformat_free_context(g_render.outCtx);
+		closeStream(&Renderer::g_render.audioStream);
+		closeStream(&Renderer::g_render.videoStream);
+		avio_closep(&Renderer::g_render.outCtx->pb);
+		avformat_free_context(Renderer::g_render.outCtx);
 		return;
 	}
 
-	g_render.audioBufIdx = 0;
-	g_render.audioBufSz = g_render.audioStream.tmpFrame->nb_samples;
+	Renderer::g_render.audioBufIdx = 0;
+	Renderer::g_render.audioBufSz = Renderer::g_render.audioStream.tmpFrame->nb_samples;
 
-	g_render.channels = g_render.audioStream.enc->channels;
+	Renderer::g_render.channels = Renderer::g_render.audioStream.enc->channels;
 
-	g_render.imageBuf = (uint8_t *)malloc(3 * g_render.width * g_render.height);
-	for (int i = 0; i < g_render.channels; ++i) {
-		g_render.audioBuf[i] = (int16_t *)malloc(g_render.audioBufSz * sizeof g_render.audioBuf[i][0]);
+	Renderer::g_render.imageBuf = (uint8_t *)malloc(3 * Renderer::g_render.width * Renderer::g_render.height);
+	for (int i = 0; i < Renderer::g_render.channels; ++i) {
+		Renderer::g_render.audioBuf[i] = (int16_t *)malloc(Renderer::g_render.audioBufSz * sizeof Renderer::g_render.audioBuf[i][0]);
 	}
 
-	g_render.nextBlendIdx = 0;
-	g_render.totalBlendWeight = 0;
-	if (g_render.toBlend > 1) {
-		g_render.blendSumBuf = (uint32_t *)calloc(3 * g_render.width * g_render.height, sizeof g_render.blendSumBuf[0]);
+	Renderer::g_render.nextBlendIdx = 0;
+	Renderer::g_render.totalBlendWeight = 0;
+	if (Renderer::g_render.toBlend > 1) {
+		Renderer::g_render.blendSumBuf = (uint32_t *)calloc(3 * Renderer::g_render.width * Renderer::g_render.height, sizeof Renderer::g_render.blendSumBuf[0]);
 	}
 
 	g_movieInfo->moviename[0] = 'a';  // Just something nonzero to make the game think there's a movie in progress
@@ -630,25 +551,25 @@ static void workerStartRender(AVCodecID videoCodec, AVCodecID audioCodec, int64_
 	g_movieInfo->movieframe = 0;
 	g_movieInfo->type = 0;  // Should stop anything actually being output
 
-	g_render.isRendering.store(true);
+	Renderer::g_render.isRendering.store(true);
 
-	console->Print("Started rendering to '%s'\n", g_render.filename.c_str());
+	console->Print("Started rendering to '%s'\n", Renderer::g_render.filename.c_str());
 
 	console->Print(
 		"    video: %s (%dx%d @ %d fps, %" PRId64 " kb/s, %s)\n",
-		g_render.videoStream.codec->name,
-		g_render.width,
-		g_render.height,
-		g_render.fps,
-		g_render.videoStream.enc->bit_rate / 1000,
-		av_get_pix_fmt_name(g_render.videoStream.enc->pix_fmt));
+		Renderer::g_render.videoStream.codec->name,
+		Renderer::g_render.width,
+		Renderer::g_render.height,
+		Renderer::g_render.fps,
+		Renderer::g_render.videoStream.enc->bit_rate / 1000,
+		av_get_pix_fmt_name(Renderer::g_render.videoStream.enc->pix_fmt));
 
 	console->Print(
 		"    audio: %s (%d Hz, %" PRId64 " kb/s, %s)\n",
-		g_render.audioStream.codec->name,
-		g_render.audioStream.enc->sample_rate,
-		g_render.audioStream.enc->bit_rate / 1000,
-		av_get_sample_fmt_name(g_render.audioStream.enc->sample_fmt));
+		Renderer::g_render.audioStream.codec->name,
+		Renderer::g_render.audioStream.enc->sample_rate,
+		Renderer::g_render.audioStream.enc->bit_rate / 1000,
+		av_get_sample_fmt_name(Renderer::g_render.audioStream.enc->sample_fmt));
 }
 
 // }}}
@@ -662,32 +583,32 @@ static void workerFinishRender(bool error) {
 		console->Print("Stopping render...\n");
 	}
 
-	g_render.isRendering.store(false);
+	Renderer::g_render.isRendering.store(false);
 
-	flushStream(&g_render.videoStream, true);
-	flushStream(&g_render.audioStream, true);
+	flushStream(&Renderer::g_render.videoStream, true);
+	flushStream(&Renderer::g_render.audioStream, true);
 
-	av_write_trailer(g_render.outCtx);
+	av_write_trailer(Renderer::g_render.outCtx);
 
-	console->Print("Rendered %d frames to '%s'\n", g_render.videoStream.nextPts, g_render.filename.c_str());
+	console->Print("Rendered %d frames to '%s'\n", Renderer::g_render.videoStream.nextPts, Renderer::g_render.filename.c_str());
 
-	g_render.imageBufLock.lock();
-	g_render.audioBufLock.lock();
+	Renderer::g_render.imageBufLock.lock();
+	Renderer::g_render.audioBufLock.lock();
 
-	closeStream(&g_render.videoStream);
-	closeStream(&g_render.audioStream);
-	avio_closep(&g_render.outCtx->pb);
-	avformat_free_context(g_render.outCtx);
-	free(g_render.imageBuf);
-	for (int i = 0; i < g_render.channels; ++i) {
-		free(g_render.audioBuf[i]);
+	closeStream(&Renderer::g_render.videoStream);
+	closeStream(&Renderer::g_render.audioStream);
+	avio_closep(&Renderer::g_render.outCtx->pb);
+	avformat_free_context(Renderer::g_render.outCtx);
+	free(Renderer::g_render.imageBuf);
+	for (int i = 0; i < Renderer::g_render.channels; ++i) {
+		free(Renderer::g_render.audioBuf[i]);
 	}
-	if (g_render.toBlend > 1) {
-		free(g_render.blendSumBuf);
+	if (Renderer::g_render.toBlend > 1) {
+		free(Renderer::g_render.blendSumBuf);
 	}
 
-	g_render.imageBufLock.unlock();
-	g_render.audioBufLock.unlock();
+	Renderer::g_render.imageBufLock.unlock();
+	Renderer::g_render.audioBufLock.unlock();
 
 	// Reset all the Source movieinfo struct to its default values
 	g_movieInfo->moviename[0] = 0;
@@ -701,56 +622,56 @@ static void workerFinishRender(bool error) {
 // workerHandleVideoFrame {{{
 
 static bool workerHandleVideoFrame() {
-	g_render.imageBufLock.lock();
-	g_render.workerMsg.store(WorkerMsg::NONE);  // It's important that we do this *after* locking the image buffer
-	size_t size = g_render.width * g_render.height * 3;
-	if (g_render.toBlend == 1) {
+	Renderer::g_render.imageBufLock.lock();
+	Renderer::g_render.workerMsg.store(Renderer::WorkerMsg::NONE);  // It's important that we do this *after* locking the image buffer
+	size_t size = Renderer::g_render.width * Renderer::g_render.height * 3;
+	if (Renderer::g_render.toBlend == 1) {
 		// We can just copy the data directly
-		memcpy(g_render.videoStream.tmpFrame->data[0], g_render.imageBuf, size);
-		g_render.imageBufLock.unlock();
+		memcpy(Renderer::g_render.videoStream.tmpFrame->data[0], Renderer::g_render.imageBuf, size);
+		Renderer::g_render.imageBufLock.unlock();
 	} else {
-		if (g_render.nextBlendIdx >= g_render.toBlendStart && g_render.nextBlendIdx < g_render.toBlendEnd) {
-			double framePos = (g_render.nextBlendIdx - g_render.toBlendStart) / (g_render.toBlendEnd - g_render.toBlendStart - 1);
+		if (Renderer::g_render.nextBlendIdx >= Renderer::g_render.toBlendStart && Renderer::g_render.nextBlendIdx < Renderer::g_render.toBlendEnd) {
+			double framePos = (Renderer::g_render.nextBlendIdx - Renderer::g_render.toBlendStart) / (Renderer::g_render.toBlendEnd - Renderer::g_render.toBlendStart - 1);
 			uint32_t weight = calcFrameWeight(framePos);
 			for (size_t i = 0; i < size; ++i) {
-				g_render.blendSumBuf[i] += weight * (uint32_t)g_render.imageBuf[i];
+				Renderer::g_render.blendSumBuf[i] += weight * (uint32_t)Renderer::g_render.imageBuf[i];
 			}
-			g_render.totalBlendWeight += weight;
+			Renderer::g_render.totalBlendWeight += weight;
 		}
-		g_render.imageBufLock.unlock();
+		Renderer::g_render.imageBufLock.unlock();
 
-		if (++g_render.nextBlendIdx != g_render.toBlend) {
+		if (++Renderer::g_render.nextBlendIdx != Renderer::g_render.toBlend) {
 			// We've added in this frame, but not done blending yet
 			return true;
 		}
 
 		for (size_t i = 0; i < size; ++i) {
-			g_render.videoStream.tmpFrame->data[0][i] = (uint8_t)(g_render.blendSumBuf[i] / g_render.totalBlendWeight);
-			g_render.blendSumBuf[i] = 0;
+			Renderer::g_render.videoStream.tmpFrame->data[0][i] = (uint8_t)(Renderer::g_render.blendSumBuf[i] / Renderer::g_render.totalBlendWeight);
+			Renderer::g_render.blendSumBuf[i] = 0;
 		}
 
-		g_render.nextBlendIdx = 0;
-		g_render.totalBlendWeight = 0;
+		Renderer::g_render.nextBlendIdx = 0;
+		Renderer::g_render.totalBlendWeight = 0;
 	}
 
 	// tmpFrame is now our final frame; convert to the output format and
 	// process it
 
-	sws_scale(g_render.videoStream.swsCtx, (const uint8_t *const *)g_render.videoStream.tmpFrame->data, g_render.videoStream.tmpFrame->linesize, 0, g_render.height, g_render.videoStream.frame->data, g_render.videoStream.frame->linesize);
+	sws_scale(Renderer::g_render.videoStream.swsCtx, (const uint8_t *const *)Renderer::g_render.videoStream.tmpFrame->data, Renderer::g_render.videoStream.tmpFrame->linesize, 0, Renderer::g_render.height, Renderer::g_render.videoStream.frame->data, Renderer::g_render.videoStream.frame->linesize);
 
-	g_render.videoStream.frame->pts = g_render.videoStream.nextPts;
+	Renderer::g_render.videoStream.frame->pts = Renderer::g_render.videoStream.nextPts;
 
-	if (avcodec_send_frame(g_render.videoStream.enc, g_render.videoStream.frame) < 0) {
+	if (avcodec_send_frame(Renderer::g_render.videoStream.enc, Renderer::g_render.videoStream.frame) < 0) {
 		console->Print("Failed to send video frame for encoding!\n");
 		return false;
 	}
 
-	if (!flushStream(&g_render.videoStream)) {
+	if (!flushStream(&Renderer::g_render.videoStream)) {
 		console->Print("Failed to flush video stream!\n");
 		return false;
 	}
 
-	++g_render.videoStream.nextPts;
+	++Renderer::g_render.videoStream.nextPts;
 
 	return true;
 }
@@ -760,14 +681,14 @@ static bool workerHandleVideoFrame() {
 // workerHandleAudioFrame {{{
 
 static bool workerHandleAudioFrame() {
-	g_render.audioBufLock.lock();
-	g_render.workerMsg.store(WorkerMsg::NONE);  // It's important that we do this *after* locking the audio buffer
+	Renderer::g_render.audioBufLock.lock();
+	Renderer::g_render.workerMsg.store(Renderer::WorkerMsg::NONE);  // It's important that we do this *after* locking the audio buffer
 
-	Stream *s = &g_render.audioStream;
-	for (int i = 0; i < g_render.channels; ++i) {
-		memcpy(s->tmpFrame->data[i], g_render.audioBuf[i], g_render.audioBufSz * sizeof g_render.audioBuf[i][0]);
+	Renderer::Stream *s = &Renderer::g_render.audioStream;
+	for (int i = 0; i < Renderer::g_render.channels; ++i) {
+		memcpy(s->tmpFrame->data[i], Renderer::g_render.audioBuf[i], Renderer::g_render.audioBufSz * sizeof Renderer::g_render.audioBuf[i][0]);
 	}
-	g_render.audioBufLock.unlock();
+	Renderer::g_render.audioBufLock.unlock();
 
 
 	s->tmpFrame->pts = s->nextPts;
@@ -802,33 +723,33 @@ static bool workerHandleAudioFrame() {
 
 static void worker(AVCodecID videoCodec, AVCodecID audioCodec, int64_t videoBitrate, int64_t audioBitrate, AVDictionary *options) {
 	workerStartRender(videoCodec, audioCodec, videoBitrate, audioBitrate, options);
-	if (!g_render.isRendering.load()) {
-		g_render.workerFailedToStart.store(true);
+	if (!Renderer::g_render.isRendering.load()) {
+		Renderer::g_render.workerFailedToStart.store(true);
 		return;
 	}
-	std::unique_lock<std::mutex> lock(g_render.workerUpdateLock);
+	std::unique_lock<std::mutex> lock(Renderer::g_render.workerUpdateLock);
 	while (true) {
-		g_render.workerUpdate.wait(lock);
-		switch (g_render.workerMsg.load()) {
-		case WorkerMsg::VIDEO_FRAME_READY:
+		Renderer::g_render.workerUpdate.wait(lock);
+		switch (Renderer::g_render.workerMsg.load()) {
+		case Renderer::WorkerMsg::VIDEO_FRAME_READY:
 			if (!workerHandleVideoFrame()) {
 				workerFinishRender(true);
 				return;
 			}
 			break;
-		case WorkerMsg::AUDIO_FRAME_READY:
+		case Renderer::WorkerMsg::AUDIO_FRAME_READY:
 			if (!workerHandleAudioFrame()) {
 				workerFinishRender(true);
 				return;
 			}
 			break;
-		case WorkerMsg::STOP_RENDERING_ERROR:
+		case Renderer::WorkerMsg::STOP_RENDERING_ERROR:
 			workerFinishRender(true);
 			return;
-		case WorkerMsg::STOP_RENDERING_REQUESTED:
+		case Renderer::WorkerMsg::STOP_RENDERING_REQUESTED:
 			workerFinishRender(false);
 			return;
-		case WorkerMsg::NONE:
+		case Renderer::WorkerMsg::NONE:
 			break;
 		}
 	}
@@ -841,13 +762,13 @@ static void worker(AVCodecID videoCodec, AVCodecID audioCodec, int64_t videoBitr
 static void startRender() {
 	// We can't start rendering if we haven't stopped yet, so make sure
 	// the worker thread isn't running
-	if (g_render.worker.joinable()) {
-		g_render.worker.join();
+	if (Renderer::g_render.worker.joinable()) {
+		Renderer::g_render.worker.join();
 	}
 
 	AVDictionary *options = NULL;
 
-	if (g_render.isRendering.load()) {
+	if (Renderer::g_render.isRendering.load()) {
 		console->Print("Already rendering\n");
 		return;
 	}
@@ -857,36 +778,36 @@ static void startRender() {
 		return;
 	}
 
-	g_render.samplerate = p2fx_render_sample_rate.GetInt();
-	g_render.fps = p2fx_render_fps.GetInt();
+	Renderer::g_render.samplerate = p2fx_render_sample_rate.GetInt();
+	Renderer::g_render.fps = p2fx_render_fps.GetInt();
 
 	if (p2fx_render_blend.GetInt() == 0 && host_framerate.GetInt() == 0) {
 		console->Print("host_framerate or p2fx_render_blend must be nonzero\n");
 		return;
 	} else if (p2fx_render_blend.GetInt() != 0) {
-		g_render.toBlend = p2fx_render_blend.GetInt();
-		int framerate = g_render.toBlend * g_render.fps;
+		Renderer::g_render.toBlend = p2fx_render_blend.GetInt();
+		int framerate = Renderer::g_render.toBlend * Renderer::g_render.fps;
 		if (host_framerate.GetInt() != 0 && host_framerate.GetInt() != framerate) {
 			console->Print("Warning: overriding host_framerate to %d based on p2fx_render_fps and p2fx_render_blend\n", framerate);
 		}
 		host_framerate.SetValue(framerate);
 	} else {  // host_framerate nonzero
 		int framerate = host_framerate.GetInt();
-		if (framerate % g_render.fps != 0) {
+		if (framerate % Renderer::g_render.fps != 0) {
 			console->Print("host_framerate must be a multiple of p2fx_render_fps\n");
 			return;
 		}
-		g_render.toBlend = framerate / g_render.fps;
+		Renderer::g_render.toBlend = framerate / Renderer::g_render.fps;
 	}
 
 	{
 		float shutter = (float)p2fx_render_shutter_angle.GetInt() / 360.0f;
-		int toExclude = (int)round(g_render.toBlend * (1 - shutter) / 2);
-		if (toExclude * 2 >= g_render.toBlend) {
-			toExclude = g_render.toBlend / 2 - 1;
+		int toExclude = (int)round(Renderer::g_render.toBlend * (1 - shutter) / 2);
+		if (toExclude * 2 >= Renderer::g_render.toBlend) {
+			toExclude = Renderer::g_render.toBlend / 2 - 1;
 		}
-		g_render.toBlendStart = toExclude;
-		g_render.toBlendEnd = g_render.toBlend - toExclude;
+		Renderer::g_render.toBlendStart = toExclude;
+		Renderer::g_render.toBlendEnd = Renderer::g_render.toBlend - toExclude;
 	}
 
 	if (snd_surround_speakers.GetInt() != 2) {
@@ -935,17 +856,17 @@ static void startRender() {
 		}
 	}
 
-	g_render.width = GetScreenWidth();
-	g_render.height = GetScreenHeight();
+	Renderer::g_render.width = GetScreenWidth();
+	Renderer::g_render.height = GetScreenHeight();
 
-	g_render.workerFailedToStart.store(false);
+	Renderer::g_render.workerFailedToStart.store(false);
 
-	g_render.workerMsg.store(WorkerMsg::NONE);
-	g_render.worker = std::thread(worker, videoCodec, audioCodec, videoBitrate * 1000, audioBitrate * 1000, options);
+	Renderer::g_render.workerMsg.store(Renderer::WorkerMsg::NONE);
+	Renderer::g_render.worker = std::thread(worker, videoCodec, audioCodec, videoBitrate * 1000, audioBitrate * 1000, options);
 
 	// Busy-wait until the rendering has started so that we don't miss
 	// any frames
-	while (!g_render.isRendering.load() && !g_render.workerFailedToStart.load())
+	while (!Renderer::g_render.isRendering.load() && !Renderer::g_render.workerFailedToStart.load())
 		;
 }
 
@@ -963,14 +884,14 @@ static void (*SND_RecordBuffer)();
 static void SND_RecordBuffer_Hook();
 static Hook g_RecordBufferHook(&SND_RecordBuffer_Hook);
 static void SND_RecordBuffer_Hook() {
-	if (!g_render.isRendering.load()) {
+	if (!Renderer::g_render.isRendering.load()) {
 		g_RecordBufferHook.Disable();
 		SND_RecordBuffer();
 		g_RecordBufferHook.Enable();
 		return;
 	}
 
-	if (g_render.isPaused.load())
+	if (Renderer::g_render.isPaused.load())
 		return;
 
 	if (engine->ConsoleVisible()) return;
@@ -978,7 +899,7 @@ static void SND_RecordBuffer_Hook() {
 	// If the worker has received a message it hasn't yet handled,
 	// busy-wait; this is a really obscure race condition that should
 	// never happen
-	while (g_render.isRendering.load() && g_render.workerMsg.load() != WorkerMsg::NONE)
+	while (Renderer::g_render.isRendering.load() && Renderer::g_render.workerMsg.load() != Renderer::WorkerMsg::NONE)
 		;
 
 	if (snd_surround_speakers.GetInt() != 2) {
@@ -987,40 +908,40 @@ static void SND_RecordBuffer_Hook() {
 		return;
 	}
 
-	g_render.audioBufLock.lock();
+	Renderer::g_render.audioBufLock.lock();
 
-	for (int i = 0; i < *g_snd_linear_count; i += g_render.channels) {
-		for (int c = 0; c < g_render.channels; ++c) {
-			g_render.audioBuf[c][g_render.audioBufIdx] = clip16(((*g_snd_p)[i + c] * *g_snd_vol) >> 8);
+	for (int i = 0; i < *g_snd_linear_count; i += Renderer::g_render.channels) {
+		for (int c = 0; c < Renderer::g_render.channels; ++c) {
+			Renderer::g_render.audioBuf[c][Renderer::g_render.audioBufIdx] = clip16(((*g_snd_p)[i + c] * *g_snd_vol) >> 8);
 		}
 
-		++g_render.audioBufIdx;
-		if (g_render.audioBufIdx == g_render.audioBufSz) {
-			g_render.audioBufLock.unlock();
+		++Renderer::g_render.audioBufIdx;
+		if (Renderer::g_render.audioBufIdx == Renderer::g_render.audioBufSz) {
+			Renderer::g_render.audioBufLock.unlock();
 
-			g_render.workerUpdateLock.lock();
-			g_render.workerMsg.store(WorkerMsg::AUDIO_FRAME_READY);
-			g_render.workerUpdate.notify_all();
-			g_render.workerUpdateLock.unlock();
+			Renderer::g_render.workerUpdateLock.lock();
+			Renderer::g_render.workerMsg.store(Renderer::WorkerMsg::AUDIO_FRAME_READY);
+			Renderer::g_render.workerUpdate.notify_all();
+			Renderer::g_render.workerUpdateLock.unlock();
 
 			// Busy-wait until the worker locks the audio buffer; not
 			// ideal, but shouldn't take long
-			while (g_render.isRendering.load() && g_render.workerMsg.load() != WorkerMsg::NONE)
+			while (Renderer::g_render.isRendering.load() && Renderer::g_render.workerMsg.load() != Renderer::WorkerMsg::NONE)
 				;
 
-			if (!g_render.isRendering.load()) {
+			if (!Renderer::g_render.isRendering.load()) {
 				// We shouldn't write to that buffer anymore, it's been
 				// invalidated
 				// We've already unlocked audioBufLock so just return
 				return;
 			}
 
-			g_render.audioBufLock.lock();
-			g_render.audioBufIdx = 0;
+			Renderer::g_render.audioBufLock.lock();
+			Renderer::g_render.audioBufIdx = 0;
 		}
 	}
 
-	g_render.audioBufLock.unlock();
+	Renderer::g_render.audioBufLock.unlock();
 
 	return;
 }
@@ -1036,24 +957,24 @@ void Renderer::Frame() {
 		if (engine->GetMaxClients() >= 2 && p2fx_render_skip_coop_videos.GetBool()) {
 			start &= engine->startedTransitionFadeout;
 		}
-		g_render.isPaused.store(!start);
+		Renderer::g_render.isPaused.store(!start);
 		if (!start) return;
 
 		Renderer::isDemoLoading = false;
 
-		if (!g_render.isRendering.load()) {
-			g_render.filename = std::string(engine->GetGameDirectory()) + "/" + std::string(engine->demoplayer->DemoName) + "." + p2fx_render_autostart_extension.GetString();
+		if (!Renderer::g_render.isRendering.load()) {
+			Renderer::g_render.filename = std::string(engine->GetGameDirectory()) + "/" + std::string(engine->demoplayer->DemoName) + "." + p2fx_render_autostart_extension.GetString();
 			startRender();
 		}
 	} else {
 		Renderer::isDemoLoading = false;
 	}
 
-	if (!g_render.isRendering.load()) return;
+	if (!Renderer::g_render.isRendering.load()) return;
 
 	if (engine->GetMaxClients() >= 2 && p2fx_render_skip_coop_videos.GetBool() && engine->isLevelTransition) {
 		// The transition video has begun, pause the render
-		g_render.isPaused.store(true);
+		Renderer::g_render.isPaused.store(true);
 		return;
 	}
 
@@ -1065,11 +986,11 @@ void Renderer::Frame() {
 		if (!p2fx_render_merge.GetBool())
 			msgStopRender(false);
 		else
-			g_render.isPaused.store(true);
+			Renderer::g_render.isPaused.store(true);
 		return;
 	}
 
-	if (g_render.isPaused.load())
+	if (Renderer::g_render.isPaused.load())
 		return;
 
 	// Don't render if the console is visible
@@ -1078,53 +999,53 @@ void Renderer::Frame() {
 	// If the worker has received a message it hasn't yet handled,
 	// busy-wait; this is a really obscure race condition that should
 	// never happen
-	while (g_render.isRendering.load() && g_render.workerMsg.load() != WorkerMsg::NONE)
+	while (Renderer::g_render.isRendering.load() && Renderer::g_render.workerMsg.load() != Renderer::WorkerMsg::NONE)
 		;
 
-	if (GetScreenWidth() != g_render.width) {
+	if (GetScreenWidth() != Renderer::g_render.width) {
 		console->Print("Screen resolution has changed!\n");
 		msgStopRender(true);
 		return;
 	}
 
-	if (GetScreenHeight() != g_render.height) {
+	if (GetScreenHeight() != Renderer::g_render.height) {
 		console->Print("Screen resolution has changed!\n");
 		msgStopRender(true);
 		return;
 	}
 
-	if (av_frame_make_writable(g_render.videoStream.frame) < 0) {
+	if (av_frame_make_writable(Renderer::g_render.videoStream.frame) < 0) {
 		console->Print("Failed to make video frame writable!\n");
 		msgStopRender(true);
 		return;
 	}
 
-	g_render.imageBufLock.lock();
+	Renderer::g_render.imageBufLock.lock();
 
 	// Double check the buffer hasn't at some point between the start of
 	// the function and now been invalidated
-	if (!g_render.isRendering.load()) {
-		g_render.imageBufLock.unlock();
+	if (!Renderer::g_render.isRendering.load()) {
+		Renderer::g_render.imageBufLock.unlock();
 		return;
 	}
 
-	ReadScreenPixels(0, 0, g_render.width, g_render.height, g_render.imageBuf, IMAGE_FORMAT_BGR888);
+	ReadScreenPixels(0, 0, Renderer::g_render.width, Renderer::g_render.height, Renderer::g_render.imageBuf, IMAGE_FORMAT_BGR888);
 
-	g_render.imageBufLock.unlock();
+	Renderer::g_render.imageBufLock.unlock();
 
 	// Signal to the worker thread that there is image data for it to
 	// process
 	{
-		std::lock_guard<std::mutex> lock(g_render.workerUpdateLock);
-		g_render.workerMsg.store(WorkerMsg::VIDEO_FRAME_READY);
-		g_render.workerUpdate.notify_all();
+		std::lock_guard<std::mutex> lock(Renderer::g_render.workerUpdateLock);
+		Renderer::g_render.workerMsg.store(Renderer::WorkerMsg::VIDEO_FRAME_READY);
+		Renderer::g_render.workerUpdate.notify_all();
 	}
 }
 
 // }}}
 
 ON_EVENT(DEMO_STOP) {
-	if (g_render.isRendering.load() && p2fx_render_autostop.GetBool() && !p2fx_render_merge.GetBool()) {
+	if (Renderer::g_render.isRendering.load() && p2fx_render_autostop.GetBool() && !p2fx_render_merge.GetBool()) {
 		msgStopRender(false);
 	}
 }
@@ -1196,7 +1117,7 @@ CON_COMMAND(p2fx_render_start, "p2fx_render_start <file> - start rendering frame
 		return;
 	}
 
-	g_render.filename = std::string(args[1]);
+	Renderer::g_render.filename = std::string(args[1]);
 
 	startRender();
 }
@@ -1207,7 +1128,7 @@ CON_COMMAND(p2fx_render_finish, "p2fx_render_finish - stop rendering frames\n") 
 		return;
 	}
 
-	if (!g_render.isRendering.load()) {
+	if (!Renderer::g_render.isRendering.load()) {
 		console->Print("Not rendering!\n");
 		return;
 	}

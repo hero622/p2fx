@@ -94,6 +94,19 @@ void DemoViewer::Think() {
 			}
 		}
 	}
+
+	if (Input::keys[0x52].IsPressed()) {
+		if (!Renderer::g_render.isRendering) {
+			std::time_t t = time(NULL);
+			std::tm *tm = localtime(&t);
+			char buf[80];
+			std::strftime(buf, sizeof(buf), "%Y-%m-%d-%H-%M-%S", tm);
+
+			engine->ExecuteCommand(Utils::ssprintf("p2fx_render_start \"p2fx %s.avi\"", buf).c_str(), true);
+		} else {
+			engine->ExecuteCommand("p2fx_render_finish", true);
+		}
+	}
 }
 
 void DemoViewer::ParseDemoData() {
