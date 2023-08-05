@@ -106,8 +106,8 @@ void Menu::Draw() {
 		case 4:
 			ImGui::Columns(2, "Columns", false);
 
-			ImGui::SetColumnOffset(1, 260.0f);
-			ImGui::PushItemWidth(260.0f);
+			ImGui::SetColumnOffset(1, 240.0f);
+			ImGui::PushItemWidth(240.0f);
 
 			static std::string selectedCfg = std::string();
 			if (ImGui::BeginListBox("##Configs")) {
@@ -131,25 +131,25 @@ void Menu::Draw() {
 
 			ImGui::NextColumn();
 			
-			if (ImGui::Button("Create", ImVec2(60.0f, 20.0f))) {
+			if (ImGui::Button("Create", ImVec2(80.0f, 27.0f))) {
 				if (strlen(cfgName) != 0)
 					Config::g_Cfgs.push_back(cfgName);
 			}
-			if (ImGui::Button("Save", ImVec2(60.0f, 20.0f))) {
+			if (ImGui::Button("Save", ImVec2(80.0f, 27.0f))) {
 				if (!selectedCfg.empty())
 					Config::Save(selectedCfg);
 			}
-			if (ImGui::Button("Load", ImVec2(60.0f, 20.0f))) {
+			if (ImGui::Button("Load", ImVec2(80.0f, 27.0f))) {
 				if (!selectedCfg.empty())
 					Config::Load(selectedCfg);
 			}
-			if (ImGui::Button("Delete", ImVec2(60.0f, 20.0f))) {
+			if (ImGui::Button("Delete", ImVec2(80.0f, 27.0f))) {
 				if (!selectedCfg.empty()) {
 					Config::Delete(selectedCfg);
 					selectedCfg = "";
 				}
 			}
-			if (ImGui::Button("Refresh", ImVec2(60.0f, 20.0f))) {
+			if (ImGui::Button("Refresh", ImVec2(80.0f, 27.0f))) {
 				Config::EnumerateCfgs();
 			}
 			break;
