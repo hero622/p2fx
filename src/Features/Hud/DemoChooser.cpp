@@ -51,11 +51,13 @@ void DemoChooser::Paint(int slot) {
 
 	hover = PointInBounds(x0, y0, x1, y1, mx, my);
 
-	if (Input::keys[VK_LBUTTON].IsPressed() && hover) {
-		Menu::g_fileDialog.Open();
-		surface->SetAllMenuPanelState(false);
-	} else if (!Menu::g_fileDialog.IsOpened()) {
-		surface->SetAllMenuPanelState(true);
+	if (Input::keys[VK_LBUTTON].IsPressed()) {
+		if (hover) {
+			Menu::g_fileDialog.Open();
+			surface->SetAllMenuPanelState(false);
+		} else if (!Menu::g_fileDialog.IsOpened()) {
+			surface->SetAllMenuPanelState(true);
+		}
 	}
 
 	if (surface->g_hide)

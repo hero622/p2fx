@@ -8,7 +8,9 @@ void Menu::Draw() {
 	g_fileDialog.Display();
 
 	if (g_fileDialog.HasSelected()) {
-		engine->ExecuteCommand(Utils::ssprintf("playdemo \"%s\"", g_fileDialog.GetSelected().string().c_str()).c_str());
+		auto path = g_fileDialog.GetSelected().string();
+		auto safepath = path.substr(path.find("portal2") + 8, path.size());
+		engine->ExecuteCommand(Utils::ssprintf("playdemo \"%s\"", safepath).c_str());
 		g_fileDialog.ClearSelected();
 	}
 
