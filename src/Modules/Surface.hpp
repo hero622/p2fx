@@ -9,10 +9,8 @@
 class Surface : public Module {
 public:
 	Interface *matsurface = nullptr;
-	Interface *panel = nullptr;
 
 	typedef unsigned long HFont;
-	typedef unsigned int VPANEL;
 
 	using _DrawSetColor = int(__rescall *)(void *thisptr, int r, int g, int b, int a);
 	using _DrawFilledRect = int(__rescall *)(void *thisptr, int x0, int y0, int x1, int y1);
@@ -38,9 +36,6 @@ public:
 	using _IsTextureIDValid = int(__rescall *)(void *thisptr, int id);
 	using _CreateNewTextureID = int(__rescall *)(void *thisptr, bool procedural);
 
-	using _SetVisible = int(__rescall *)(void *thisptr, VPANEL vguiPanel, bool state);
-	using _GetName = const char *(__rescall *)(void *thisptr, VPANEL vguiPanel);
-
 	_GetFontTall GetFontTall = nullptr;
 	_DrawSetColor DrawSetColor = nullptr;
 	_DrawFilledRect DrawFilledRect = nullptr;
@@ -65,18 +60,7 @@ public:
 	_IsTextureIDValid IsTextureIDValid = nullptr;
 	_CreateNewTextureID CreateNewTextureID = nullptr;
 
-	_SetVisible SetVisible = nullptr;
-	_GetName GetName = nullptr;
-
 	CUtlVector<CFontAmalgam> *m_FontAmalgams;
-
-	bool g_isInMainMenu = false;
-	bool g_hide = false;
-	struct {
-		bool hasLoaded = false;
-
-		Surface::VPANEL BtnPlaySolo, BtnCoOp, BtnCommunity, BtnOptions, BtnExtras, BtnQuit, BtnEconUI;
-	} vguiPanels;
 
 public:
 	bool IsFontValid(HFont font);
@@ -89,16 +73,7 @@ public:
 	void DrawFilledCircle(int x, int y, float radius, Color clr);
 	void DrawColoredLine(int x0, int y0, int x1, int y1, Color clr);
 
-	void SetPanelVisible(VPANEL vguiPanel, bool state);
-	const char *GetPanelName(VPANEL vguiPanel);
-
-	void SetMenuPanelState(bool state);
-	void SetAllMenuPanelState(bool state);
-
 public:
-	// ISurface::PaintTraverse
-	DECL_DETOUR(PaintTraverse, unsigned int vguiPanel, bool forceRepaint, bool allowForce);
-
 	bool Init() override;
 	void Shutdown() override;
 	const char *Name() override { return MODULE("vguimatsurface"); }

@@ -140,7 +140,6 @@
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="CrashHandler.cpp" />
     <ClCompile Include="Command.cpp" />
-    <ClCompile Include="Features\Hud\DemoChooser.cpp" />
     <ClCompile Include="Features\DemoViewer.cpp" />
     <ClCompile Include="Features\Hud\DemoHud.cpp" />
     <ClCompile Include="Entity.cpp" />
@@ -266,8 +265,6 @@
     <ClInclude Include="Config.hpp" />
     <ClInclude Include="CrashHandler.hpp" />
     <ClInclude Include="Command.hpp" />
-    <ClInclude Include="imfilebrowser.h" />
-    <ClInclude Include="Features\Hud\DemoChooser.hpp" />
     <ClInclude Include="Features\DemoViewer.hpp" />
     <ClInclude Include="Features\Hud\DemoHud.hpp" />
     <ClInclude Include="Entity.hpp" />

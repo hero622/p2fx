@@ -14,8 +14,6 @@
 
 #include <stdarg.h>
 
-REDECL(Surface::PaintTraverse);
-
 // using font amalgams array to determine whether font is valid.
 bool Surface::IsFontValid(HFont font) {
 	if (m_FontAmalgams == nullptr) return false;
@@ -92,83 +90,8 @@ void Surface::DrawColoredLine(int x0, int y0, int x1, int y1, Color clr) {
 	this->DrawLine(this->matsurface->ThisPtr(), x0, y0, x1, y1);
 }
 
-void Surface::SetPanelVisible(VPANEL vguiPanel, bool state) {
-	this->SetVisible(this->panel->ThisPtr(), vguiPanel, state);
-}
-const char *Surface::GetPanelName(VPANEL vguiPanel) {
-	return this->GetName(this->panel->ThisPtr(), vguiPanel);
-}
-
-void Surface::SetMenuPanelState(bool state) {
-	if (!vguiPanels.hasLoaded)
-		return;
-
-	surface->SetPanelVisible(vguiPanels.BtnPlaySolo, state);
-	surface->SetPanelVisible(vguiPanels.BtnCoOp, state);
-	surface->SetPanelVisible(vguiPanels.BtnCommunity, state);
-	surface->SetPanelVisible(vguiPanels.BtnExtras, state);
-	surface->SetPanelVisible(vguiPanels.BtnEconUI, state);
-}
-void Surface::SetAllMenuPanelState(bool state) {
-	if (!vguiPanels.hasLoaded)
-		return;
-
-	surface->SetPanelVisible(vguiPanels.BtnOptions, state);
-	surface->SetPanelVisible(vguiPanels.BtnQuit, state);
-
-	g_hide = !state;
-}
-
-DETOUR(Surface::PaintTraverse, VPANEL vguiPanel, bool forceRepaint, bool allowForce) {
-	auto name = surface->GetPanelName(vguiPanel);
-
-	if (!strcmp(name, "BtnPlaySolo")) surface->vguiPanels.BtnPlaySolo = vguiPanel;
-	if (!strcmp(name, "BtnCoOp")) surface->vguiPanels.BtnCoOp = vguiPanel;
-	if (!strcmp(name, "BtnCommunity")) surface->vguiPanels.BtnCommunity = vguiPanel;
-	if (!strcmp(name, "BtnOptions")) surface->vguiPanels.BtnOptions = vguiPanel;
-	if (!strcmp(name, "BtnExtras")) surface->vguiPanels.BtnExtras = vguiPanel;
-	if (!strcmp(name, "BtnQuit")) surface->vguiPanels.BtnQuit = vguiPanel;
-	if (!strcmp(name, "BtnEconUI")) surface->vguiPanels.BtnEconUI = vguiPanel;
-
-	if (surface->vguiPanels.BtnPlaySolo != NULL &&
-		surface->vguiPanels.BtnCoOp != NULL &&
-		surface->vguiPanels.BtnCommunity != NULL &&
-		surface->vguiPanels.BtnOptions != NULL &&
-		surface->vguiPanels.BtnExtras != NULL &&
-		surface->vguiPanels.BtnQuit != NULL &&
-		surface->vguiPanels.BtnEconUI != NULL)
-		surface->vguiPanels.hasLoaded = true;
-
-	if (!strcmp(name, "MainMenu") && !surface->g_isInMainMenu) {
-		surface->SetMenuPanelState(false);
-		surface->SetAllMenuPanelState(true);
-		Scheduler::InHostTicks(30, [=]() {
-			surface->g_isInMainMenu = true;
-		});
-	}
-	if ((!strcmp(name, "Options") || !strcmp(name, "GenericConfirmation")) && surface->g_isInMainMenu) {
-		surface->g_isInMainMenu = false;
-	}
-
-	return Surface::PaintTraverse(thisptr, vguiPanel, forceRepaint, allowForce);
-}
-
-ON_EVENT(SESSION_START) {
-	surface->vguiPanels.BtnPlaySolo = NULL;
-	surface->vguiPanels.BtnCoOp = NULL;
-	surface->vguiPanels.BtnCommunity = NULL;
-	surface->vguiPanels.BtnOptions = NULL;
-	surface->vguiPanels.BtnExtras = NULL;
-	surface->vguiPanels.BtnQuit = NULL;
-	surface->vguiPanels.BtnEconUI = NULL;
-	surface->vguiPanels.hasLoaded = false;
-
-	surface->g_isInMainMenu = false;
-}
-
 bool Surface::Init() {
 	this->matsurface = Interface::Create(this->Name(), "VGUI_Surface031");
-	this->panel = Interface::Create(MODULE("vgui2"), "VGUI_Panel009");
 
 	if (this->matsurface) {
 		this->DrawSetColor = matsurface->Original<_DrawSetColor>(Offsets::DrawSetColor);
@@ -201,20 +124,10 @@ bool Surface::Init() {
 		m_FontAmalgams = ((CUtlVector<CFontAmalgam> *)FontManager());
 	}
 
-	if (this->panel) {
-		this->SetVisible = this->panel->Original<_SetVisible>(Offsets::SetVisible);
-		this->GetName = this->panel->Original<_GetName>(Offsets::IPanelGetName);
-		this->panel->Hook(Surface::PaintTraverse_Hook, Surface::PaintTraverse, Offsets::PaintTraverse);
-	}
-
-	return this->hasLoaded = this->matsurface && this->panel;
+	return this->hasLoaded = this->matsurface;
 }
 void Surface::Shutdown() {
-	SetMenuPanelState(true);
-	SetAllMenuPanelState(true);
-
 	Interface::Delete(this->matsurface);
-	Interface::Delete(this->panel);
 }
 
 Surface *surface;

@@ -5,15 +5,6 @@
 #include "Config.hpp"
 
 void Menu::Draw() {
-	g_fileDialog.Display();
-
-	if (g_fileDialog.HasSelected()) {
-		auto path = g_fileDialog.GetSelected().string();
-		auto safepath = path.substr(path.find("portal2") + 8, path.size());
-		engine->ExecuteCommand(Utils::ssprintf("playdemo \"%s\"", safepath).c_str());
-		g_fileDialog.ClearSelected();
-	}
-
 	if (!g_shouldDraw)
 		return;
 
@@ -243,7 +234,4 @@ void Menu::Init() {
 
 	Config::Init();
 	Campath::Init();
-
-	g_fileDialog.SetTitle("P2FX");
-	g_fileDialog.SetTypeFilters({".dem"});
 }
