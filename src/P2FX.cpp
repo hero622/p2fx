@@ -74,13 +74,14 @@ bool P2FX::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServer
 			this->modules->AddModule<InputSystem>(&inputSystem);
 			this->modules->AddModule<Scheme>(&scheme);
 			this->modules->AddModule<Surface>(&surface);
-			this->modules->AddModule<VGui>(&vgui);
+			this->modules->AddModule<EngineVGui>(&enginevgui);
 			this->modules->AddModule<Engine>(&engine);
 			this->modules->AddModule<Client>(&client);
 			this->modules->AddModule<Server>(&server);
 			this->modules->AddModule<MaterialSystem>(&materialSystem);
 			this->modules->AddModule<FileSystem>(&fileSystem);
 			this->modules->AddModule<ShaderApi>(&shaderApi);
+			this->modules->AddModule<VGui>(&vgui);
 			this->modules->InitAll();
 
 			if (engine && engine->hasLoaded) {

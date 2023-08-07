@@ -7,7 +7,7 @@
 #include "Offsets.hpp"
 #include "Utils.hpp"
 #include "Scheme.hpp"
-#include "VGui.hpp"
+#include "EngineVGui.hpp"
 #include "Event.hpp"
 
 #include "Engine.hpp"

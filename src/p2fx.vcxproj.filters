@@ -58,7 +58,7 @@
     <ClCompile Include="Modules\Tier1.cpp">
       <Filter>p2fx\Modules</Filter>
     </ClCompile>
-    <ClCompile Include="Modules\VGui.cpp">
+    <ClCompile Include="Modules\EngineVGui.cpp">
       <Filter>p2fx\Modules</Filter>
     </ClCompile>
     <ClCompile Include="Features\Cvars.cpp">
@@ -265,6 +265,9 @@
     <ClCompile Include="Config.cpp">
       <Filter>p2fx</Filter>
     </ClCompile>
+    <ClCompile Include="Modules\VGui.cpp">
+      <Filter>p2fx\Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\lib\minhook\buffer.h">
@@ -339,7 +342,7 @@
     <ClInclude Include="Modules\Tier1.hpp">
       <Filter>p2fx\Modules</Filter>
     </ClInclude>
-    <ClInclude Include="Modules\VGui.hpp">
+    <ClInclude Include="Modules\EngineVGui.hpp">
       <Filter>p2fx\Modules</Filter>
     </ClInclude>
     <ClInclude Include="Features\Cvars.hpp">
@@ -836,6 +839,9 @@
     </ClInclude>
     <ClInclude Include="Config.hpp">
       <Filter>p2fx</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\VGui.hpp">
+      <Filter>p2fx\Modules</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

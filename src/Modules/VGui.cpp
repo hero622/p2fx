@@ -1,80 +1,62 @@
 #include "VGui.hpp"
 
-#include "Features/Hud/Hud.hpp"
-#include "Features/Session.hpp"
-#include "Modules/Engine.hpp"
-#include "Modules/Server.hpp"
-#include "Modules/Surface.hpp"
-#include "P2FX.hpp"
+#include "Command.hpp"
+#include "Console.hpp"
+#include "Engine.hpp"
+#include "Event.hpp"
+#include "Game.hpp"
+#include "Hook.hpp"
+#include "Interface.hpp"
+#include "Offsets.hpp"
+#include "Server.hpp"
+#include "Utils.hpp"
 
-#include <algorithm>
+#pragma push_macro("GetClassName")
+#undef GetClassName
 
-REDECL(VGui::Paint);
-REDECL(VGui::UpdateProgressBar);
+REDECL(VGui::PaintTraverse);
 
-void VGui::Draw(Hud *const &hud) {
-	if (hud->ShouldDraw()) {
-		hud->Paint(0);
+DETOUR(VGui::PaintTraverse, VPANEL vguiPanel, bool forceRepaint, bool allowForce) {
+	auto name = vgui->GetName(vgui->ipanel->ThisPtr(), vguiPanel);
+
+	if (!strcmp(name, "BtnPlaySolo")) {
+		// you just kinda have to guess the module as far as i can tell:
+		// find modules by searching for VGui_InitInterfacesList and VGui_InitMatSysInterfacesList in src
+		// some ones i found that seem promising (case doesnt matter i think):
+		// ClientDLL (most useful)
+		// CLIENT
+		// MATSURFACE
+		// GAMEDLL
+		// GameUI
+		vgui_Panel *panel = vgui->GetPanel(vgui->ipanel->ThisPtr(), vguiPanel, "ClientDLL");
+
+
+		// vgui_Label *label = (vgui_Label *)panel;
+
+		// label->SetText(label, "YO");
+
+		// console->Print("%s: %p\n", name, panel);
 	}
-}
 
-// CEngineVGui::Paint
-DETOUR(VGui::Paint, PaintMode_t mode) {
-	auto result = VGui::Paint(thisptr, mode);
-
-	surface->StartDrawing(surface->matsurface->ThisPtr());
-
-	if ((mode & PAINT_UIPANELS)) {
-		for (auto const &hud : vgui->huds) {
-			vgui->Draw(hud);
-		}
-	}
-
-	surface->FinishDrawing();
-
-	return result;
-}
-
-DETOUR(VGui::UpdateProgressBar, int progress) {
-	if (vgui->lastProgressBar != progress) {
-		vgui->lastProgressBar = progress;
-		vgui->progressBarCount = 0;
-	}
-	vgui->progressBarCount++;
-	if (p2fx_disable_progress_bar_update.GetInt() == 1 && vgui->progressBarCount > 1) {
-		return 0;
-	}
-	if (p2fx_disable_progress_bar_update.GetInt() == 2) {
-		return 0;
-	}
-	return VGui::UpdateProgressBar(thisptr, progress);
-}
-
-bool VGui::IsUIVisible() {
-	return this->IsGameUIVisible(this->enginevgui->ThisPtr());
+	return VGui::PaintTraverse(thisptr, vguiPanel, forceRepaint, allowForce);
 }
 
 bool VGui::Init() {
-	this->enginevgui = Interface::Create(this->Name(), "VEngineVGui001");
+	this->ipanel = Interface::Create(this->Name(), "VGUI_Panel009");
 
-	if (this->enginevgui) {
-		this->IsGameUIVisible = this->enginevgui->Original<_IsGameUIVisible>(Offsets::IsGameUIVisible);
+	if (this->ipanel) {
+		this->GetName = this->ipanel->Original<_GetName>(36);
+		this->GetPanel = this->ipanel->Original<_GetPanel>(55);
 
-		this->enginevgui->Hook(VGui::Paint_Hook, VGui::Paint, Offsets::Paint);
-		this->enginevgui->Hook(VGui::UpdateProgressBar_Hook, VGui::UpdateProgressBar, Offsets::Paint + 12);
-
-		for (auto &hud : Hud::GetList()) {
-			if (hud->version == SourceGame_Unknown || p2fx.game->Is(hud->version)) {
-				this->huds.push_back(hud);
-			}
-		}
+		this->ipanel->Hook(VGui::PaintTraverse_Hook, VGui::PaintTraverse, 41);
 	}
 
-	return this->hasLoaded = this->enginevgui;
+	return this->hasLoaded = this->ipanel;
 }
 void VGui::Shutdown() {
-	Interface::Delete(this->enginevgui);
-	this->huds.clear();
+	Interface::Delete(this->ipanel);
 }
 
 VGui *vgui;
+
+#pragma pop_macro("GetClassName")

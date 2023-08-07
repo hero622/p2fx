@@ -181,7 +181,7 @@
     <ClCompile Include="Modules\Server.cpp" />
     <ClCompile Include="Modules\Surface.cpp" />
     <ClCompile Include="Modules\Tier1.cpp" />
-    <ClCompile Include="Modules\VGui.cpp" />
+    <ClCompile Include="Modules\EngineVGui.cpp" />
     <ClCompile Include="Offsets.cpp" />
     <ClCompile Include="Plugin.cpp" />
     <ClCompile Include="P2FX.cpp" />
@@ -207,6 +207,7 @@
     <ClCompile Include="Utils\SDK\MeshBuilder.cpp" />
     <ClCompile Include="Variable.cpp" />
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="Modules\VGui.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\lib\imgui\imconfig.h" />
@@ -308,7 +309,7 @@
     <ClInclude Include="Modules\Server.hpp" />
     <ClInclude Include="Modules\Surface.hpp" />
     <ClInclude Include="Modules\Tier1.hpp" />
-    <ClInclude Include="Modules\VGui.hpp" />
+    <ClInclude Include="Modules\EngineVGui.hpp" />
     <ClInclude Include="Offsets.hpp" />
     <ClInclude Include="Plugin.hpp" />
     <ClInclude Include="P2FX.hpp" />
@@ -358,6 +359,7 @@
     <ClInclude Include="Utils\SDK\ITexture.hpp" />
     <ClInclude Include="Variable.hpp" />
     <ClInclude Include="Input.hpp" />
+    <ClInclude Include="Modules\VGui.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\lib\minhook\LICENSE.txt" />

@@ -1,38 +1,48 @@
 #pragma once
-#include "Features/Hud/Hud.hpp"
+#include "Command.hpp"
 #include "Interface.hpp"
 #include "Module.hpp"
 #include "Utils.hpp"
+#include "Variable.hpp"
 
-#include <vector>
+#pragma push_macro("GetClassName")
+#undef GetClassName
+
+typedef unsigned int VPANEL;
+
+class vgui_Panel {
+public:
+
+};
+
+class vgui_Label : vgui_Panel {
+public:
+	/* void SetText(const char *tokenName) {
+		using _SetText = void(__rescall *)(void *, const char *);
+		Memory::VMT<_SetText>(this, 1)(this, tokenName);
+	} */
+};
 
 class VGui : public Module {
 public:
-	Interface *enginevgui = nullptr;
-
-private:
-	std::vector<Hud *> huds = std::vector<Hud *>();
-
-	int lastProgressBar = 0;
-	int progressBarCount = 0;
-
-private:
-	void Draw(Hud *const &hud);
+	Interface *ipanel = nullptr;
 
 public:
-	using _IsGameUIVisible = bool(__rescall *)(void *thisptr);
+	using _GetName = const char *(__rescall *)(void *thisptr, VPANEL vguiPanel);
+	using _GetPanel = vgui_Panel *(__rescall *)(void *thisptr, VPANEL vguiPanel, const char *destinationModule);
 
-	_IsGameUIVisible IsGameUIVisible = nullptr;
+	_GetName GetName = nullptr;
+	_GetPanel GetPanel = nullptr;
 
-	bool IsUIVisible();
-
-	// CEngineVGui::Paint
-	DECL_DETOUR(Paint, PaintMode_t mode);
-	DECL_DETOUR(UpdateProgressBar, int progress);
+public:
+	// IPanel::PaintTraverse
+	DECL_DETOUR(PaintTraverse, VPANEL vguiPanel, bool forceRepaint, bool allowForce);
 
 	bool Init() override;
 	void Shutdown() override;
-	const char *Name() override { return MODULE("engine"); }
+	const char *Name() override { return MODULE("vgui2"); }
 };
 
 extern VGui *vgui;
+
+#pragma pop_macro("GetClassName")

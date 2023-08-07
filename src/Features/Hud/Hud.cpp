@@ -8,7 +8,7 @@
 #include "Modules/Scheme.hpp"
 #include "Modules/Server.hpp"
 #include "Modules/Surface.hpp"
-#include "Modules/VGui.hpp"
+#include "Modules/EngineVGui.hpp"
 #include "Event.hpp"
 #include "Variable.hpp"
 

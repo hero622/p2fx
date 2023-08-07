@@ -7,6 +7,7 @@
 #include "Modules/Server.hpp"
 #include "Modules/Surface.hpp"
 #include "Modules/Tier1.hpp"
-#include "Modules/VGui.hpp"
+#include "Modules/EngineVGui.hpp"
 #include "Modules/FileSystem.hpp"
 #include "Modules/ShaderApi.hpp"
+#include "Modules/VGui.hpp"

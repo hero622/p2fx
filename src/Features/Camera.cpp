@@ -9,7 +9,7 @@
 #include "Modules/Engine.hpp"
 #include "Modules/InputSystem.hpp"
 #include "Modules/Server.hpp"
-#include "Modules/VGui.hpp"
+#include "Modules/EngineVGui.hpp"
 #include "Offsets.hpp"
 #include "Utils.hpp"
 
@@ -72,7 +72,7 @@ ON_EVENT(P2FX_UNLOAD) {
 bool Camera::IsDriving() {
 	bool drivingInDemo = engine->demoplayer->IsPlaying();
 	bool wantingToDrive = inputSystem->IsKeyDown(ButtonCode_t::MOUSE_LEFT);
-	bool isUI = vgui->IsUIVisible();
+	bool isUI = enginevgui->IsUIVisible();
 
 	return (camera->controlType == Drive || camera->controlType == Follow) && wantingToDrive && drivingInDemo && !isUI;
 }
