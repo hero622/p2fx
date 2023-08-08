@@ -22,33 +22,44 @@ int VGui::GetImageId(const char *pImageName) {
 	return nImageId;
 }
 
+void VGui::OverrideMenu(bool state) {
+	if (this->vguiState < VGUI_LOADED || (this->vguiState == VGUI_OVERWRITTEN && state))
+		return;
+
+	for (auto panel : this->panels) {
+		vgui->SetVisible(vgui->ipanel->ThisPtr(), panel, !state);
+	}
+
+	// you just kinda have to guess the module as far as i can tell:
+	// find modules by searching for VGui_InitInterfacesList and VGui_InitMatSysInterfacesList in src
+	// some ones i found that seem promising (case doesnt matter i think):
+	// ClientDLL (most useful)
+	// CLIENT
+	// MATSURFACE
+	// GAMEDLL
+	// GameUI
+	Label *label = (Label *)vgui->GetPanel(vgui->ipanel->ThisPtr(), this->extrasBtn, "ClientDLL");
+	// BaseModHybridButton class inherits from Label so we can just use that
+	label->SetText(state ? "DEMO VIEWER" : "#L4D360UI_MainMenu_Extras");
+
+	this->vguiState = state ? VGUI_OVERWRITTEN : VGUI_RESET;
+}
+
+ON_EVENT(FRAME) {
+	vgui->OverrideMenu(true);
+}
+
 DETOUR(VGui::PaintTraverse, VPANEL vguiPanel, bool forceRepaint, bool allowForce) {
 	auto name = vgui->GetName(vgui->ipanel->ThisPtr(), vguiPanel);
 	
-	static int state = 0;
-
-	if (state < 5) {
+	if (vgui->vguiState < VGUI_LOADED) {
 		if (!strcmp(name, "BtnPlaySolo") || !strcmp(name, "BtnCoOp") || !strcmp(name, "BtnCommunity") || !strcmp(name, "BtnEconUI")) {
-			vgui->SetVisible(vgui->ipanel->ThisPtr(), vguiPanel, false);
-
-			state++;
+			vgui->panels.push_back(vguiPanel);
+			vgui->vguiState++;
 		}
-
 		if (!strcmp(name, "BtnExtras")) {
-			// you just kinda have to guess the module as far as i can tell:
-			// find modules by searching for VGui_InitInterfacesList and VGui_InitMatSysInterfacesList in src
-			// some ones i found that seem promising (case doesnt matter i think):
-			// ClientDLL (most useful)
-			// CLIENT
-			// MATSURFACE
-			// GAMEDLL
-			// GameUI
-			Label *label = (Label *)vgui->GetPanel(vgui->ipanel->ThisPtr(), vguiPanel, "ClientDLL");
-			// BaseModHybridButton class inherits from Label so we can just use taht
-
-			label->SetText("DEMO VIEWER");
-
-			state++;
+			vgui->extrasBtn = vguiPanel;
+			vgui->vguiState++;
 		}
 	}
 
@@ -57,35 +68,43 @@ DETOUR(VGui::PaintTraverse, VPANEL vguiPanel, bool forceRepaint, bool allowForce
 
 extern Hook g_PopulateFromScriptHook;
 DETOUR_T(void, VGui::PopulateFromScript) {
-	vgui->extraInfos.RemoveAll();
+	if (vgui->vguiState == VGUI_RESET) {
+		g_PopulateFromScriptHook.Disable();
+		VGui::PopulateFromScript(thisptr);
+		g_PopulateFromScriptHook.Enable();
+		return;
+	}
 
-	CUtlVector<ExtraInfo_t> *m_ExtraInfos = reinterpret_cast<CUtlVector<ExtraInfo_t> *>((uintptr_t)thisptr + 0x830);
+	uintptr_t m_ExtraInfosAddr = (uintptr_t)thisptr + 0x830;
+	CUtlVector<ExtraInfo_t> *m_ExtraInfos = (CUtlVector<ExtraInfo_t> *)(m_ExtraInfosAddr);
+
+	m_ExtraInfos->RemoveAll();
 
 	int m_nImageId = vgui->GetImageId("vgui/chapters/chapter5");
 
 	for (const auto &p : std::filesystem::directory_iterator(engine->GetGameDirectory())) {
 		auto path = p.path();
 
-		if (vgui->extraInfos.m_Size == 1170)
+		if (m_ExtraInfos->m_Size == 1170)
 			break;
 
 		if (path.extension() == ".dem") {
 			std::string filename = path.stem().string();
 
-			auto safepath = path.string().substr(path.string().find("portal2") + 8, path.string().size());
+			auto safepath = path.string().substr(path.string().find("portal2") + 8);
 
-			int nIndex = vgui->extraInfos.AddToTail();
-			vgui->extraInfos[nIndex].m_TitleString = filename.c_str();
-			vgui->extraInfos[nIndex].m_SubtitleString = filename.c_str();
-			vgui->extraInfos[nIndex].m_MapName = "";
-			vgui->extraInfos[nIndex].m_VideoName = "";
-			vgui->extraInfos[nIndex].m_URLName = "";
-			vgui->extraInfos[nIndex].m_Command = Utils::ssprintf("playdemo %s", safepath.c_str()).c_str();
-			vgui->extraInfos[nIndex].m_nImageId = m_nImageId;
+			ExtraInfo_t extraInfo;
+			extraInfo.m_TitleString = filename.c_str();
+			extraInfo.m_SubtitleString = filename.c_str();
+			extraInfo.m_MapName = "";
+			extraInfo.m_VideoName = "";
+			extraInfo.m_URLName = "";
+			extraInfo.m_Command = Utils::ssprintf("playdemo %s", safepath.c_str()).c_str();
+			extraInfo.m_nImageId = m_nImageId;
+
+			m_ExtraInfos->AddToTail(extraInfo);
 		}
 	}
-
-	*m_ExtraInfos = vgui->extraInfos;
 }
 Hook g_PopulateFromScriptHook(&VGui::PopulateFromScript_Hook);
 
@@ -107,6 +126,8 @@ bool VGui::Init() {
 	return this->hasLoaded = this->ipanel;
 }
 void VGui::Shutdown() {
+	this->OverrideMenu(false);
+
 	Interface::Delete(this->ipanel);
 }
 

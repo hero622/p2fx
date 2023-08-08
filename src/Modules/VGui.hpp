@@ -56,10 +56,21 @@ public:
 	// cast necessary !!!
 	_GetPanel GetPanel = nullptr;
 
-	CUtlVector<ExtraInfo_t> extraInfos;
+	enum VGUI_STATE {
+		VGUI_IDLE = 0,
+		VGUI_LOADING,
+		VGUI_LOADED = 5,
+		VGUI_OVERWRITTEN,
+		VGUI_RESET
+	};
+
+	int vguiState = 0;
+	std::vector<VPANEL> panels;
+	VPANEL extrasBtn;
 
 public:
 	int GetImageId(const char *pImageName);
+	void OverrideMenu(bool state);
 
 public:
 	// IPanel::PaintTraverse

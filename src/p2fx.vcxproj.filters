@@ -852,7 +852,9 @@
     <ClInclude Include="Utils\SDK\UtlString.hpp">
       <Filter>p2fx\Utils\SDK</Filter>
     </ClInclude>
-    <ClInclude Include="Utils\SDK\Platform.hpp" />
+    <ClInclude Include="Utils\SDK\Platform.hpp">
+      <Filter>p2fx\Utils\SDK</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="lib">
