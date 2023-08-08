@@ -5,38 +5,60 @@
 #include "Utils.hpp"
 #include "Variable.hpp"
 
-#pragma push_macro("GetClassName")
-#undef GetClassName
-
 typedef unsigned int VPANEL;
 
-class vgui_Panel {
+class BaseModHybridButton {
 public:
-
-};
-
-class vgui_Label : vgui_Panel {
-public:
-	/* void SetText(const char *tokenName) {
+	void SetText(const char *tokenName) {
 		using _SetText = void(__rescall *)(void *, const char *);
-		Memory::VMT<_SetText>(this, 1)(this, tokenName);
-	} */
+		Memory::VMT<_SetText>(this, 184)(this, tokenName);
+	}
 };
+
+class GenericPanelList {
+public:
+	/* unsigned short AddPanelItem(void *panelItem, bool bNeedsInvalidateScheme) {
+		using _AddPanelItem = unsigned short(__rescall *)(void *, void *, bool);
+		return Memory::VMT<_AddPanelItem>(this, 183)(this, panelItem, bNeedsInvalidateScheme);
+	} */
+
+	void RemoveAllPanelItems() {
+		using _RemoveAllPanelItems = void(__rescall *)(void *);
+		Memory::VMT<_RemoveAllPanelItems>(this, 187)(this);
+	}
+};
+
+class SaveGameItem {
+public:
+	SaveGameItem(void *pParent, const char *pPanelName) {
+
+	}
+
+public:
+	wchar_t m_DateString[128];
+};
+
 
 class VGui : public Module {
 public:
 	Interface *ipanel = nullptr;
 
 public:
+	using _SetVisible = int(__rescall *)(void *thisptr, VPANEL vguiPanel, bool state);
 	using _GetName = const char *(__rescall *)(void *thisptr, VPANEL vguiPanel);
-	using _GetPanel = vgui_Panel *(__rescall *)(void *thisptr, VPANEL vguiPanel, const char *destinationModule);
+	using _GetPanel = void *(__rescall *)(void *thisptr, VPANEL vguiPanel, const char *destinationModule);
 
+	_SetVisible SetVisible = nullptr;
 	_GetName GetName = nullptr;
+	// cast necessary !!!
 	_GetPanel GetPanel = nullptr;
 
 public:
 	// IPanel::PaintTraverse
 	DECL_DETOUR(PaintTraverse, VPANEL vguiPanel, bool forceRepaint, bool allowForce);
+
+	// SaveLoadGameDialog::PopulateSaveGameList
+	DECL_DETOUR(PopulateSaveGameList);
 
 	bool Init() override;
 	void Shutdown() override;
@@ -44,5 +66,3 @@ public:
 };
 
 extern VGui *vgui;
-
-#pragma pop_macro("GetClassName")
