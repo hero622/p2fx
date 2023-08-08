@@ -7,37 +7,40 @@
 
 typedef unsigned int VPANEL;
 
-class BaseModHybridButton {
+class Label {
 public:
 	void SetText(const char *tokenName) {
 		using _SetText = void(__rescall *)(void *, const char *);
 		Memory::VMT<_SetText>(this, 184)(this, tokenName);
 	}
-};
 
-class GenericPanelList {
-public:
-	/* unsigned short AddPanelItem(void *panelItem, bool bNeedsInvalidateScheme) {
-		using _AddPanelItem = unsigned short(__rescall *)(void *, void *, bool);
-		return Memory::VMT<_AddPanelItem>(this, 183)(this, panelItem, bNeedsInvalidateScheme);
-	} */
-
-	void RemoveAllPanelItems() {
-		using _RemoveAllPanelItems = void(__rescall *)(void *);
-		Memory::VMT<_RemoveAllPanelItems>(this, 187)(this);
+	void GetText(const wchar_t *textOut, int bufLenInBytes) {
+		using _GetText = void(__rescall *)(void *, const wchar_t *, int);
+		Memory::VMT<_GetText>(this, 186)(this, textOut, bufLenInBytes);
 	}
 };
 
-class SaveGameItem {
+class CBaseModFrame {
 public:
-	SaveGameItem(void *pParent, const char *pPanelName) {
-
+	void SetTitle(const char *title, bool surfaceTitle) {
+		using _SetTitle = void(__rescall *)(void *, const char *, bool);
+		Memory::VMT<_SetTitle>(this, 200)(this, title, surfaceTitle);
 	}
-
-public:
-	wchar_t m_DateString[128];
 };
 
+struct ExtraInfo_t {
+	ExtraInfo_t() {
+		m_nImageId = -1;
+	}
+
+	int m_nImageId;
+	CUtlString m_TitleString;
+	CUtlString m_SubtitleString;
+	CUtlString m_MapName;
+	CUtlString m_VideoName;
+	CUtlString m_URLName;
+	CUtlString m_Command;
+};
 
 class VGui : public Module {
 public:
@@ -53,12 +56,17 @@ public:
 	// cast necessary !!!
 	_GetPanel GetPanel = nullptr;
 
+	CUtlVector<ExtraInfo_t> extraInfos;
+
+public:
+	int GetImageId(const char *pImageName);
+
 public:
 	// IPanel::PaintTraverse
 	DECL_DETOUR(PaintTraverse, VPANEL vguiPanel, bool forceRepaint, bool allowForce);
 
 	// SaveLoadGameDialog::PopulateSaveGameList
-	DECL_DETOUR(PopulateSaveGameList);
+	DECL_DETOUR_T(void, PopulateFromScript);
 
 	bool Init() override;
 	void Shutdown() override;

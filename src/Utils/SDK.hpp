@@ -26,6 +26,8 @@
 #include "SDK/ServerPlugin.hpp"
 #include "SDK/UserCmd.hpp"
 #include "SDK/UtlMemory.hpp"
+#include "SDK/UtlVector.hpp"
+#include "SDK/UtlString.hpp"
 #include "SDK/Trace.hpp"
 
 #include "SDK/Other.hpp"

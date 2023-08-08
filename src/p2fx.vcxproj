@@ -205,6 +205,7 @@
     <ClCompile Include="Utils\SDK\KeyValues.cpp" />
     <ClCompile Include="Utils\SDK\ServerPlugin.cpp" />
     <ClCompile Include="Utils\SDK\MeshBuilder.cpp" />
+    <ClCompile Include="Utils\SDK\UtlString.cpp" />
     <ClCompile Include="Variable.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Modules\VGui.cpp" />
@@ -349,6 +350,7 @@
     <ClInclude Include="Utils\SDK\Math.hpp" />
     <ClInclude Include="Utils\SDK\GameMovement.hpp" />
     <ClInclude Include="Utils\SDK\Other.hpp" />
+    <ClInclude Include="Utils\SDK\Platform.hpp" />
     <ClInclude Include="Utils\SDK\PlayerLocalData.hpp" />
     <ClInclude Include="Utils\SDK\PortalPlacement.hpp" />
     <ClInclude Include="Utils\SDK\ServerPlugin.hpp" />
@@ -357,6 +359,8 @@
     <ClInclude Include="Utils\SDK\Trace.hpp" />
     <ClInclude Include="Utils\SDK\MeshBuilder.hpp" />
     <ClInclude Include="Utils\SDK\ITexture.hpp" />
+    <ClInclude Include="Utils\SDK\UtlString.hpp" />
+    <ClInclude Include="Utils\SDK\UtlVector.hpp" />
     <ClInclude Include="Variable.hpp" />
     <ClInclude Include="Input.hpp" />
     <ClInclude Include="Modules\VGui.hpp" />

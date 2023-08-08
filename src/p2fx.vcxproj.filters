@@ -268,6 +268,9 @@
     <ClCompile Include="Modules\VGui.cpp">
       <Filter>p2fx\Modules</Filter>
     </ClCompile>
+    <ClCompile Include="Utils\SDK\UtlString.cpp">
+      <Filter>p2fx\Utils\SDK</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\lib\minhook\buffer.h">
@@ -843,6 +846,13 @@
     <ClInclude Include="Modules\VGui.hpp">
       <Filter>p2fx\Modules</Filter>
     </ClInclude>
+    <ClInclude Include="Utils\SDK\UtlVector.hpp">
+      <Filter>p2fx\Utils\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\SDK\UtlString.hpp">
+      <Filter>p2fx\Utils\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\SDK\Platform.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="lib">
