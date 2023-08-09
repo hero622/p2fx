@@ -72,7 +72,7 @@ void Variable::Realloc() {
 void Variable::AddCallBack(FnChangeCallback_t callback) {
 	if (callback != nullptr) {
 		this->originalCallbacks = this->ThisPtr()->m_fnChangeCallback;
-		this->ThisPtr()->m_fnChangeCallback.Append(callback);
+		this->ThisPtr()->m_fnChangeCallback.AddToTail(callback);
 		this->hasCustomCallback = true;
 		this->GetList().push_back(this);
 	}

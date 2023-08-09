@@ -3,12 +3,9 @@
 #include "Variable.hpp"
 
 #include "../lib/imgui/imgui.h"
-#include "imfilebrowser.h"
 
 namespace Menu {
 	inline bool g_shouldDraw = false;
-
-	inline ImGui::FileBrowser g_fileDialog(ImGuiFileBrowserFlags_CloseOnEsc);
 
 	void Draw();
 	void Init();

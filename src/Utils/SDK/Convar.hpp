@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Utils/Platform.hpp"
-#include "UtlMemory.hpp"
+#include "UtlVector.hpp"
 #include "Color.hpp"
 
 #define FCVAR_DEVELOPMENTONLY (1 << 1)

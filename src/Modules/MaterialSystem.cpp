@@ -65,7 +65,7 @@ DETOUR(MaterialSystem::CreateMaterial, const char *pMaterialName, void *pVMTKeyV
     // apparently the game loads PeTI related materials into the memory every time you
     // load the game. This simply prevents that from happening.
     bool isPetiMaterial = sMaterialName.find("props_map_editor") != std::string::npos;
-    bool isWhiteMaterial = sMaterialName.find("vgui/white") != std::string::npos;
+    bool isWhiteMaterial = sMaterialName.find("enginevgui/white") != std::string::npos;
 #ifdef _WIN32
     bool isPetiMap = sMapName.find("puzzlemaker\\") != std::string::npos;
 #else

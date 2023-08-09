@@ -62,50 +62,56 @@ bool P2FX::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServer
 
 		curl_global_init(CURL_GLOBAL_ALL);
 
-		tier1 = new Tier1();
-		if (tier1->Init()) {
-			this->features->AddFeature<Cvars>(&cvars);
-			this->features->AddFeature<Session>(&session);
-			this->features->AddFeature<EntityList>(&entityList);
-			this->features->AddFeature<FovChanger>(&fovChanger);
-			this->features->AddFeature<Camera>(&camera);
-			this->features->AddFeature<DemoViewer>(&demoViewer);
+		tier0 = new Tier0();
+		if (tier0->Init()) {
+			tier1 = new Tier1();
+			if (tier1->Init()) {
+				this->features->AddFeature<Cvars>(&cvars);
+				this->features->AddFeature<Session>(&session);
+				this->features->AddFeature<EntityList>(&entityList);
+				this->features->AddFeature<FovChanger>(&fovChanger);
+				this->features->AddFeature<Camera>(&camera);
+				this->features->AddFeature<DemoViewer>(&demoViewer);
 
-			this->modules->AddModule<InputSystem>(&inputSystem);
-			this->modules->AddModule<Scheme>(&scheme);
-			this->modules->AddModule<Surface>(&surface);
-			this->modules->AddModule<VGui>(&vgui);
-			this->modules->AddModule<Engine>(&engine);
-			this->modules->AddModule<Client>(&client);
-			this->modules->AddModule<Server>(&server);
-			this->modules->AddModule<MaterialSystem>(&materialSystem);
-			this->modules->AddModule<FileSystem>(&fileSystem);
-			this->modules->AddModule<ShaderApi>(&shaderApi);
-			this->modules->InitAll();
+				this->modules->AddModule<InputSystem>(&inputSystem);
+				this->modules->AddModule<Scheme>(&scheme);
+				this->modules->AddModule<Surface>(&surface);
+				this->modules->AddModule<EngineVGui>(&enginevgui);
+				this->modules->AddModule<Engine>(&engine);
+				this->modules->AddModule<Client>(&client);
+				this->modules->AddModule<Server>(&server);
+				this->modules->AddModule<MaterialSystem>(&materialSystem);
+				this->modules->AddModule<FileSystem>(&fileSystem);
+				this->modules->AddModule<ShaderApi>(&shaderApi);
+				this->modules->AddModule<VGui>(&vgui);
+				this->modules->InitAll();
 
-			if (engine && engine->hasLoaded) {
-				Input::Init();
+				if (engine && engine->hasLoaded) {
+					Input::Init();
 
-				engine->demoplayer->Init();
+					engine->demoplayer->Init();
 
-				this->cheats->Init();
+					this->cheats->Init();
 
-				this->features->AddFeature<Listener>(&listener);
+					this->features->AddFeature<Listener>(&listener);
 
-				if (listener) {
-					listener->Init();
+					if (listener) {
+						listener->Init();
+					}
+
+					this->SearchPlugin();
+
+					console->PrintActive("Loaded p2fx, Version %s\n", P2FX_VERSION);
+
+					return true;
+				} else {
+					console->Warning("P2FX: Failed to load engine module!\n");
 				}
-
-				this->SearchPlugin();
-
-				console->PrintActive("Loaded p2fx, Version %s\n", P2FX_VERSION);
-				
-				return true;
 			} else {
-				console->Warning("P2FX: Failed to load engine module!\n");
+				console->Warning("P2FX: Failed to load tier1 module!\n");
 			}
 		} else {
-			console->Warning("P2FX: Failed to load tier1 module!\n");
+			console->Warning("P2FX: Failed to load tier0 module!\n");
 		}
 	} else {
 		console->Warning("P2FX: Game not supported!\n");
@@ -136,6 +142,7 @@ bool P2FX::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServer
 	SAFE_DELETE(p2fx.plugin)
 	SAFE_DELETE(p2fx.game)
 	SAFE_DELETE(tier1)
+	SAFE_DELETE(tier0)
 	SAFE_DELETE(console)
 	CrashHandler::Cleanup();
 	return false;
@@ -214,6 +221,7 @@ void P2FX::Unload() {
 	console->Print("Cya :)\n");
 
 	SAFE_DELETE(tier1)
+	SAFE_DELETE(tier0)
 	SAFE_DELETE(console)
 	CrashHandler::Cleanup();
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <map>
 
 enum SourceGameVersion {
 	SourceGame_Unknown = 0,
@@ -39,6 +40,7 @@ public:
 
 	static std::string VersionToString(int version);
 	static std::vector<std::string> mapNames;
+	static std::map<std::string, int> chapters;
 	static std::vector<AchievementData> achievements;
 
 	static bool IsSpeedrunMod();
