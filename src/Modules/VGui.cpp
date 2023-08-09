@@ -8,7 +8,6 @@
 #include "Hook.hpp"
 #include "Interface.hpp"
 #include "Offsets.hpp"
-#include "Server.hpp"
 #include "Utils.hpp"
 #include "Surface.hpp"
 #include "Tier0.hpp"
@@ -69,16 +68,8 @@ DETOUR(VGui::PaintTraverse, VPANEL vguiPanel, bool forceRepaint, bool allowForce
 
 	return VGui::PaintTraverse(thisptr, vguiPanel, forceRepaint, allowForce);
 }
-
 extern Hook g_PopulateFromScriptHook;
 DETOUR_T(void, VGui::PopulateFromScript) {
-	if (vgui->vguiState == VGUI_RESET) {
-		g_PopulateFromScriptHook.Disable();
-		VGui::PopulateFromScript(thisptr);
-		g_PopulateFromScriptHook.Enable();
-		return;
-	}
-
 	uintptr_t m_ExtraInfosAddr = (uintptr_t)thisptr + 0x830;
 	CUtlVector<ExtraInfo_t> &m_ExtraInfos = *(CUtlVector<ExtraInfo_t> *)m_ExtraInfosAddr;
 

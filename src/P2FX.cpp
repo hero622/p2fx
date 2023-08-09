@@ -221,6 +221,7 @@ void P2FX::Unload() {
 	console->Print("Cya :)\n");
 
 	SAFE_DELETE(tier1)
+	SAFE_DELETE(tier0)
 	SAFE_DELETE(console)
 	CrashHandler::Cleanup();
 }
