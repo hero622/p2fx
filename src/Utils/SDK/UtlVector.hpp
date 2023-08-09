@@ -3,6 +3,7 @@
 #include "UtlMemory.hpp"
 
 #include <cstring>
+#include <algorithm>
 
 template <class T, class A = CUtlMemory<T>>
 class CUtlVector {

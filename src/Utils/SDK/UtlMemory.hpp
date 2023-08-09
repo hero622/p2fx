@@ -1,7 +1,9 @@
 #pragma once
 
-#define assert(expression) ((void)0)
 #include "Platform.hpp"
+#include "Memdbgon.hpp"
+
+#define assert(expression) ((void)0)
 
 template <class T, class I = int>
 class CUtlMemory {
@@ -9,7 +11,7 @@ public:
 	// constructor, destructor
 	CUtlMemory(int nGrowSize = 0, int nInitSize = 0);
 	CUtlMemory(T *pMemory, int numElements);
-	CUtlMemory(const T *pMemory, int numElements);
+	CUtlMemory(const T *pMemory, int numEWlements);
 	~CUtlMemory();
 
 	// Set the size by which the memory grows
@@ -89,8 +91,7 @@ CUtlMemory<T, I>::CUtlMemory(int nGrowSize, int nInitAllocationCount)
 	ValidateGrowSize();
 	assert(nGrowSize >= 0);
 	if (m_nAllocationCount) {
-		m_pMemory = (T *)new unsigned char[m_nAllocationCount * sizeof(T)];
-		//m_pMemory = (T*)malloc(m_nAllocationCount * sizeof(T));
+		m_pMemory = (T *)malloc(m_nAllocationCount * sizeof(T));
 	}
 }
 
@@ -350,8 +351,6 @@ void CUtlMemory<T, I>::Grow(int num) {
 		return;
 	}
 
-
-	auto oldAllocationCount = m_nAllocationCount;
 	// Make sure we have at least numallocated + num allocations.
 	// Use the grow rules specified for this memory (in m_nGrowSize)
 	int nAllocationRequested = m_nAllocationCount + num;
@@ -377,12 +376,9 @@ void CUtlMemory<T, I>::Grow(int num) {
 	m_nAllocationCount = nNewAllocationCount;
 
 	if (m_pMemory) {
-		auto ptr = new unsigned char[m_nAllocationCount * sizeof(T)];
-
-		memcpy(ptr, m_pMemory, oldAllocationCount * sizeof(T));
-		m_pMemory = (T *)ptr;
+		m_pMemory = (T *)realloc(m_pMemory, m_nAllocationCount * sizeof(T));
 	} else {
-		m_pMemory = (T *)new unsigned char[m_nAllocationCount * sizeof(T)];
+		m_pMemory = (T *)malloc(m_nAllocationCount * sizeof(T));
 	}
 }
 
@@ -605,7 +601,7 @@ void CUtlMemoryAligned<T, nAlignment>::Grow(int num) {
 		assert(CUtlMemory<T>::m_pMemory);
 	} else {
 		MEM_ALLOC_CREDIT_CLASS();
-		CUtlMemory<T>::m_pMemory = (T *)MemAlloc_AllocAligned(CUtlMemory<T>::m_nAllocationCount * sizeof(T), nAlignment);
+		CUtlMemory<T>::m_pMemory = (T *)mallocAligned(CUtlMemory<T>::m_nAllocationCount * sizeof(T), nAlignment);
 		assert(CUtlMemory<T>::m_pMemory);
 	}
 }
@@ -636,7 +632,7 @@ inline void CUtlMemoryAligned<T, nAlignment>::EnsureCapacity(int num) {
 		CUtlMemory<T>::m_pMemory = (T *)MemAlloc_ReallocAligned(CUtlMemory<T>::m_pMemory, CUtlMemory<T>::m_nAllocationCount * sizeof(T), nAlignment);
 	} else {
 		MEM_ALLOC_CREDIT_CLASS();
-		CUtlMemory<T>::m_pMemory = (T *)MemAlloc_AllocAligned(CUtlMemory<T>::m_nAllocationCount * sizeof(T), nAlignment);
+		CUtlMemory<T>::m_pMemory = (T *)mallocAligned(CUtlMemory<T>::m_nAllocationCount * sizeof(T), nAlignment);
 	}
 }
 
@@ -655,3 +651,8 @@ void CUtlMemoryAligned<T, nAlignment>::Purge() {
 		CUtlMemory<T>::m_nAllocationCount = 0;
 	}
 }
+
+#undef free
+#undef malloc
+#undef realloc
+#undef _aligned_malloc

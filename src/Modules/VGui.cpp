@@ -11,6 +11,7 @@
 #include "Server.hpp"
 #include "Utils.hpp"
 #include "Surface.hpp"
+#include "Tier0.hpp"
 
 REDECL(VGui::PaintTraverse);
 REDECL(VGui::PopulateFromScript);
@@ -46,13 +47,16 @@ void VGui::OverrideMenu(bool state) {
 }
 
 ON_EVENT(FRAME) {
+	if (engine->hoststate->m_activeGame)
+		return;
+
 	vgui->OverrideMenu(true);
 }
 
 DETOUR(VGui::PaintTraverse, VPANEL vguiPanel, bool forceRepaint, bool allowForce) {
-	auto name = vgui->GetName(vgui->ipanel->ThisPtr(), vguiPanel);
-	
 	if (vgui->vguiState < VGUI_LOADED) {
+		auto name = vgui->GetName(vgui->ipanel->ThisPtr(), vguiPanel);
+
 		if (!strcmp(name, "BtnPlaySolo") || !strcmp(name, "BtnCoOp") || !strcmp(name, "BtnCommunity") || !strcmp(name, "BtnEconUI")) {
 			vgui->panels.push_back(vguiPanel);
 			vgui->vguiState++;
@@ -76,16 +80,14 @@ DETOUR_T(void, VGui::PopulateFromScript) {
 	}
 
 	uintptr_t m_ExtraInfosAddr = (uintptr_t)thisptr + 0x830;
-	CUtlVector<ExtraInfo_t> *m_ExtraInfos = (CUtlVector<ExtraInfo_t> *)(m_ExtraInfosAddr);
-
-	m_ExtraInfos->RemoveAll();
+	CUtlVector<ExtraInfo_t> &m_ExtraInfos = *(CUtlVector<ExtraInfo_t> *)m_ExtraInfosAddr;
 
 	int m_nImageId = vgui->GetImageId("vgui/chapters/chapter5");
 
 	for (const auto &p : std::filesystem::directory_iterator(engine->GetGameDirectory())) {
 		auto path = p.path();
 
-		if (m_ExtraInfos->m_Size == 1170)
+		if (m_ExtraInfos.m_Size == 1170)
 			break;
 
 		if (path.extension() == ".dem") {
@@ -93,16 +95,14 @@ DETOUR_T(void, VGui::PopulateFromScript) {
 
 			auto safepath = path.string().substr(path.string().find("portal2") + 8);
 
-			ExtraInfo_t extraInfo;
-			extraInfo.m_TitleString = filename.c_str();
-			extraInfo.m_SubtitleString = filename.c_str();
-			extraInfo.m_MapName = "";
-			extraInfo.m_VideoName = "";
-			extraInfo.m_URLName = "";
-			extraInfo.m_Command = Utils::ssprintf("playdemo %s", safepath.c_str()).c_str();
-			extraInfo.m_nImageId = m_nImageId;
-
-			m_ExtraInfos->AddToTail(extraInfo);
+			int nIndex = m_ExtraInfos.AddToTail();
+			m_ExtraInfos[nIndex].m_TitleString = filename.c_str();
+			m_ExtraInfos[nIndex].m_SubtitleString = filename.c_str();
+			m_ExtraInfos[nIndex].m_MapName = "";
+			m_ExtraInfos[nIndex].m_VideoName = "";
+			m_ExtraInfos[nIndex].m_URLName = "";
+			m_ExtraInfos[nIndex].m_Command = Utils::ssprintf("playdemo %s", safepath.c_str()).c_str();
+			m_ExtraInfos[nIndex].m_nImageId = m_nImageId;
 		}
 	}
 }

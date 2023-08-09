@@ -11,3 +11,4 @@
 #include "Modules/FileSystem.hpp"
 #include "Modules/ShaderApi.hpp"
 #include "Modules/VGui.hpp"
+#include "Modules/Tier0.hpp"

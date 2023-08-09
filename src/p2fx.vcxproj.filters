@@ -271,6 +271,9 @@
     <ClCompile Include="Utils\SDK\UtlString.cpp">
       <Filter>p2fx\Utils\SDK</Filter>
     </ClCompile>
+    <ClCompile Include="Modules\Tier0.cpp">
+      <Filter>p2fx\Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\lib\minhook\buffer.h">
@@ -854,6 +857,15 @@
     </ClInclude>
     <ClInclude Include="Utils\SDK\Platform.hpp">
       <Filter>p2fx\Utils\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\SDK\Memalloc.hpp">
+      <Filter>p2fx\Utils\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\SDK\Memdbgon.hpp">
+      <Filter>p2fx\Utils\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Tier0.hpp">
+      <Filter>p2fx\Modules</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
