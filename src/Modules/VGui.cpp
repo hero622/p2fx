@@ -53,6 +53,10 @@ ON_EVENT(FRAME) {
 	vgui->OverrideMenu(true);
 }
 
+ON_EVENT(SESSION_END) {
+	vgui->vguiState = VGui::VGUI_IDLE;
+}
+
 DETOUR(VGui::PaintTraverse, VPANEL vguiPanel, bool forceRepaint, bool allowForce) {
 	if (vgui->vguiState < VGUI_LOADED) {
 		auto name = vgui->GetName(vgui->ipanel->ThisPtr(), vguiPanel);
