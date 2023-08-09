@@ -46,14 +46,8 @@ void VGui::OverrideMenu(bool state) {
 	this->vguiState = state ? VGUI_OVERWRITTEN : VGUI_RESET;
 }
 
-ON_EVENT(FRAME) {
-	if (engine->hoststate->m_activeGame)
-		return;
-
-	vgui->OverrideMenu(true);
-}
-
 ON_EVENT(SESSION_END) {
+	vgui->panels.clear();
 	vgui->vguiState = VGui::VGUI_IDLE;
 }
 
@@ -69,6 +63,8 @@ DETOUR(VGui::PaintTraverse, VPANEL vguiPanel, bool forceRepaint, bool allowForce
 			vgui->extrasBtn = vguiPanel;
 			vgui->vguiState++;
 		}
+	} else if (vgui->vguiState == VGUI_LOADED) {
+		vgui->OverrideMenu(true);
 	}
 
 	return VGui::PaintTraverse(thisptr, vguiPanel, forceRepaint, allowForce);
