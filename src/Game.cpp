@@ -8,10 +8,6 @@
 #include <string>
 
 #include "Games/Portal2.hpp"
-#include "Games/ApertureTag.hpp"
-#include "Games/PortalStoriesMel.hpp"
-#include "Games/PortalReloaded.hpp"
-#include "Games/ThinkingWithTimeMachine.hpp"
 
 #define HAS_GAME_FLAG(flag, name)  \
 	if (version & (flag)) {           \
@@ -25,7 +21,6 @@
 	}
 
 #define TARGET_MOD MODULE("server")
-#define TARGET_MOD2 MODULE("engine")
 
 std::vector<std::string> Game::mapNames;
 std::map<std::string, int> Game::chapters;
@@ -57,31 +52,10 @@ Game *Game::CreateNew() {
 		return modDir;
 	};
 
-	auto modDir = GetModDir(TARGET_MOD2);
-
-	// This check is at the top because aptag's server dll is in a
-	// portal2 bin folder so it gets detected as portal 2 otherwise
-	if (Utils::ICompare(modDir, ApertureTag::GameDir())) {
-		return new ApertureTag();
-	}
-
-	// May as well do the same thing here too then
-	if (Utils::ICompare(modDir, ThinkingWithTimeMachine::GameDir())) {
-		return new ThinkingWithTimeMachine();
-	}
-
-	modDir = GetModDir(TARGET_MOD);
+	auto modDir = GetModDir(TARGET_MOD);
 
 	if (Utils::ICompare(modDir, Portal2::ModDir())) {
 		return new Portal2();
-	}
-
-	if (Utils::ICompare(modDir, PortalStoriesMel::ModDir())) {
-		return new PortalStoriesMel();
-	}
-
-	if (Utils::ICompare(modDir, PortalReloaded::ModDir())) {
-		return new PortalReloaded();
 	}
 
 	return nullptr;
@@ -90,10 +64,6 @@ std::string Game::VersionToString(int version) {
 	auto games = std::string("");
 	while (version > 0) {
 		HAS_GAME_FLAG(SourceGame_Portal2, "Portal 2")
-		HAS_GAME_FLAG(SourceGame_ApertureTag, "Aperture Tag")
-		HAS_GAME_FLAG(SourceGame_PortalStoriesMel, "Portal Stories: Mel")
-		HAS_GAME_FLAG(SourceGame_ThinkingWithTimeMachine, "Thinking with Time Machine")
-		HAS_GAME_FLAG(SourceGame_PortalReloaded, "Portal Reloaded")
 	}
 	return games;
 }

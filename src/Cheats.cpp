@@ -3,7 +3,6 @@
 #include "Event.hpp"
 #include "Features/Cvars.hpp"
 #include "Features/Hud/Hud.hpp"
-#include "Features/Listener.hpp"
 #include "Features/OverlayRender.hpp"
 #include "Game.hpp"
 #include "Modules/Client.hpp"

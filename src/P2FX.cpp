@@ -93,12 +93,6 @@ bool P2FX::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServer
 
 					this->cheats->Init();
 
-					this->features->AddFeature<Listener>(&listener);
-
-					if (listener) {
-						listener->Init();
-					}
-
 					this->SearchPlugin();
 
 					console->PrintActive("Loaded p2fx, Version %s\n", P2FX_VERSION);

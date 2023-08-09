@@ -6,7 +6,6 @@
 #include "Event.hpp"
 #include "Features/Camera.hpp"
 #include "Features/FovChanger.hpp"
-#include "Features/NetMessage.hpp"
 #include "Features/OverlayRender.hpp"
 #include "Features/Session.hpp"
 #include "Game.hpp"
@@ -208,6 +207,46 @@ DETOUR_T(bool, Client::ShouldDraw_SaveStatus) {
 	return Client::ShouldDraw_SaveStatus(thisptr);
 }
 
+bool chatData(std::string str) {
+	if (!Utils::StartsWith(str.c_str(), "!SAR:")) return false;
+
+	// Strips header
+	str = str.substr(5);
+
+	if (str[0] != 'o' && str[0] != 'b') return false;
+	if (str[1] != ':') return false;
+
+	char player = engine->IsOrange() ? 'o' : 'b';
+	if (str[0] == player) return true;  // Ignore messages we sent
+
+	// Strip o: or b:
+	str = str.substr(2, str.size() - 2);
+
+	size_t pos = str.find(":");
+	if (pos == std::string::npos) return false;
+
+	std::string type = str.substr(0, pos);
+	str = str.substr(pos + 1);
+
+	std::vector<uint8_t> buf;
+
+	for (size_t i = 0; i < str.size(); ++i) {
+		if (str[i] == '#') {
+			try {
+				int c = stoi(str.substr(i + 1, 2), 0, 16);
+				buf.push_back((uint8_t)c);
+			} catch (std::invalid_argument &e) {
+				return false;
+			}
+			i += 2;
+		} else {
+			buf.push_back((uint8_t)str[i]);
+		}
+	}
+
+	return true;
+}
+
 // CHudChat::MsgFunc_SayText2
 DETOUR(Client::MsgFunc_SayText2, bf_read &msg) {
 	// copy old state in case we need to recover it
@@ -243,7 +282,7 @@ DETOUR(Client::MsgFunc_SayText2, bf_read &msg) {
 		str += c;
 	}
 
-	if (NetMessage::ChatData(str)) {
+	if (chatData(str)) {
 		// skip the other crap, just in case it matters
 		msg.ReadUnsigned(8);
 		return 0;

@@ -6,15 +6,7 @@
 enum SourceGameVersion {
 	SourceGame_Unknown = 0,
 
-	SourceGame_Portal2 = (1 << 0),
-	SourceGame_ApertureTag = (1 << 5),
-	SourceGame_PortalStoriesMel = (1 << 6),
-	SourceGame_ThinkingWithTimeMachine = (1 << 7),
-	SourceGame_PortalReloaded = (1 << 11),
-
-#ifndef _WIN32
-	SourceGame_EIPRelPIC = SourceGame_Portal2,
-#endif
+	SourceGame_Portal2 = (1 << 0)
 };
 
 struct AchievementData {

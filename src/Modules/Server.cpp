@@ -7,7 +7,6 @@
 #include "Features/EntityList.hpp"
 #include "Features/FovChanger.hpp"
 #include "Features/Hud/Crosshair.hpp"
-#include "Features/NetMessage.hpp"
 #include "Features/Session.hpp"
 #include "Game.hpp"
 #include "Hook.hpp"
@@ -177,18 +176,6 @@ DETOUR_T(bool, Server::IsInPVS, void *info) {
 }
 Hook g_IsInPVS_Hook(&Server::IsInPVS_Hook);
 
-ON_INIT {
-	NetMessage::RegisterHandler(
-		CM_FLAGS_MESSAGE_TYPE, +[](const void *data, size_t size) {
-			if (size == 6 && engine->IsOrange()) {
-				char slot = *(char *)data;
-				float time = *(float *)((uintptr_t)data + 1);
-				bool end = !!*(char *)((uintptr_t)data + 5);
-				Event::Trigger<Event::CM_FLAGS>({slot, time, end});
-			}
-		});
-}
-
 static inline bool hasSlotCompleted(void *thisptr, int slot) {
 #ifdef _WIN32
 	return *(uint8_t *)((uintptr_t)thisptr + 0x4B0 + slot);
@@ -203,13 +190,6 @@ static inline bool isFakeFlag(void *thisptr) {
 
 static void TriggerCMFlag(int slot, float time, bool end) {
 	Event::Trigger<Event::CM_FLAGS>({slot, time, end});
-	if (engine->IsCoop()) {
-		char data[6];
-		data[0] = (char)slot;
-		*(float *)(data + 1) = time;
-		data[5] = (char)end;
-		NetMessage::SendMsg(CM_FLAGS_MESSAGE_TYPE, data, sizeof data);
-	}
 }
 
 extern Hook g_flagStartTouchHook;
@@ -386,7 +366,6 @@ ON_EVENT(SESSION_START) {
 ON_EVENT(POST_TICK) {
 	if (g_sendResetDoneAt != -1 && session->GetTick() >= g_sendResetDoneAt) {
 		g_sendResetDoneAt = -1;
-		NetMessage::SendMsg(RESET_COOP_PROGRESS_MESSAGE_TYPE, (void *)"done", 4);
 	}
 }
 
@@ -567,8 +546,6 @@ bool Server::Init() {
 #endif
 		g_IsInPVS_Hook.SetFunc(IsInPVS);
 	}
-
-	NetMessage::RegisterHandler(RESET_COOP_PROGRESS_MESSAGE_TYPE, &netResetCoopProgress);
 
 	sv_cheats = Variable("sv_cheats");
 	sv_footsteps = Variable("sv_footsteps");

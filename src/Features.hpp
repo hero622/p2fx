@@ -2,6 +2,5 @@
 #include "Features/Cvars.hpp"
 #include "Features/EntityList.hpp"
 #include "Features/FovChanger.hpp"
-#include "Features/Listener.hpp"
 #include "Features/Session.hpp"
 #include "Features/DemoViewer.hpp"

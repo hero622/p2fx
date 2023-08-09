@@ -2,8 +2,6 @@
 
 #include "Event.hpp"
 #include "Features/Hud/Hud.hpp"
-#include "Features/Listener.hpp"
-#include "Features/NetMessage.hpp"
 #include "Modules/Client.hpp"
 #include "Modules/Console.hpp"
 #include "Modules/Engine.hpp"
@@ -94,12 +92,6 @@ void Session::Ended() {
 
 	this->lastFrame = this->currentFrame;
 	this->currentFrame = 0;
-
-	NetMessage::SessionEnded();
-
-	if (listener) {
-		listener->Reset();
-	}
 
 	this->loadStart = NOW();
 	if (!engine->demoplayer->IsPlaying() && !engine->IsOrange()) {

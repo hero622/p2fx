@@ -67,16 +67,10 @@
     <ClCompile Include="Features\Feature.cpp">
       <Filter>p2fx\Features</Filter>
     </ClCompile>
-    <ClCompile Include="Features\Listener.cpp">
-      <Filter>p2fx\Features</Filter>
-    </ClCompile>
     <ClCompile Include="Features\Session.cpp">
       <Filter>p2fx\Features</Filter>
     </ClCompile>
     <ClCompile Include="Features\Updater.cpp">
-      <Filter>p2fx\Features</Filter>
-    </ClCompile>
-    <ClCompile Include="Features\NetMessage.cpp">
       <Filter>p2fx\Features</Filter>
     </ClCompile>
     <ClCompile Include="Cheats.cpp">
@@ -181,19 +175,7 @@
     <ClCompile Include="Utils\SDK\MeshBuilder.cpp">
       <Filter>p2fx\Utils\SDK</Filter>
     </ClCompile>
-    <ClCompile Include="Games\ApertureTag.cpp">
-      <Filter>p2fx\Games</Filter>
-    </ClCompile>
     <ClCompile Include="Games\Portal2.cpp">
-      <Filter>p2fx\Games</Filter>
-    </ClCompile>
-    <ClCompile Include="Games\PortalReloaded.cpp">
-      <Filter>p2fx\Games</Filter>
-    </ClCompile>
-    <ClCompile Include="Games\PortalStoriesMel.cpp">
-      <Filter>p2fx\Games</Filter>
-    </ClCompile>
-    <ClCompile Include="Games\ThinkingWithTimeMachine.cpp">
       <Filter>p2fx\Games</Filter>
     </ClCompile>
     <ClCompile Include="Utils\ed25519\verify.cpp">
@@ -357,16 +339,10 @@
     <ClInclude Include="Features\Feature.hpp">
       <Filter>p2fx\Features</Filter>
     </ClInclude>
-    <ClInclude Include="Features\Listener.hpp">
-      <Filter>p2fx\Features</Filter>
-    </ClInclude>
     <ClInclude Include="Features\Session.hpp">
       <Filter>p2fx\Features</Filter>
     </ClInclude>
     <ClInclude Include="Features\Updater.hpp">
-      <Filter>p2fx\Features</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\NetMessage.hpp">
       <Filter>p2fx\Features</Filter>
     </ClInclude>
     <ClInclude Include="Cheats.hpp">
@@ -768,19 +744,7 @@
     <ClInclude Include="Utils\SDK.hpp">
       <Filter>p2fx\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="Games\ApertureTag.hpp">
-      <Filter>p2fx\Games</Filter>
-    </ClInclude>
     <ClInclude Include="Games\Portal2.hpp">
-      <Filter>p2fx\Games</Filter>
-    </ClInclude>
-    <ClInclude Include="Games\PortalReloaded.hpp">
-      <Filter>p2fx\Games</Filter>
-    </ClInclude>
-    <ClInclude Include="Games\PortalStoriesMel.hpp">
-      <Filter>p2fx\Games</Filter>
-    </ClInclude>
-    <ClInclude Include="Games\ThinkingWithTimeMachine.hpp">
       <Filter>p2fx\Games</Filter>
     </ClInclude>
     <ClInclude Include="Utils\ed25519\ed25519.h">

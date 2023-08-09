@@ -8,7 +8,6 @@
 #include "Features/Camera.hpp"
 #include "Features/Cvars.hpp"
 #include "Features/Demo/DemoParser.hpp"
-#include "Features/NetMessage.hpp"
 #include "Features/OverlayRender.hpp"
 #include "Features/Renderer.hpp"
 #include "Features/Session.hpp"
@@ -357,8 +356,6 @@ DETOUR(Engine::Frame) {
 	engine->demoplayer->HandlePlaybackFix();
 	Event::Trigger<Event::FRAME>({});
 	if (!engine->IsSkipping() && session->isRunning) Event::Trigger<Event::RENDER>({});
-
-	NetMessage::Update();
 
 	return Engine::Frame(thisptr);
 }
