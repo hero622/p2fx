@@ -224,11 +224,6 @@ extern Variable sv_portal_players;
 extern Variable fps_max;
 extern Variable mat_norendering;
 
-extern Variable p2fx_pause_at;
-extern Variable p2fx_pause_for;
-
-extern Variable p2fx_tick_debug;
-
 extern float g_cur_fps;
 
 #define TIME_TO_TICKS(dt) ((int)(0.5f + (float)(dt) / *engine->interval_per_tick))

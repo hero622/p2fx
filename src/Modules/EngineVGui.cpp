@@ -41,13 +41,7 @@ DETOUR(EngineVGui::UpdateProgressBar, int progress) {
 		enginevgui->progressBarCount = 0;
 	}
 	enginevgui->progressBarCount++;
-	if (p2fx_disable_progress_bar_update.GetInt() == 1 && enginevgui->progressBarCount > 1) {
-		return 0;
-	}
-	if (p2fx_disable_progress_bar_update.GetInt() == 2) {
-		return 0;
-	}
-	return EngineVGui::UpdateProgressBar(thisptr, progress);
+	return 0;
 }
 
 bool EngineVGui::IsUIVisible() {

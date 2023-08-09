@@ -13,9 +13,6 @@
 #include <chrono>
 #include <thread>
 
-Variable p2fx_loads_uncap("p2fx_loads_uncap", "0", 0, 1, "Temporarily set fps_max to 0 during loads\n");
-Variable p2fx_loads_norender("p2fx_loads_norender", "0", 0, 1, "Temporarily set mat_norendering to 1 during loads\n");
-
 Session *session;
 
 Session::Session()
@@ -139,22 +136,14 @@ void Session::Changed(int state) {
 }
 
 void Session::DoFastLoads() {
-	if (p2fx_loads_uncap.GetBool()) {
-		this->oldFpsMax = fps_max.GetInt();
-		fps_max.SetValue(0);
-	}
-
-	if (p2fx_loads_norender.GetBool()) {
-		mat_norendering.SetValue(1);
-	}
+	this->oldFpsMax = fps_max.GetInt();
+	fps_max.SetValue(0);
+	mat_norendering.SetValue(1);
 }
 
 void Session::ResetLoads() {
-	if (p2fx_loads_uncap.GetBool() && fps_max.GetInt() == 0) {
+	if (fps_max.GetInt() == 0) {
 		fps_max.SetValue(this->oldFpsMax);
 	}
-
-	if (p2fx_loads_norender.GetBool()) {
-		mat_norendering.SetValue(0);
-	}
+	mat_norendering.SetValue(0);
 }

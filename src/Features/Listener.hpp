@@ -35,7 +35,3 @@ public:
 };
 
 extern Listener *listener;
-
-extern Variable p2fx_debug_listener;
-
-extern Command p2fx_dump_events;

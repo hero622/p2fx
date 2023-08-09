@@ -47,7 +47,7 @@ REDECL(MaterialSystem::CreateMaterial);
 
 DETOUR(MaterialSystem::UncacheUnusedMaterials, bool bRecomputeStateSnapshots) {
 	auto start = std::chrono::high_resolution_clock::now();
-	bool bRecomputeStateSnapshotFixed = p2fx_prevent_mat_snapshot_recompute.GetBool() ? false : bRecomputeStateSnapshots;
+	bool bRecomputeStateSnapshotFixed = false;
 	auto result = MaterialSystem::UncacheUnusedMaterials(thisptr, bRecomputeStateSnapshotFixed);
 	auto stop = std::chrono::high_resolution_clock::now();
 	console->DevMsg("UncacheUnusedMaterials - %dms\n", std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count());

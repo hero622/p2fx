@@ -41,9 +41,6 @@ Variable sv_portal_players;
 Variable fps_max;
 Variable mat_norendering;
 
-Variable p2fx_pause_at("p2fx_pause_at", "-1", -1, "Pause at the specified tick. -1 to deactivate it.\n");
-Variable p2fx_pause_for("p2fx_pause_for", "0", 0, "Pause for this amount of ticks.\n");
-
 Variable p2fx_tick_debug("p2fx_tick_debug", "0", 0, 3, "Output debugging information to the console related to ticks and frames.\n");
 
 float g_cur_fps = 0.0f;
@@ -254,28 +251,6 @@ bool Engine::TraceFromCamera(float distMax, int mask, CGameTrace &tr) {
 }
 
 ON_EVENT(PRE_TICK) {
-	if (!engine->demoplayer->IsPlaying()) {
-		if (p2fx_pause_at.GetInt() == -1 || (!sv_cheats.GetBool() && p2fx_pause_at.GetInt() > 0)) {
-			if (p2fx_pause_at.GetInt() != -1 && !engine->hasPaused) {
-				console->Print("p2fx_pause_at values over 0 are only usable with sv_cheats\n");
-			}
-			engine->hasPaused = true;  // We don't want to randomly pause if the user sets p2fx_pause_at in this session
-			engine->isPausing = false;
-		} else {
-			if (!engine->hasPaused && session->isRunning && event.tick >= p2fx_pause_at.GetInt()) {
-				engine->ExecuteCommand("pause", true);
-				engine->hasPaused = true;
-				engine->isPausing = true;
-				engine->pauseTick = server->tickCount;
-			} else if (p2fx_pause_for.GetInt() > 0 && engine->isPausing && server->tickCount >= p2fx_pause_for.GetInt() + engine->pauseTick) {
-				engine->ExecuteCommand("unpause", true);
-				engine->isPausing = false;
-			}
-		}
-	}
-}
-
-ON_EVENT(PRE_TICK) {
 	if (engine->shouldPauseForSync && event.tick >= 0) {
 		engine->ExecuteCommand("pause", true);
 		engine->shouldPauseForSync = false;
@@ -447,7 +422,7 @@ _def:
 
 // CSteam3Client::OnGameOverlayActivated
 DETOUR_B(Engine::OnGameOverlayActivated, GameOverlayActivated_t *pGameOverlayActivated) {
-	engine->shouldSuppressPause = p2fx_disable_steam_pause.GetBool() && pGameOverlayActivated->m_bActive;
+	engine->shouldSuppressPause = false;
 	return Engine::OnGameOverlayActivatedBase(thisptr, pGameOverlayActivated);
 }
 

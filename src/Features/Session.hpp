@@ -37,6 +37,3 @@ public:
 };
 
 extern Session *session;
-
-extern Variable p2fx_loads_uncap;
-extern Variable p2fx_loads_norender;

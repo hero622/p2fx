@@ -8,8 +8,6 @@
 
 #include <cstring>
 
-Variable p2fx_debug_listener("p2fx_debug_listener", "0", "Prints event data of registered listener.\n");
-
 static const char *EVENTS[] = {
 	"player_spawn_blue",
 	"player_spawn_orange",
@@ -60,13 +58,6 @@ void Listener::FireGameEvent(IGameEvent *ev) {
 	if (!ev) {
 		return;
 	}
-
-	if (p2fx_debug_listener.GetBool()) {
-		console->Print("[%i] Event fired: %s\n", session->GetTick(), ev->GetName());
-		if (engine->ConPrintEvent) {
-			engine->ConPrintEvent(engine->s_GameEventManager->ThisPtr(), ev);
-		}
-	}
 }
 int Listener::GetEventDebugID() {
 	return 42;
@@ -81,23 +72,4 @@ void Listener::OnCheatsChanged(IConVar *pVar, const char *pOldString, float flOl
 	//        //session->Start();
 	//    }
 	//}
-}
-
-// Commands
-
-CON_COMMAND(p2fx_dump_events, "p2fx_dump_events - dumps all registered game events of the game event manager\n") {
-	if (!engine->s_GameEventManager) {
-		return;
-	}
-
-	auto s_GameEventManager = reinterpret_cast<uintptr_t>(engine->s_GameEventManager->ThisPtr());
-	auto m_Size = *reinterpret_cast<int *>(s_GameEventManager + CGameEventManager_m_Size);
-	console->Print("m_Size = %i\n", m_Size);
-	if (m_Size > 0) {
-		auto m_GameEvents = *(uintptr_t *)(s_GameEventManager + CGameEventManager_m_GameEvents);
-		for (auto i = 0; i < m_Size; ++i) {
-			auto name = *(char **)(m_GameEvents + CGameEventDescriptor_Size * i + CGameEventManager_m_GameEvents_name);
-			console->Print("%s\n", name);
-		}
-	}
 }

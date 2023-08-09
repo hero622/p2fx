@@ -233,29 +233,6 @@ CON_COMMAND(p2fx_about, "p2fx_about - prints info about P2FX plugin\n") {
 	console->Print("Version: " P2FX_VERSION "\n");
 	console->Print("Built: " P2FX_BUILT "\n");
 }
-CON_COMMAND(p2fx_cvars_dump, "p2fx_cvars_dump - dumps all cvars to a file\n") {
-	std::ofstream file("game.cvars", std::ios::out | std::ios::trunc | std::ios::binary);
-	auto result = cvars->Dump(file);
-	file.close();
-
-	console->Print("Dumped %i cvars to game.cvars!\n", result);
-}
-CON_COMMAND(p2fx_cvars_dump_doc, "p2fx_cvars_dump_doc - dumps all P2FX cvars to a file\n") {
-	std::ofstream file("p2fx.cvars", std::ios::out | std::ios::trunc | std::ios::binary);
-	auto result = cvars->DumpDoc(file);
-	file.close();
-
-	console->Print("Dumped %i cvars to p2fx.cvars!\n", result);
-}
-CON_COMMAND(p2fx_cvars_lock, "p2fx_cvars_lock - restores default flags of unlocked cvars\n") {
-	cvars->Lock();
-}
-CON_COMMAND(p2fx_cvars_unlock, "p2fx_cvars_unlock - unlocks all special cvars\n") {
-	cvars->Unlock();
-}
-CON_COMMAND(p2fx_cvarlist, "p2fx_cvarlist - lists all P2FX cvars and unlocked engine cvars\n") {
-	cvars->ListAll();
-}
 CON_COMMAND(p2fx_exit, "p2fx_exit - removes all function hooks, registered commands and unloads the module\n") {
 	p2fx.Unload();
 }
