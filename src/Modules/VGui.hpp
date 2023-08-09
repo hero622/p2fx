@@ -53,8 +53,7 @@ public:
 
 	_SetVisible SetVisible = nullptr;
 	_GetName GetName = nullptr;
-	// cast necessary !!!
-	_GetPanel GetPanel = nullptr;
+	_GetPanel GetPanel = nullptr;  // cast necessary !!!
 
 	enum VGUI_STATE {
 		VGUI_IDLE = 0,
@@ -67,8 +66,10 @@ public:
 	int vguiState = 0;
 	std::vector<VPANEL> panels;
 	VPANEL extrasBtn;
+	std::map<int, int> chapterImgs;
 
 public:
+	void InitImgs();
 	int GetImageId(const char *pImageName);
 	void OverrideMenu(bool state);
 

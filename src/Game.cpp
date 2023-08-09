@@ -28,6 +28,7 @@
 #define TARGET_MOD2 MODULE("engine")
 
 std::vector<std::string> Game::mapNames;
+std::map<std::string, int> Game::chapters;
 std::vector<AchievementData> Game::achievements;
 
 const char *Game::Version() {
