@@ -13,9 +13,21 @@
 #include "Tier0.hpp"
 #include "Features/Demo/DemoParser.hpp"
 
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
 REDECL(VGui::PaintTraverse);
 REDECL(VGui::PopulateFromScript);
 REDECL(VGui::ApplySchemeSettings);
+REDECL(VGui::OnCommand);
+REDECL(VGui::OpenWindow);
+
+extern Hook g_PopulateFromScriptHook;
+extern Hook g_ApplySchemeSettingsHook;
+extern Hook g_ActivateSelectedItemHook;
+extern Hook g_OnCommandHook;
+extern Hook g_OpenWindowHook;
 
 void VGui::InitImgs() {
 	g_chapterImgs[0] = this->GetImageId("vgui/chapters/coopcommentary_chapter1");
@@ -40,10 +52,6 @@ int VGui::GetImageId(const char *pImageName) {
 bool VGui::IsMenuOpened() {
 	return this->IsVisible(this->ipanel->ThisPtr(), this->g_menuPanel);
 }
-
-extern Hook g_PopulateFromScriptHook;
-extern Hook g_ApplySchemeSettingsHook;
-extern Hook g_ActivateSelectedItemHook;
 
 void VGui::OverrideMenu(bool state) {
 	if (this->g_vguiState < VGUI_LOADED || (this->g_vguiState == VGUI_OVERWRITTEN && state))
@@ -97,6 +105,14 @@ DETOUR(VGui::PaintTraverse, VPANEL vguiPanel, bool forceRepaint, bool allowForce
 		vgui->g_curDirectory = engine->GetGameDirectory();
 	}
 
+	if (!strcmp(name, "BtnRestartLevel")) {
+		Label *label = (Label *)vgui->GetPanel(vgui->ipanel->ThisPtr(), vguiPanel, "ClientDLL");
+		label->SetText("NEXT DEMO");
+	} else if (!strcmp(name, "BtnLeaderboards")) {
+		Label *label = (Label *)vgui->GetPanel(vgui->ipanel->ThisPtr(), vguiPanel, "ClientDLL");
+		label->SetText("CHANGE DEMO");
+	}
+
 	return VGui::PaintTraverse(thisptr, vguiPanel, forceRepaint, allowForce);
 }
 
@@ -118,6 +134,8 @@ CON_COMMAND_F(p2fx_directory, "Internal command, do not use.\n", FCVAR_HIDDEN) {
 }
 
 void VGui::EnumerateFiles(CUtlVector<ExtraInfo_t> &m_ExtraInfos, std::string path) {
+	vgui->g_demos.clear();
+
 	// back button
 	if (std::filesystem::path(path) != std::filesystem::path(engine->GetGameDirectory())) {
 		int nIndex = m_ExtraInfos.AddToTail();
@@ -187,6 +205,8 @@ void VGui::EnumerateFiles(CUtlVector<ExtraInfo_t> &m_ExtraInfos, std::string pat
 				m_ExtraInfos[nIndex].m_URLName = "";
 				m_ExtraInfos[nIndex].m_Command = Utils::ssprintf("playdemo \"%s\"", safepath.string().c_str()).c_str();
 				m_ExtraInfos[nIndex].m_nImageId = g_chapterImgs[chapter];
+
+				g_demos.push_back(safepath.string().c_str());
 			}
 		}
 	}
@@ -211,6 +231,36 @@ DETOUR_T(void, VGui::ApplySchemeSettings, void *pScheme) {
 }
 Hook g_ApplySchemeSettingsHook(&VGui::ApplySchemeSettings_Hook);
 
+DETOUR_T(void, VGui::OnCommand, const char *command) {
+	if (!strcmp(command, "RestartLevel")) {
+		// previous demo
+		int curIdx = std::distance(vgui->g_demos.begin(), std::find(vgui->g_demos.begin(), vgui->g_demos.end(), std::string(engine->demoplayer->DemoName)));
+		engine->ExecuteCommand(Utils::ssprintf("playdemo %s", vgui->g_demos[curIdx + 1]).c_str(), true);
+		return;
+	}
+	else if (!strcmp(command, "Leaderboards_")) {
+		// change demo
+		engine->ExecuteCommand("gameui_preventescape", true); // GameUI().PreventEngineHideGameUI();
+		VGui::OpenWindow(vgui->g_CBaseModPanel, 63, thisptr, true, NULL); // WT_EXTRAS = 63
+		return;
+	}
+
+	g_OnCommandHook.Disable();
+	VGui::OnCommand(thisptr, command);
+	g_OnCommandHook.Enable();
+}
+Hook g_OnCommandHook(&VGui::OnCommand_Hook);
+
+// we only use this to obtain the CBaseModPanel Singleton
+DETOUR_T(void *, VGui::OpenWindow, const int &wt, void *caller, bool hidePrevious, KeyValues *pParameter) {
+	// this is a singleton so its fine if we only obtain it once
+	vgui->g_CBaseModPanel = thisptr;
+
+	g_OpenWindowHook.Disable(true);
+	return VGui::OpenWindow(thisptr, wt, caller, hidePrevious, pParameter);
+}
+Hook g_OpenWindowHook(&VGui::OpenWindow_Hook);
+
 bool VGui::Init() {
 	this->ipanel = Interface::Create(this->Name(), "VGUI_Panel009");
 
@@ -221,16 +271,22 @@ bool VGui::Init() {
 		this->GetPanel = this->ipanel->Original<_GetPanel>(55);
 
 		this->ipanel->Hook(VGui::PaintTraverse_Hook, VGui::PaintTraverse, 41);
-
-		// vgui stuff are all over everywhere, base level stuff is in vgui2, most panels are in client
-		VGui::PopulateFromScript = (decltype(VGui::PopulateFromScript))Memory::Scan(MODULE("client"), "55 8B EC 83 EC 1C 6A 24 89 4D F8 E8 ? ? ? ? 83 C4 04 85 C0 74 11 68 ? ? ? ? 8B C8 E8 ? ? ? ? 89 45 FC EB 07");
-		g_PopulateFromScriptHook.SetFunc(VGui::PopulateFromScript);
-
-		VGui::ApplySchemeSettings = (decltype(VGui::ApplySchemeSettings))Memory::Scan(MODULE("client"), "55 8B EC 8B 45 08 56 57 50 8B F1 E8 ? ? ? ? 6A 00 68 ? ? ? ? 68 ? ? ? ? 6A 00 6A 00 68 ? ? ? ? 8B CE E8 ? ? ? ? 50 E8 ? ? ? ? 83 C4 14 68 ? ? ? ? 89 86 ? ? ? ? E8 ? ? ? ?");
-		g_ApplySchemeSettingsHook.SetFunc(VGui::ApplySchemeSettings);
-
-		this->InitImgs();
 	}
+
+	this->InitImgs();
+
+	// vgui stuff are all over everywhere, base level stuff is in vgui2, most panels are in client
+	VGui::PopulateFromScript = (decltype(VGui::PopulateFromScript))Memory::Scan(MODULE("client"), "55 8B EC 83 EC 1C 6A 24 89 4D F8 E8 ? ? ? ? 83 C4 04 85 C0 74 11 68 ? ? ? ? 8B C8 E8 ? ? ? ? 89 45 FC EB 07");
+	g_PopulateFromScriptHook.SetFunc(VGui::PopulateFromScript);
+
+	VGui::ApplySchemeSettings = (decltype(VGui::ApplySchemeSettings))Memory::Scan(MODULE("client"), "55 8B EC 8B 45 08 56 57 50 8B F1 E8 ? ? ? ? 6A 00 68 ? ? ? ? 68 ? ? ? ? 6A 00 6A 00 68 ? ? ? ? 8B CE E8 ? ? ? ? 50 E8 ? ? ? ? 83 C4 14 68 ? ? ? ? 89 86 ? ? ? ? E8 ? ? ? ?");
+	g_ApplySchemeSettingsHook.SetFunc(VGui::ApplySchemeSettings);
+
+	VGui::OpenWindow = (decltype(VGui::OpenWindow))Memory::Scan(MODULE("client"), "55 8B EC 83 EC 10 53 56 8B F1 F3 0F 10 86 ? ? ? ? 0F 2E 05 ? ? ? ? 9F 57 F6 C4 44 7B 10 F3 0F 10 05 ? ? ? ? F3 0F 11 86 ? ? ? ?");
+	g_OpenWindowHook.SetFunc(VGui::OpenWindow);
+
+	VGui::OnCommand = (decltype(VGui::OnCommand))Memory::Scan(MODULE("client"), "55 8B EC 83 EC 3C 53 56 57 8B F1 E8 ? ? ? ? 8B C8 E8 ? ? ? ? 8B F8 E8 ? ? ? ? 8B 5D 08 85 C0 74 11 57 57 53 68 ? ? ? ? FF 15 ? ? ? ? 83 C4 10");
+	g_OnCommandHook.SetFunc(VGui::OnCommand);
 
 	return this->hasLoaded = this->ipanel;
 }

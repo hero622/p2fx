@@ -18,13 +18,6 @@ public:
 	}
 };
 
-class CBaseModFrame {
-public:
-	void SetTitle(const char *title, bool surfaceTitle) {
-		Memory::VMT<void(__rescall *)(void *, const char *, bool)>(this, 200)(this, title, surfaceTitle);
-	}
-};
-
 class GenericPanelList {
 public:
 	void RemoveAllPanelItems() {
@@ -79,9 +72,12 @@ public:
 	void *g_extrasDialog;
 	void *g_pScheme;
 
+	void *g_CBaseModPanel;
+
 public:
 	std::map<int, int> g_chapterImgs;
 	std::string g_curDirectory;
+	std::vector<std::string> g_demos;
 
 	void InitImgs();
 	int GetImageId(const char *pImageName);
@@ -98,6 +94,12 @@ public:
 
 	// CExtrasDialog::ApplySchemeSettings
 	DECL_DETOUR_T(void, ApplySchemeSettings, void *pScheme);
+
+	// InGameMainMenu::OnCommand
+	DECL_DETOUR_T(void, OnCommand, const char *command);
+	
+	// CBaseModPanel::OpenWindow
+	DECL_DETOUR_T(void *, OpenWindow, const int &wt, void *caller, bool hidePrevious, KeyValues *pParameter);
 
 	bool Init() override;
 	void Shutdown() override;
