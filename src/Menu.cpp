@@ -46,6 +46,7 @@ void Menu::Draw() {
 			CImGui::Checkbox("Portal Dynamic Lights", "r_portal_use_dlights");
 			CImGui::Sliderf("Bloom Scale", "mat_bloomscale", 0.0f, 10.0f);
 			CImGui::Sliderf("Sun Brightness", "r_flashlightbrightness", 0.0f, 10.0f);
+			CImGui::Sliderf("Force Tonemap Scale", "mat_force_tonemap_scale", 0.0f, 16.0f);
 			CImGui::Colorpickerf2("Ambient Light", "mat_ambient_light_r", "mat_ambient_light_g", "mat_ambient_light_b");
 
 			ImGui::Separator();

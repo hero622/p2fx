@@ -20,6 +20,7 @@ std::vector<std::string> cvars = {
 	"r_portal_use_dlights",
 	"mat_bloomscale",
 	"r_flashlightbrightness",
+	"mat_force_tonemap_scale",
 	"mat_ambient_light_r",
 	"mat_ambient_light_g",
 	"mat_ambient_light_b",

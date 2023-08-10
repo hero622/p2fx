@@ -25,6 +25,7 @@ Variable ui_transition_time;
 Variable hide_gun_when_holding;
 Variable cl_viewmodelfov;
 Variable r_flashlightbrightness;
+Variable mat_hdr_manual_tonemap_rate;
 
 void Cheats::Init() {
 	ui_loadingscreen_transition_time = Variable("ui_loadingscreen_transition_time");
@@ -35,6 +36,10 @@ void Cheats::Init() {
 	hide_gun_when_holding = Variable("hide_gun_when_holding");
 	cl_viewmodelfov = Variable("cl_viewmodelfov");
 	r_flashlightbrightness = Variable("r_flashlightbrightness");
+	mat_hdr_manual_tonemap_rate = Variable("mat_hdr_manual_tonemap_rate");
+
+	// instant tonemapping
+	engine->ExecuteCommand("mat_hdr_manual_tonemap_rate 0.0");
 
 	engine->ExecuteCommand("ui_loadingscreen_transition_time 0.0");
 	engine->ExecuteCommand("ui_loadingscreen_fadein_time 0.0");
