@@ -301,8 +301,7 @@ void Camera::DrawInWorld() const {
 		// dont draw twice
 		if (!isKeyframe) {
 			for (int tick : keyframeTicks) {
-				// ghetto comparision
-				if (std::string(state) == std::string(camera->states[tick]))
+				if ((state.origin - camera->states[tick].origin).Length() < 1.0f)
 					return;
 			}
 		}
