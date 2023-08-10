@@ -118,20 +118,25 @@ CON_COMMAND_F(p2fx_directory, "Internal command, do not use.\n", FCVAR_HIDDEN) {
 }
 
 void VGui::EnumerateFiles(CUtlVector<ExtraInfo_t> &m_ExtraInfos, std::string path) {
-	int nIndex = m_ExtraInfos.AddToTail();
-	m_ExtraInfos[nIndex].m_TitleString = "..";
-	m_ExtraInfos[nIndex].m_SubtitleString = "";
-	m_ExtraInfos[nIndex].m_MapName = "";
-	m_ExtraInfos[nIndex].m_VideoName = "";
-	m_ExtraInfos[nIndex].m_URLName = "";
-	m_ExtraInfos[nIndex].m_Command = Utils::ssprintf("p2fx_directory \"%s\"", std::filesystem::path(path).parent_path().string().c_str()).c_str();  // ghetto method bc im too lazy to hook ActivateSelectedItem and all that
-	m_ExtraInfos[nIndex].m_nImageId = -1;
+	// back button
+	if (std::filesystem::path(path) != std::filesystem::path(engine->GetGameDirectory())) {
+		int nIndex = m_ExtraInfos.AddToTail();
+		m_ExtraInfos[nIndex].m_TitleString = "..";
+		m_ExtraInfos[nIndex].m_SubtitleString = "";
+		m_ExtraInfos[nIndex].m_MapName = "";
+		m_ExtraInfos[nIndex].m_VideoName = "";
+		m_ExtraInfos[nIndex].m_URLName = "";
+		m_ExtraInfos[nIndex].m_Command = Utils::ssprintf("p2fx_directory \"%s\"", std::filesystem::path(path).parent_path().string().c_str()).c_str();  // ghetto method bc im too lazy to hook ActivateSelectedItem and all that
+		m_ExtraInfos[nIndex].m_nImageId = -1;
+	}
 
+	// list folders first
 	for (const auto &p : std::filesystem::directory_iterator(path)) {
 		if (m_ExtraInfos.m_Size == 1170)
 			break;
 
 		if (p.is_directory()) {
+			// check if folder has any demos recursively
 			bool containsDemo = false;
 			for (const auto &dems : std::filesystem::recursive_directory_iterator(p)) {
 				if (dems.path().extension() == ".dem") {
@@ -155,6 +160,7 @@ void VGui::EnumerateFiles(CUtlVector<ExtraInfo_t> &m_ExtraInfos, std::string pat
 			m_ExtraInfos[nIndex].m_nImageId = -1;
 		}
 	}
+	// list demo files
 	for (const auto &p : std::filesystem::directory_iterator(path)) {
 		if (m_ExtraInfos.m_Size == 1170)
 			break;
@@ -164,7 +170,7 @@ void VGui::EnumerateFiles(CUtlVector<ExtraInfo_t> &m_ExtraInfos, std::string pat
 		if (filepath.extension() == ".dem") {
 			std::string filename = filepath.stem().string();
 
-			auto safepath = filepath.string().substr(filepath.string().find("portal2") + 8);
+			auto safepath = std::filesystem::relative(std::filesystem::path(filepath), std::filesystem::path(engine->GetGameDirectory()));
 
 			Demo demo;
 			DemoParser parser;
@@ -179,7 +185,7 @@ void VGui::EnumerateFiles(CUtlVector<ExtraInfo_t> &m_ExtraInfos, std::string pat
 				m_ExtraInfos[nIndex].m_MapName = "";
 				m_ExtraInfos[nIndex].m_VideoName = "";
 				m_ExtraInfos[nIndex].m_URLName = "";
-				m_ExtraInfos[nIndex].m_Command = Utils::ssprintf("playdemo \"%s\"", safepath.c_str()).c_str();
+				m_ExtraInfos[nIndex].m_Command = Utils::ssprintf("playdemo \"%s\"", safepath.string().c_str()).c_str();
 				m_ExtraInfos[nIndex].m_nImageId = g_chapterImgs[chapter];
 			}
 		}
