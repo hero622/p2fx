@@ -69,17 +69,6 @@ void VGui::OverrideMenu(bool state) {
 	label->SetText(state ? "DEMO VIEWER" : "#L4D360UI_MainMenu_Extras");
 
 	this->g_vguiState = state ? VGUI_OVERWRITTEN : VGUI_RESET;
-
-	if (this->g_vguiState == VGUI_RESET && this->g_ExtraInfos) {
-		(*(CUtlVector<ExtraInfo_t> *)this->g_ExtraInfos).RemoveAll();
-		this->g_pInfoList->RemoveAllPanelItems();
-
-		g_PopulateFromScriptHook.Disable(true);
-		VGui::PopulateFromScript(this->g_extrasDialog);
-
-		g_ApplySchemeSettingsHook.Disable(true);
-		VGui::ApplySchemeSettings(this->g_extrasDialog, this->g_pScheme);
-	}
 }
 
 ON_EVENT(SESSION_END) {
