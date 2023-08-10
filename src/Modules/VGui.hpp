@@ -10,21 +10,25 @@ typedef unsigned int VPANEL;
 class Label {
 public:
 	void SetText(const char *tokenName) {
-		using _SetText = void(__rescall *)(void *, const char *);
-		Memory::VMT<_SetText>(this, 184)(this, tokenName);
+		Memory::VMT<void(__rescall *)(void *, const char *)>(this, 184)(this, tokenName);
 	}
 
 	void GetText(const wchar_t *textOut, int bufLenInBytes) {
-		using _GetText = void(__rescall *)(void *, const wchar_t *, int);
-		Memory::VMT<_GetText>(this, 186)(this, textOut, bufLenInBytes);
+		Memory::VMT<void(__rescall *)(void *, const wchar_t *, int)>(this, 186)(this, textOut, bufLenInBytes);
 	}
 };
 
 class CBaseModFrame {
 public:
 	void SetTitle(const char *title, bool surfaceTitle) {
-		using _SetTitle = void(__rescall *)(void *, const char *, bool);
-		Memory::VMT<_SetTitle>(this, 200)(this, title, surfaceTitle);
+		Memory::VMT<void(__rescall *)(void *, const char *, bool)>(this, 200)(this, title, surfaceTitle);
+	}
+};
+
+class GenericPanelList {
+public:
+	void RemoveAllPanelItems() {
+		Memory::VMT<void(__rescall *)(void *)>(this, 187)(this);
 	}
 };
 
@@ -63,22 +67,33 @@ public:
 		VGUI_RESET
 	};
 
-	int vguiState = 0;
-	std::vector<VPANEL> panels;
-	VPANEL extrasBtn;
-	std::map<int, int> chapterImgs;
+	int g_vguiState = 0;
+	std::vector<VPANEL> g_panels;
+	VPANEL g_extrasBtn;
+
+	uintptr_t g_ExtraInfos;
+	GenericPanelList *g_pInfoList;
+	void *g_extrasDialog;
+	void *g_pScheme;
 
 public:
+	std::map<int, int> g_chapterImgs;
+	std::string g_curDirectory;
+
 	void InitImgs();
 	int GetImageId(const char *pImageName);
 	void OverrideMenu(bool state);
+	void EnumerateFiles(CUtlVector<ExtraInfo_t> &m_ExtraInfos, std::string path);
 
 public:
 	// IPanel::PaintTraverse
 	DECL_DETOUR(PaintTraverse, VPANEL vguiPanel, bool forceRepaint, bool allowForce);
 
-	// SaveLoadGameDialog::PopulateSaveGameList
+	// CExtrasDialog::PopulateSaveGameList
 	DECL_DETOUR_T(void, PopulateFromScript);
+
+	// CExtrasDialog::ApplySchemeSettings
+	DECL_DETOUR_T(void, ApplySchemeSettings, void *pScheme);
 
 	bool Init() override;
 	void Shutdown() override;
