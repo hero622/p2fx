@@ -52,10 +52,12 @@ public:
 
 public:
 	using _SetVisible = int(__rescall *)(void *thisptr, VPANEL vguiPanel, bool state);
+	using _IsVisible = bool(__rescall *)(void *thisptr, VPANEL vguiPanel);
 	using _GetName = const char *(__rescall *)(void *thisptr, VPANEL vguiPanel);
 	using _GetPanel = void *(__rescall *)(void *thisptr, VPANEL vguiPanel, const char *destinationModule);
 
 	_SetVisible SetVisible = nullptr;
+	_IsVisible IsVisible = nullptr;
 	_GetName GetName = nullptr;
 	_GetPanel GetPanel = nullptr;  // cast necessary !!!
 
@@ -68,6 +70,7 @@ public:
 	};
 
 	int g_vguiState = 0;
+	VPANEL g_menuPanel;
 	std::vector<VPANEL> g_panels;
 	VPANEL g_extrasBtn;
 
@@ -82,6 +85,7 @@ public:
 
 	void InitImgs();
 	int GetImageId(const char *pImageName);
+	bool IsMenuOpened();
 	void OverrideMenu(bool state);
 	void EnumerateFiles(CUtlVector<ExtraInfo_t> &m_ExtraInfos, std::string path);
 

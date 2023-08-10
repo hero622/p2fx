@@ -18,16 +18,16 @@ REDECL(VGui::PopulateFromScript);
 REDECL(VGui::ApplySchemeSettings);
 
 void VGui::InitImgs() {
-	g_chapterImgs[0] = vgui->GetImageId("vgui/chapters/coopcommentary_chapter1");
-	g_chapterImgs[1] = vgui->GetImageId("vgui/chapters/chapter1");
-	g_chapterImgs[2] = vgui->GetImageId("vgui/chapters/chapter2");
-	g_chapterImgs[3] = vgui->GetImageId("vgui/chapters/chapter3");
-	g_chapterImgs[4] = vgui->GetImageId("vgui/chapters/chapter4");
-	g_chapterImgs[5] = vgui->GetImageId("vgui/chapters/chapter5");
-	g_chapterImgs[6] = vgui->GetImageId("vgui/chapters/chapter6");
-	g_chapterImgs[7] = vgui->GetImageId("vgui/chapters/chapter7");
-	g_chapterImgs[8] = vgui->GetImageId("vgui/chapters/chapter8");
-	g_chapterImgs[9] = vgui->GetImageId("vgui/chapters/chapter9");
+	g_chapterImgs[0] = this->GetImageId("vgui/chapters/coopcommentary_chapter1");
+	g_chapterImgs[1] = this->GetImageId("vgui/chapters/chapter1");
+	g_chapterImgs[2] = this->GetImageId("vgui/chapters/chapter2");
+	g_chapterImgs[3] = this->GetImageId("vgui/chapters/chapter3");
+	g_chapterImgs[4] = this->GetImageId("vgui/chapters/chapter4");
+	g_chapterImgs[5] = this->GetImageId("vgui/chapters/chapter5");
+	g_chapterImgs[6] = this->GetImageId("vgui/chapters/chapter6");
+	g_chapterImgs[7] = this->GetImageId("vgui/chapters/chapter7");
+	g_chapterImgs[8] = this->GetImageId("vgui/chapters/chapter8");
+	g_chapterImgs[9] = this->GetImageId("vgui/chapters/chapter9");
 }
 
 int VGui::GetImageId(const char *pImageName) {
@@ -35,6 +35,10 @@ int VGui::GetImageId(const char *pImageName) {
 	surface->DrawSetTextureFile(surface->matsurface->ThisPtr(), nImageId, pImageName, true, false);
 
 	return nImageId;
+}
+
+bool VGui::IsMenuOpened() {
+	return this->IsVisible(this->ipanel->ThisPtr(), this->g_menuPanel);
 }
 
 extern Hook g_PopulateFromScriptHook;
@@ -46,18 +50,13 @@ void VGui::OverrideMenu(bool state) {
 		return;
 
 	for (auto panel : this->g_panels) {
-		vgui->SetVisible(vgui->ipanel->ThisPtr(), panel, !state);
+		this->SetVisible(this->ipanel->ThisPtr(), panel, !state);
 	}
 
 	// you just kinda have to guess the module as far as i can tell:
 	// find modules by searching for VGui_InitInterfacesList and VGui_InitMatSysInterfacesList in src
-	// some ones i found that seem promising (case doesnt matter i think):
-	// ClientDLL (most useful)
-	// CLIENT
-	// MATSURFACE
-	// GAMEDLL
-	// GameUI
-	Label *label = (Label *)vgui->GetPanel(vgui->ipanel->ThisPtr(), this->g_extrasBtn, "ClientDLL");
+	// most stuff is in ClientDLL
+	Label *label = (Label *)this->GetPanel(this->ipanel->ThisPtr(), this->g_extrasBtn, "ClientDLL");
 	// BaseModHybridButton class inherits from Label so we can just use that
 	label->SetText(state ? "DEMO VIEWER" : "#L4D360UI_MainMenu_Extras");
 
@@ -82,13 +81,14 @@ ON_EVENT(SESSION_END) {
 
 DETOUR(VGui::PaintTraverse, VPANEL vguiPanel, bool forceRepaint, bool allowForce) {
 	auto name = vgui->GetName(vgui->ipanel->ThisPtr(), vguiPanel);
-	
+
 	if (vgui->g_vguiState < VGUI_LOADED) {
-		if (!strcmp(name, "BtnPlaySolo") || !strcmp(name, "BtnCoOp") || !strcmp(name, "BtnCommunity") || !strcmp(name, "BtnEconUI")) {
+		if (!strcmp(name, "CBaseModPanel")) {
+			vgui->g_menuPanel = vguiPanel;
+		} else if (!strcmp(name, "BtnPlaySolo") || !strcmp(name, "BtnCoOp") || !strcmp(name, "BtnCommunity") || !strcmp(name, "BtnEconUI")) {
 			vgui->g_panels.push_back(vguiPanel);
 			vgui->g_vguiState++;
-		}
-		if (!strcmp(name, "BtnExtras")) {
+		} else if (!strcmp(name, "BtnExtras")) {
 			vgui->g_extrasBtn = vguiPanel;
 			vgui->g_vguiState++;
 		}
@@ -216,6 +216,7 @@ bool VGui::Init() {
 
 	if (this->ipanel) {
 		this->SetVisible = this->ipanel->Original<_SetVisible>(14);
+		this->IsVisible = this->ipanel->Original<_IsVisible>(15);
 		this->GetName = this->ipanel->Original<_GetName>(36);
 		this->GetPanel = this->ipanel->Original<_GetPanel>(55);
 

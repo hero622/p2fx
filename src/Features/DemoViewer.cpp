@@ -4,6 +4,7 @@
 
 #include "Modules/Engine.hpp"
 #include "Modules/InputSystem.hpp"
+#include "Modules/VGui.hpp"
 
 #include "Hud/DemoHud.hpp"
 #include "Camera.hpp"
@@ -19,7 +20,7 @@ DemoViewer::DemoViewer() {
 }
 
 void DemoViewer::Think() {
-	if (!engine->demoplayer->IsPlaying())
+	if (!engine->demoplayer->IsPlaying() || vgui->IsMenuOpened())
 		return;
 
 	if (Input::keys[VK_F4].IsPressed()) {

@@ -8,6 +8,7 @@
 
 #include "Features/DemoViewer.hpp"
 #include "Features/Camera.hpp"
+#include "Features/Renderer.hpp"
 
 #include "Variable.hpp"
 
@@ -180,7 +181,7 @@ void DemoHud::Paint(int slot) {
 
 	surface->DrawRect({20, 20, 20}, x + 457, y, x + 560, y + 30);
 	surface->DrawRect({36, 36, 36}, x + 459, y + 2, x + 558, y + 28);
-	DRAW_CENTERED_TEXT(font, x + 508, y + 2, white, "RECORD");
+	DRAW_CENTERED_TEXT(font, x + 508, y + 2, Renderer::g_render.isRendering ? accent : white, "RECORD");
 
 	y += 40;
 
