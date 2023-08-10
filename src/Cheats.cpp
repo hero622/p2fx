@@ -68,7 +68,7 @@ ON_EVENT(FRAME) {
 ON_EVENT(DEMO_START) {
 	// instant tonemapping
 	mat_hdr_manual_tonemap_rate.SetValue(0.0f);
-	Scheduler::InHostTicks(60, [=]() {
+	Scheduler::InHostTicks(1, [=]() {
 		mat_hdr_manual_tonemap_rate.SetValue(1.0f);
 	});
 }
