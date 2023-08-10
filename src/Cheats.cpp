@@ -26,6 +26,7 @@ Variable hide_gun_when_holding;
 Variable cl_viewmodelfov;
 Variable r_flashlightbrightness;
 Variable mat_hdr_manual_tonemap_rate;
+Variable mat_motion_blur_enabled;
 
 void Cheats::Init() {
 	ui_loadingscreen_transition_time = Variable("ui_loadingscreen_transition_time");
@@ -37,9 +38,7 @@ void Cheats::Init() {
 	cl_viewmodelfov = Variable("cl_viewmodelfov");
 	r_flashlightbrightness = Variable("r_flashlightbrightness");
 	mat_hdr_manual_tonemap_rate = Variable("mat_hdr_manual_tonemap_rate");
-
-	// instant tonemapping
-	engine->ExecuteCommand("mat_hdr_manual_tonemap_rate 0.0");
+	mat_motion_blur_enabled = Variable("mat_motion_blur_enabled");
 
 	engine->ExecuteCommand("ui_loadingscreen_transition_time 0.0");
 	engine->ExecuteCommand("ui_loadingscreen_fadein_time 0.0");
@@ -63,4 +62,13 @@ void Cheats::Shutdown() {
 
 ON_EVENT(FRAME) {
 	sv_cheats.SetValue(1);
+	mat_motion_blur_enabled.SetValue(0);
+}
+
+ON_EVENT(DEMO_START) {
+	// instant tonemapping
+	mat_hdr_manual_tonemap_rate.SetValue(0.0f);
+	Scheduler::InHostTicks(60, [=]() {
+		mat_hdr_manual_tonemap_rate.SetValue(1.0f);
+	});
 }

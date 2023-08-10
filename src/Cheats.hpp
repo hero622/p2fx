@@ -21,3 +21,4 @@ extern Variable hide_gun_when_holding;
 extern Variable cl_viewmodelfov;
 extern Variable r_flashlightbrightness;
 extern Variable mat_hdr_manual_tonemap_rate;
+extern Variable mat_motion_blur_enabled;

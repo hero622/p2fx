@@ -121,7 +121,7 @@ void VGui::EnumerateFiles(CUtlVector<ExtraInfo_t> &m_ExtraInfos, std::string pat
 	// back button
 	if (std::filesystem::path(path) != std::filesystem::path(engine->GetGameDirectory())) {
 		int nIndex = m_ExtraInfos.AddToTail();
-		m_ExtraInfos[nIndex].m_TitleString = "..";
+		m_ExtraInfos[nIndex].m_TitleString = "../";
 		m_ExtraInfos[nIndex].m_SubtitleString = "";
 		m_ExtraInfos[nIndex].m_MapName = "";
 		m_ExtraInfos[nIndex].m_VideoName = "";
@@ -151,7 +151,7 @@ void VGui::EnumerateFiles(CUtlVector<ExtraInfo_t> &m_ExtraInfos, std::string pat
 			std::string dirname = dirpath.stem().string();
 
 			int nIndex = m_ExtraInfos.AddToTail();
-			m_ExtraInfos[nIndex].m_TitleString = dirname.c_str();
+			m_ExtraInfos[nIndex].m_TitleString = Utils::ssprintf("%s/", dirname.c_str()).c_str();
 			m_ExtraInfos[nIndex].m_SubtitleString = "";
 			m_ExtraInfos[nIndex].m_MapName = "";
 			m_ExtraInfos[nIndex].m_VideoName = "";

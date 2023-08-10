@@ -17,7 +17,6 @@ const char *getPath(std::string filename, bool cfg = true) {
 // Config
 
 std::vector<std::string> cvars = {
-	"r_portal_use_dlights",
 	"mat_bloomscale",
 	"r_flashlightbrightness",
 	"mat_force_tonemap_scale",
