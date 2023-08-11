@@ -67,7 +67,6 @@ jobs:
             **Changelog**
             TODO
           files: |
-            p2fx.so
             p2fx.dll
             p2fx.pdb
           prerelease: ${{ contains(github.ref, '-pre') }}
