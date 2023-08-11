@@ -52,9 +52,9 @@ void Menu::Draw() {
 
 			CImGui::Slider2("FOV", "cl_fov", "p2fx_force_fov", 45, 140);
 			CImGui::Slider("Viewmodel FOV", "cl_viewmodelfov", 0, 90);
-			CImGui::Sliderf("Viewmodel X", "viewmodel_offset_x", 0.0f, 25.0f);
-			CImGui::Sliderf("Viewmodel Y", "viewmodel_offset_y", 0.0f, 25.0f);
-			CImGui::Sliderf("Viewmodel Z", "viewmodel_offset_z", 0.0f, 25.0f);
+			CImGui::Sliderf("Viewmodel X", "viewmodel_offset_x", -25.0f, 25.0f);
+			CImGui::Sliderf("Viewmodel Y", "viewmodel_offset_y", -25.0f, 25.0f);
+			CImGui::Sliderf("Viewmodel Z", "viewmodel_offset_z", -25.0f, 25.0f);
 			CImGui::Checkbox("Disable weapon sway", "p2fx_disable_weapon_sway");
 
 			ImGui::Separator();
@@ -86,7 +86,7 @@ void Menu::Draw() {
 			CImGui::Slider("Quality", "mat_dof_quality", 0, 3);
 			CImGui::Slider("Near Focus Depth", "mat_dof_near_focus_depth", 0, 8000);
 			CImGui::Slider("Near Blur Depth", "mat_dof_near_blur_depth", 0, 8000);
-			CImGui::Sliderf("Near Blur Radius", "mat_dof_near_blur_radius", 0, 10);
+			CImGui::Slider("Near Blur Radius", "mat_dof_near_blur_radius", 0, 10);
 			CImGui::Slider("Far Focus Depth", "mat_dof_far_focus_depth", 0, 8000);
 			CImGui::Slider("Far Blur Depth", "mat_dof_far_blur_depth", 0, 8000);
 			CImGui::Slider("Far Blur Radius", "mat_dof_far_blur_radius", 0, 10);
