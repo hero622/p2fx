@@ -5,27 +5,6 @@ on:
     tags: '*'
 
 jobs:
-  build-lin:
-    name: Linux Build
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with: { fetch-depth: 0 }
-      - name: Install Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y g++-10-multilib
-      - name: Build
-        env:
-          RELEASE_BUILD: 1
-        run: make -j$(nproc)
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: p2fx-linux
-          path: p2fx.so
-          if-no-files-found: error
   build-win:
     name: Windows Build
     runs-on: windows-2019
@@ -56,16 +35,12 @@ jobs:
   release:
     name: Release
     if: github.repository == 'Zyntex1/p2fx'
-    needs: [build-lin, build-win]
+    needs: [build-win]
     runs-on: ubuntu-latest
     steps:
       - name: Get Release Version
         id: get_release
         run: echo ::set-output name=version::${GITHUB_REF:10}
-      - name: Download Linux Build
-        uses: actions/download-artifact@v3
-        with:
-          name: p2fx-linux
       - name: Download Windows Build
         uses: actions/download-artifact@v3
         with:
@@ -83,8 +58,8 @@ jobs:
             **Installation**
             - Download:
               - [Windows](https://github.com/Zyntex1/p2fx/releases/download/${{ steps.get_release.outputs.version }}/p2fx.dll)
-              - [Linux](https://github.com/Zyntex1/p2fx/releases/download/${{ steps.get_release.outputs.version }}/p2fx.so)
             - Place the binary into the game folder e.g. `Portal 2`
+            - Add `+mat_hdr_level 3` to the game's launch options
             - Open developer console and enter `plugin_load p2fx`
 
             ---
