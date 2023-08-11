@@ -154,5 +154,5 @@ void Campath::Init() {
 		return;
 	}
 
-	Config::EnumerateCfgs();
+	Campath::EnumerateCfgs();
 }

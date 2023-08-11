@@ -75,11 +75,11 @@ void DemoViewer::Think() {
 	
 	if (Input::keys[VK_LEFT].IsPressed()) {
 		for (auto itr = camera->states.rbegin(); itr != camera->states.rend(); ++itr) {
-			if (itr->first < engine->demoplayer->GetTick()) {
+			if (itr->first < engine->demoplayer->GetTick() - 1) {
 				if (!engine->IsCoop()) {
 					gotoTick = std::max(itr->first - 2, 0);
 				} else {
-					engine->ExecuteCommand(Utils::ssprintf("demo_gototick %d; demo_pause", itr->first).c_str(), true);
+					engine->ExecuteCommand(Utils::ssprintf("demo_gototick %d; demo_pause", itr->first - 1).c_str(), true);
 				}
 				return;
 			}
