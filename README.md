@@ -15,21 +15,22 @@
 **P2FX** currently does not support any operating system other than **Windows**. The plugin only works on Portal 2, no other modifications. **P2FX** is not intended to be used with any other plugins loaded.
 
 ## Features
-Play demos straight from the menu
+- Play demos straight from the menu
 ![](./doc/demochooser.gif)
 
-Easily change between demos
+- Easily change between demos
 ![](./doc/changingdemos.gif)
 
-Intuitively create cinematic shots
+- Intuitively create cinematic shots
 ![](./doc/makingcines.gif)
 
-Easy Lighting, Fog, and DOF editor
+- Easy Lighting, Fog, and DOF editor
 ![](./doc/dialingfx.gif)
 
-Save your camera paths and settings with P2FX's config system
+- Save your camera paths and settings with P2FX's config system
 ![](./doc/configsystem.gif)
 
 ## Contributing
 If you want to contribute to the project, feel free to fork the repo and create a pull request.
-See: [SAR's Contributing page](https://github.com/p2sr/SourceAutoRecord/blob/master/docs/contributing.md) for more information on how to build the project etc. (it's the same)
+
+Take a look at [SAR's Contributing Guide](https://github.com/p2sr/SourceAutoRecord/blob/master/docs/contributing.md) for more information on how to build the project etc. (it's the same)

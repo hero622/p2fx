@@ -143,6 +143,10 @@ ON_EVENT(SESSION_START) {
 	g_waitingForSession = false;
 }
 
+ON_EVENT(SESSION_END) {
+	Menu::g_shouldDraw = false;
+}
+
 void DemoViewer::HandleGotoTick() {
 	if (gotoTick == -1) return;
 
