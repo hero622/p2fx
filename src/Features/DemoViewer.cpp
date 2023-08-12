@@ -23,6 +23,18 @@ void DemoViewer::Think() {
 	if (!engine->demoplayer->IsPlaying() || vgui->IsMenuOpened())
 		return;
 
+	if (Input::keys[VK_F2].IsPressed()) {
+		Menu::g_shouldDraw = !Menu::g_shouldDraw;
+
+		if (Menu::g_shouldDraw)
+			inputSystem->UnlockCursor();
+		else
+			inputSystem->LockCursor();
+	}
+
+	if (Menu::g_shouldDraw)
+		return;
+
 	if (Input::keys[VK_F4].IsPressed()) {
 		demoHud.g_shouldDraw = !demoHud.g_shouldDraw;
 	}
@@ -39,15 +51,6 @@ void DemoViewer::Think() {
 
 			engine->ExecuteCommand("p2fx_cam_path_setkf", true);
 		}
-	}
-
-	if (Input::keys[VK_F2].IsPressed()) {
-		Menu::g_shouldDraw = !Menu::g_shouldDraw;
-
-		if (Menu::g_shouldDraw)
-			inputSystem->UnlockCursor();
-		else
-			inputSystem->LockCursor();
 	}
 
 	if (Input::keys[VK_F3].IsPressed()) {
@@ -73,7 +76,27 @@ void DemoViewer::Think() {
 	}
 	host_timescale.SetValue(std::clamp(timescale, 0.2f, 2.0f));
 	
+	if (Input::keys[VK_NEXT].IsPressed()) {
+		if (!engine->IsCoop()) {
+			gotoTick = std::max(engine->demoplayer->GetTick() - 12, 0);
+		} else {
+			engine->ExecuteCommand(Utils::ssprintf("demo_gototick %d; demo_pause", engine->demoplayer->GetTick() - 11).c_str(), true);
+		}
+	}
+
 	if (Input::keys[VK_LEFT].IsPressed()) {
+		if (GetAsyncKeyState(VK_CONTROL) & 0x8000) {
+			auto state = camera->states.begin();
+			if (state->first < engine->demoplayer->GetTick() - 1) {
+				if (!engine->IsCoop()) {
+					gotoTick = std::max(state->first - 2, 0);
+				} else {
+					engine->ExecuteCommand(Utils::ssprintf("demo_gototick %d; demo_pause", state->first - 1).c_str(), true);
+				}
+				return;
+			}
+		}
+
 		for (auto itr = camera->states.rbegin(); itr != camera->states.rend(); ++itr) {
 			if (itr->first < engine->demoplayer->GetTick() - 1) {
 				if (!engine->IsCoop()) {
@@ -88,7 +111,34 @@ void DemoViewer::Think() {
 		engine->ExecuteCommand("demo_gototick 0", true);
 		gotoTick = -1;
 	}
+
+	if (Input::keys[VK_PRIOR].IsPressed()) {
+		if (!engine->IsCoop()) {
+			engine->ExecuteCommand(Utils::ssprintf("sv_alternateticks 0; demo_gototick %d; demo_resume", engine->demoplayer->GetTick() + 8, true).c_str());
+			Scheduler::InHostTicks(1, [=]() {
+				engine->ExecuteCommand("demo_pause; sv_alternateticks 1", true);
+			});
+		} else {
+			engine->ExecuteCommand(Utils::ssprintf("demo_gototick %d; demo_pause", engine->demoplayer->GetTick() + 10, true).c_str());
+		}
+	}
+
 	if (Input::keys[VK_RIGHT].IsPressed()) {
+		if (GetAsyncKeyState(VK_CONTROL) & 0x8000) {
+			auto state = --camera->states.end();
+			if (state->first > engine->demoplayer->GetTick()) {
+				if (!engine->IsCoop()) {
+					engine->ExecuteCommand(Utils::ssprintf("sv_alternateticks 0; demo_gototick %d; demo_resume", state->first - 2, true).c_str());
+					Scheduler::InHostTicks(1, [=]() {
+						engine->ExecuteCommand("demo_pause; sv_alternateticks 1", true);
+					});
+				} else {
+					engine->ExecuteCommand(Utils::ssprintf("demo_gototick %d; demo_pause", state->first, true).c_str());
+				}
+				return;
+			}
+		}
+
 		for (const auto &state : camera->states) {
 			if (state.first > engine->demoplayer->GetTick()) {
 				if (!engine->IsCoop()) {

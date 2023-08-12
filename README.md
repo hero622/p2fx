@@ -1,8 +1,6 @@
 [![CI](https://github.com/p2sr/SourceAutoRecord/workflows/CI/badge.svg)](https://github.com/Zyntex1/p2fx/actions?query=workflow%3ACI+branch%3Amaster) [![CD](https://github.com/p2sr/SourceAutoRecord/workflows/CD/badge.svg)](https://github.com/Zyntex1/p2fx/actions?query=workflow%3ACD+branch%3Amaster)
 
 # P2FX
-
-## Overview
 **P2FX** is a plugin based on [SourceAutoRecord](https://github.com/p2sr/SourceAutoRecord) for creating Portal 2 videos.
 
 ## Installation

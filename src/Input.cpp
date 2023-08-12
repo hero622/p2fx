@@ -40,7 +40,7 @@ long __stdcall Input::WndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 
 	if (Msg == WM_KEYDOWN) {
 		if (engine->demoplayer->IsPlaying() && !vgui->IsMenuOpened()) {
-			if (wParam == VK_F4 || wParam == 0x46 || wParam == VK_F2 || wParam == VK_F3 || wParam == VK_SPACE || wParam == VK_DOWN || wParam == VK_UP || wParam == VK_LEFT || wParam == VK_RIGHT || wParam == 0x52)
+			if (wParam == VK_F4 || wParam == 0x46 || wParam == VK_F2 || wParam == VK_F3 || wParam == VK_SPACE || wParam == VK_DOWN || wParam == VK_UP || wParam == VK_LEFT || wParam == VK_RIGHT || wParam == 0x52 || wParam == VK_NEXT || wParam == VK_PRIOR)
 				return 0;
 		}
 	}
