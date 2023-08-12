@@ -95,8 +95,11 @@ public:
 	// CExtrasDialog::ApplySchemeSettings
 	DECL_DETOUR_T(void, ApplySchemeSettings, void *pScheme);
 
+	// MainMenu::OnCommand
+	DECL_DETOUR_T(void, MainMenuOnCommand, const char *command);
+
 	// InGameMainMenu::OnCommand
-	DECL_DETOUR_T(void, OnCommand, const char *command);
+	DECL_DETOUR_T(void, InGameMainMenuOnCommand, const char *command);
 	
 	// CBaseModPanel::OpenWindow
 	DECL_DETOUR_T(void *, OpenWindow, const int &wt, void *caller, bool hidePrevious, KeyValues *pParameter);

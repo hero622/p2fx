@@ -20,13 +20,15 @@
 REDECL(VGui::PaintTraverse);
 REDECL(VGui::PopulateFromScript);
 REDECL(VGui::ApplySchemeSettings);
-REDECL(VGui::OnCommand);
+REDECL(VGui::MainMenuOnCommand);
+REDECL(VGui::InGameMainMenuOnCommand);
 REDECL(VGui::OpenWindow);
 
 extern Hook g_PopulateFromScriptHook;
 extern Hook g_ApplySchemeSettingsHook;
 extern Hook g_ActivateSelectedItemHook;
-extern Hook g_OnCommandHook;
+extern Hook g_MainMenuOnCommandHook;
+extern Hook g_InGameMainMenuOnCommandHook;
 extern Hook g_OpenWindowHook;
 
 void VGui::InitImgs() {
@@ -66,7 +68,7 @@ void VGui::OverrideMenu(bool state) {
 	// most stuff is in ClientDLL
 	Label *label = (Label *)this->GetPanel(this->ipanel->ThisPtr(), this->g_extrasBtn, "ClientDLL");
 	// BaseModHybridButton class inherits from Label so we can just use that
-	label->SetText(state ? "DEMO VIEWER" : "#L4D360UI_MainMenu_Extras");
+	label->SetText(state ? "DEMO VIEWER" : "#PORTAL2_MainMenu_Community");
 
 	this->g_vguiState = state ? VGUI_OVERWRITTEN : VGUI_RESET;
 }
@@ -82,10 +84,10 @@ DETOUR(VGui::PaintTraverse, VPANEL vguiPanel, bool forceRepaint, bool allowForce
 	if (vgui->g_vguiState < VGUI_LOADED) {
 		if (!strcmp(name, "CBaseModPanel")) {
 			vgui->g_menuPanel = vguiPanel;
-		} else if (!strcmp(name, "BtnPlaySolo") || !strcmp(name, "BtnCoOp") || !strcmp(name, "BtnCommunity") || !strcmp(name, "BtnEconUI")) {
+		} else if (!strcmp(name, "BtnPlaySolo") || !strcmp(name, "BtnCoOp") || !strcmp(name, "BtnExtras") || !strcmp(name, "BtnEconUI")) {
 			vgui->g_panels.push_back(vguiPanel);
 			vgui->g_vguiState++;
-		} else if (!strcmp(name, "BtnExtras")) {
+		} else if (!strcmp(name, "BtnCommunity")) {
 			vgui->g_extrasBtn = vguiPanel;
 			vgui->g_vguiState++;
 		}
@@ -220,25 +222,35 @@ DETOUR_T(void, VGui::ApplySchemeSettings, void *pScheme) {
 }
 Hook g_ApplySchemeSettingsHook(&VGui::ApplySchemeSettings_Hook);
 
-DETOUR_T(void, VGui::OnCommand, const char *command) {
+DETOUR_T(void, VGui::MainMenuOnCommand, const char *command) {
+	if (!strcmp(command, "CreateChambers")) {
+		command = "Extras";
+	}
+
+	g_MainMenuOnCommandHook.Disable();
+	VGui::MainMenuOnCommand(thisptr, command);
+	g_MainMenuOnCommandHook.Enable();
+}
+Hook g_MainMenuOnCommandHook(&VGui::MainMenuOnCommand_Hook);
+
+DETOUR_T(void, VGui::InGameMainMenuOnCommand, const char *command) {
 	if (!strcmp(command, "RestartLevel")) {
 		// previous demo
 		int curIdx = std::distance(vgui->g_demos.begin(), std::find(vgui->g_demos.begin(), vgui->g_demos.end(), std::string(engine->demoplayer->DemoName)));
 		engine->ExecuteCommand(Utils::ssprintf("playdemo %s", vgui->g_demos[curIdx + 1]).c_str(), true);
 		return;
-	}
-	else if (!strcmp(command, "Leaderboards_")) {
+	} else if (!strcmp(command, "Leaderboards_")) {
 		// change demo
-		engine->ExecuteCommand("gameui_preventescape", true); // GameUI().PreventEngineHideGameUI();
-		VGui::OpenWindow(vgui->g_CBaseModPanel, 63, thisptr, true, NULL); // WT_EXTRAS = 63
+		engine->ExecuteCommand("gameui_preventescape", true);              // GameUI().PreventEngineHideGameUI();
+		VGui::OpenWindow(vgui->g_CBaseModPanel, 63, thisptr, true, NULL);  // WT_EXTRAS = 63
 		return;
 	}
 
-	g_OnCommandHook.Disable();
-	VGui::OnCommand(thisptr, command);
-	g_OnCommandHook.Enable();
+	g_InGameMainMenuOnCommandHook.Disable();
+	VGui::InGameMainMenuOnCommand(thisptr, command);
+	g_InGameMainMenuOnCommandHook.Enable();
 }
-Hook g_OnCommandHook(&VGui::OnCommand_Hook);
+Hook g_InGameMainMenuOnCommandHook(&VGui::InGameMainMenuOnCommand_Hook);
 
 // we only use this to obtain the CBaseModPanel Singleton
 DETOUR_T(void *, VGui::OpenWindow, const int &wt, void *caller, bool hidePrevious, KeyValues *pParameter) {
@@ -274,8 +286,11 @@ bool VGui::Init() {
 	VGui::OpenWindow = (decltype(VGui::OpenWindow))Memory::Scan(MODULE("client"), "55 8B EC 83 EC 10 53 56 8B F1 F3 0F 10 86 ? ? ? ? 0F 2E 05 ? ? ? ? 9F 57 F6 C4 44 7B 10 F3 0F 10 05 ? ? ? ? F3 0F 11 86 ? ? ? ?");
 	g_OpenWindowHook.SetFunc(VGui::OpenWindow);
 
-	VGui::OnCommand = (decltype(VGui::OnCommand))Memory::Scan(MODULE("client"), "55 8B EC 83 EC 3C 53 56 57 8B F1 E8 ? ? ? ? 8B C8 E8 ? ? ? ? 8B F8 E8 ? ? ? ? 8B 5D 08 85 C0 74 11 57 57 53 68 ? ? ? ? FF 15 ? ? ? ? 83 C4 10");
-	g_OnCommandHook.SetFunc(VGui::OnCommand);
+	VGui::MainMenuOnCommand = (decltype(VGui::MainMenuOnCommand))Memory::Scan(MODULE("client"), "55 8B EC 81 EC ? ? ? ? 53 56 57 8B F9 E8 ? ? ? ? 8B C8 E8 ? ? ? ? 8B F0 89 75 FC E8 ? ? ? ? 8B 5D 08 85 C0 74 11 56 56 53 68 ? ? ? ? FF 15 ? ? ? ? 83 C4 10");
+	g_MainMenuOnCommandHook.SetFunc(VGui::MainMenuOnCommand);
+
+	VGui::InGameMainMenuOnCommand = (decltype(VGui::InGameMainMenuOnCommand))Memory::Scan(MODULE("client"), "55 8B EC 83 EC 3C 53 56 57 8B F1 E8 ? ? ? ? 8B C8 E8 ? ? ? ? 8B F8 E8 ? ? ? ? 8B 5D 08 85 C0 74 11 57 57 53 68 ? ? ? ? FF 15 ? ? ? ? 83 C4 10");
+	g_InGameMainMenuOnCommandHook.SetFunc(VGui::InGameMainMenuOnCommand);
 
 	return this->hasLoaded = this->ipanel;
 }
