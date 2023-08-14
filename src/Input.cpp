@@ -4,8 +4,7 @@
 #include "Modules/VGui.hpp"
 #include "Modules/ShaderApi.hpp"
 
-#include "../lib/imgui/imgui_impl_dx9.h"
-#include "../lib/imgui/imgui_impl_win32.h"
+#include "Menu.hpp"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
@@ -38,7 +37,10 @@ long __stdcall Input::WndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 		break;
 	}
 
-	if (Msg == WM_KEYDOWN) {
+	if (Msg == WM_KEYDOWN || Msg == WM_SYSKEYDOWN) {
+		if (Menu::g_shouldDraw)
+			return 0;
+
 		if (engine->demoplayer->IsPlaying() && !vgui->IsMenuOpened()) {
 			if (wParam == VK_F4 || wParam == 0x46 || wParam == VK_F2 || wParam == VK_F3 || wParam == VK_SPACE || wParam == VK_DOWN || wParam == VK_UP || wParam == VK_LEFT || wParam == VK_RIGHT || wParam == 0x52 || wParam == VK_NEXT || wParam == VK_PRIOR)
 				return 0;
