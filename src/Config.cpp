@@ -33,9 +33,7 @@ std::vector<std::string> cvars = {
 	"crosshair",
 	"p2fx_disable_challenge_stats_hud",
 	"hidehud",
-	"p2fx_disable_coop_score_hud",
-
-	"p2fx_cam_path_interp",
+	// "p2fx_disable_coop_score_hud",
 
 	"fog_override",
 	"fog_enable",
@@ -87,6 +85,8 @@ void Config::Save(std::string filename) {
 	if (fp) {
 		// stupid exception
 		fprintf(fp, "p2fx_force_fov %s\n", Variable("cl_fov").GetString());
+		// idk why i need to do this seperately (i should really look into it but its fine like this for now)
+		fprintf(fp, "p2fx_disable_coop_score_hud %d\n", Variable("p2fx_disable_coop_score_hud").GetInt());
 
 		for (auto &cvar : cvars) {
 			fprintf(fp, "%s %s\n", cvar.c_str(), Variable(cvar.c_str()).GetString());

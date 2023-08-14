@@ -9,7 +9,7 @@ void Menu::Draw() {
 
 	ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f), ImGuiCond_Once, ImVec2(0.5f, 0.5f));
 
-	if (ImGui::Begin("P2FX", &g_shouldDraw, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize)) {
+	if (ImGui::Begin("P2FX", (bool *)NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize)) {
 		static int tab = 0;
 
 		if (ImGui::Button("FX", ImVec2(100.0f, 30.0f))) {
@@ -55,7 +55,7 @@ void Menu::Draw() {
 			CImGui::Sliderf("Viewmodel X", "viewmodel_offset_x", -25.0f, 25.0f);
 			CImGui::Sliderf("Viewmodel Y", "viewmodel_offset_y", -25.0f, 25.0f);
 			CImGui::Sliderf("Viewmodel Z", "viewmodel_offset_z", -25.0f, 25.0f);
-			CImGui::Checkbox("Disable weapon sway", "p2fx_disable_weapon_sway");
+			CImGui::Checkbox("Disable Weapon Sway", "p2fx_disable_weapon_sway");
 
 			ImGui::Separator();
 
