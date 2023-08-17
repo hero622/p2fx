@@ -178,36 +178,6 @@
     <ClCompile Include="Games\Portal2.cpp">
       <Filter>p2fx\Games</Filter>
     </ClCompile>
-    <ClCompile Include="Utils\ed25519\verify.cpp">
-      <Filter>p2fx\Utils\ed25519</Filter>
-    </ClCompile>
-    <ClCompile Include="Utils\ed25519\add_scalar.cpp">
-      <Filter>p2fx\Utils\ed25519</Filter>
-    </ClCompile>
-    <ClCompile Include="Utils\ed25519\fe.cpp">
-      <Filter>p2fx\Utils\ed25519</Filter>
-    </ClCompile>
-    <ClCompile Include="Utils\ed25519\ge.cpp">
-      <Filter>p2fx\Utils\ed25519</Filter>
-    </ClCompile>
-    <ClCompile Include="Utils\ed25519\key_exchange.cpp">
-      <Filter>p2fx\Utils\ed25519</Filter>
-    </ClCompile>
-    <ClCompile Include="Utils\ed25519\keypair.cpp">
-      <Filter>p2fx\Utils\ed25519</Filter>
-    </ClCompile>
-    <ClCompile Include="Utils\ed25519\sc.cpp">
-      <Filter>p2fx\Utils\ed25519</Filter>
-    </ClCompile>
-    <ClCompile Include="Utils\ed25519\sha512.cpp">
-      <Filter>p2fx\Utils\ed25519</Filter>
-    </ClCompile>
-    <ClCompile Include="Utils\ed25519\sign.cpp">
-      <Filter>p2fx\Utils\ed25519</Filter>
-    </ClCompile>
-    <ClCompile Include="Utils\ed25519\seed.cpp">
-      <Filter>p2fx\Utils\ed25519</Filter>
-    </ClCompile>
     <ClCompile Include="Features\Hud\DemoHud.cpp">
       <Filter>p2fx\Features\Hud</Filter>
     </ClCompile>
@@ -747,27 +717,6 @@
     <ClInclude Include="Games\Portal2.hpp">
       <Filter>p2fx\Games</Filter>
     </ClInclude>
-    <ClInclude Include="Utils\ed25519\ed25519.h">
-      <Filter>p2fx\Utils\ed25519</Filter>
-    </ClInclude>
-    <ClInclude Include="Utils\ed25519\fe.h">
-      <Filter>p2fx\Utils\ed25519</Filter>
-    </ClInclude>
-    <ClInclude Include="Utils\ed25519\fixedint.h">
-      <Filter>p2fx\Utils\ed25519</Filter>
-    </ClInclude>
-    <ClInclude Include="Utils\ed25519\ge.h">
-      <Filter>p2fx\Utils\ed25519</Filter>
-    </ClInclude>
-    <ClInclude Include="Utils\ed25519\precomp_data.h">
-      <Filter>p2fx\Utils\ed25519</Filter>
-    </ClInclude>
-    <ClInclude Include="Utils\ed25519\sc.h">
-      <Filter>p2fx\Utils\ed25519</Filter>
-    </ClInclude>
-    <ClInclude Include="Utils\ed25519\sha512.h">
-      <Filter>p2fx\Utils\ed25519</Filter>
-    </ClInclude>
     <ClInclude Include="Features\Hud\DemoHud.hpp">
       <Filter>p2fx\Features\Hud</Filter>
     </ClInclude>
@@ -859,9 +808,6 @@
     </Filter>
     <Filter Include="p2fx\Utils\SDK">
       <UniqueIdentifier>{5ede5464-347b-47c4-adfe-8dd56c3d7923}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="p2fx\Utils\ed25519">
-      <UniqueIdentifier>{9440c4f5-a37e-4618-ad82-f7a8573582e6}</UniqueIdentifier>
     </Filter>
     <Filter Include="p2fx\Features">
       <UniqueIdentifier>{2cad3606-019d-40fd-b1e0-16eabcd459a2}</UniqueIdentifier>
