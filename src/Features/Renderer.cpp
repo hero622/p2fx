@@ -35,7 +35,8 @@ static Variable snd_surround_speakers;
 // aac, ac3, vorbis, opus, flac
 static Variable p2fx_render_vbitrate("p2fx_render_vbitrate", "40000", 1, "Video bitrate used in renders (kbit/s)\n");
 static Variable p2fx_render_abitrate("p2fx_render_abitrate", "160", 1, "Audio bitrate used in renders (kbit/s)\n");
-static Variable p2fx_render_vcodec("p2fx_render_vcodec", "h264", "Video codec used in renders (h264, hevc, vp8, vp9, dnxhd)\n", 0);
+static Variable p2fx_render_vformat("p2fx_render_vformat", "avi", "Video format used in renders (avi, mp4, mov, mxf)\n", 0);
+static Variable p2fx_render_vcodec("p2fx_render_vcodec", "huffyuv", "Video codec used in renders (huffyuv, h264, hevc, vp8, vp9, dnxhd)\n", 0);
 static Variable p2fx_render_acodec("p2fx_render_acodec", "aac", "Audio codec used in renders (aac, ac3, vorbis, opus, flac)\n", 0);
 static Variable p2fx_render_quality("p2fx_render_quality", "35", 0, 50, "Render output quality, higher is better (50=lossless)\n");
 static Variable p2fx_render_fps("p2fx_render_fps", "60", 1, "Render output FPS\n");
@@ -43,7 +44,6 @@ static Variable p2fx_render_sample_rate("p2fx_render_sample_rate", "44100", 1000
 static Variable p2fx_render_blend("p2fx_render_blend", "1", 0, "How many frames to blend for each output frame; 1 = do not blend, 0 = automatically determine based on host_framerate\n");
 static Variable p2fx_render_blend_mode("p2fx_render_blend_mode", "1", 0, 1, "What type of frameblending to use. 0 = linear, 1 = Gaussian\n");
 static Variable p2fx_render_autostart("p2fx_render_autostart", "0", "Whether to automatically start when demo playback begins\n");
-static Variable p2fx_render_autostart_extension("p2fx_render_autostart_extension", "avi", "The file extension (and hence container format) to use for automatically started renders.\n", 0);
 static Variable p2fx_render_autostop("p2fx_render_autostop", "1", "Whether to automatically stop when __END__ is seen in demo playback\n");
 static Variable p2fx_render_shutter_angle("p2fx_render_shutter_angle", "360", 30, 360, "The shutter angle to use for rendering in degrees.\n");
 static Variable p2fx_render_merge("p2fx_render_merge", "0", "When set, merge all the renders until p2fx_render_finish is entered\n");
@@ -78,6 +78,7 @@ static inline void msgStopRender(bool error) {
 // Utilities {{{
 
 static AVCodecID videoCodecFromName(const char *name) {
+	if (!strcmp(name, "huffyuv")) return AV_CODEC_ID_HUFFYUV;
 	if (!strcmp(name, "h264")) return AV_CODEC_ID_H264;
 	if (!strcmp(name, "hevc")) return AV_CODEC_ID_HEVC;
 	if (!strcmp(name, "vp8")) return AV_CODEC_ID_VP8;
@@ -347,7 +348,7 @@ static bool addStream(Renderer::Stream *out, AVFormatContext *outputCtx, AVCodec
 		out->enc->height = height;
 		out->enc->time_base = out->stream->time_base;
 		out->enc->gop_size = 12;
-		out->enc->pix_fmt = codecId == AV_CODEC_ID_DNXHD ? AV_PIX_FMT_YUV422P : AV_PIX_FMT_YUV420P;
+		out->enc->pix_fmt = codecId == AV_CODEC_ID_DNXHD || codecId == AV_CODEC_ID_HUFFYUV ? AV_PIX_FMT_YUV422P : AV_PIX_FMT_YUV420P;
 
 		break;
 
@@ -475,8 +476,8 @@ static bool openAudio(AVFormatContext *outputCtx, Renderer::Stream *s, AVDiction
 
 static void workerStartRender(AVCodecID videoCodec, AVCodecID audioCodec, int64_t videoBitrate, int64_t audioBitrate, AVDictionary *options) {
 	if (avformat_alloc_output_context2(&Renderer::g_render.outCtx, NULL, NULL, Renderer::g_render.filename.c_str()) == AVERROR(EINVAL)) {
-		console->Print("Failed to deduce output format from file extension - using AVI\n");
-		avformat_alloc_output_context2(&Renderer::g_render.outCtx, NULL, "avi", Renderer::g_render.filename.c_str());
+		console->Print("Failed to deduce output format from file extension - using %s\n", p2fx_render_vformat.GetString());
+		avformat_alloc_output_context2(&Renderer::g_render.outCtx, NULL, p2fx_render_vformat.GetString(), Renderer::g_render.filename.c_str());
 	}
 
 	if (!Renderer::g_render.outCtx) {
@@ -965,7 +966,7 @@ void Renderer::Frame() {
 		Renderer::isDemoLoading = false;
 
 		if (!Renderer::g_render.isRendering.load()) {
-			Renderer::g_render.filename = std::string(engine->GetGameDirectory()) + "/" + std::string(engine->demoplayer->DemoName) + "." + p2fx_render_autostart_extension.GetString();
+			Renderer::g_render.filename = std::string(engine->GetGameDirectory()) + "/" + std::string(engine->demoplayer->DemoName) + "." + p2fx_render_vformat.GetString();
 			startRender();
 		}
 	} else {
@@ -1119,7 +1120,7 @@ CON_COMMAND(p2fx_render_start, "p2fx_render_start <file> - start rendering frame
 		return;
 	}
 
-	Renderer::g_render.filename = std::string(args[1]);
+	Renderer::g_render.filename = std::string(args[1]) + "." + p2fx_render_vformat.GetString();
 
 	startRender();
 }

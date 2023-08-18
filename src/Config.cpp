@@ -63,6 +63,7 @@ std::vector<std::string> cvars = {
 
 	"p2fx_render_autostart",
 	"p2fx_render_autostop",
+	"p2fx_render_vformat",
 	"p2fx_render_vcodec",
 	"p2fx_render_vbitrate",
 	"p2fx_render_quality",

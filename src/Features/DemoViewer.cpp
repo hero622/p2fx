@@ -161,7 +161,7 @@ void DemoViewer::Think() {
 			char buf[80];
 			std::strftime(buf, sizeof(buf), "%Y-%m-%d-%H-%M-%S", tm);
 
-			engine->ExecuteCommand(Utils::ssprintf("p2fx_render_start \"p2fx %s.avi\"", buf).c_str(), true);
+			engine->ExecuteCommand(Utils::ssprintf("p2fx_render_start \"p2fx %s\"", buf).c_str(), true);
 		} else {
 			engine->ExecuteCommand("p2fx_render_finish", true);
 		}

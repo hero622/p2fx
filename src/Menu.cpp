@@ -95,7 +95,8 @@ void Menu::Draw() {
 		case 3:
 			CImGui::Checkbox("Autostart", "p2fx_render_autostart");
 			CImGui::Checkbox("Autostop", "p2fx_render_autostop");
-			CImGui::Combo2("Video Codec", "p2fx_render_vcodec", {"h264", "hevc", "vp8", "vp9", "dnxhd"});
+			CImGui::Combo2("Video Container Format", "p2fx_render_vformat", {"avi", "mp4", "mov", "mxf"});
+			CImGui::Combo2("Video Codec", "p2fx_render_vcodec", {"huffyuv", "h264", "hevc", "vp8", "vp9", "dnxhd"});
 			CImGui::Slider("Video Bitrate", "p2fx_render_vbitrate", 0, 100000, "%dkb/s");
 			CImGui::Slider("Quality", "p2fx_render_quality", 0, 50);
 			CImGui::Slider("FPS", "p2fx_render_fps", 0, 2000);
