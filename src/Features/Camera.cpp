@@ -864,14 +864,6 @@ CON_COMMAND(p2fx_cam_path_export,
 	int rate = args.ArgC() == 4 ? std::atoi(args[3]) : 60;
 	if (rate <= 0) rate = 60; 
 
-	// check if file exists before writing
-	std::ifstream testFile(filename.c_str());
-	if (testFile.good()) {
-		testFile.close();
-		return console->Print("File \"%s\" exists and cannot be overwritten.\n", filename.c_str());
-	}
-	testFile.close();
-
 	std::ofstream file(filename.c_str());
 
 	if (format == "kf") {
