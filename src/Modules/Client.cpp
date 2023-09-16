@@ -53,6 +53,7 @@ REDECL(Client::ProcessMovement);
 REDECL(Client::DrawTranslucentRenderables);
 REDECL(Client::DrawOpaqueRenderables);
 REDECL(Client::CalcViewModelLag);
+REDECL(Client::RecordBones);
 
 CMDECL(Client::GetAbsOrigin, Vector, m_vecAbsOrigin);
 CMDECL(Client::GetAbsAngles, QAngle, m_angAbsRotation);
@@ -421,6 +422,17 @@ DETOUR_T(void, Client::CalcViewModelLag, Vector &origin, QAngle &angles, QAngle 
 }
 Hook g_CalcViewModelLagHook(&Client::CalcViewModelLag_Hook);
 
+extern Hook g_RecordBonesHook;
+DETOUR_T(void *, Client::RecordBones, CStudioHdr *hdr, matrix3x4_t *pBoneState) {
+	console->Warning("C_BaseAnimating::RecordBones()\n");
+
+	g_RecordBonesHook.Disable();
+	auto ret = Client::RecordBones(thisptr, hdr, pBoneState);
+	g_RecordBonesHook.Enable();
+	return ret;
+}
+Hook g_RecordBonesHook(&Client::RecordBones_Hook);
+
 bool Client::Init() {
 	bool readJmp = false;
 
@@ -545,6 +557,16 @@ bool Client::Init() {
 	}
 
 	g_CalcViewModelLagHook.SetFunc(Client::CalcViewModelLag);
+
+	if (p2fx.game->Is(SourceGame_Portal2)) {
+#ifdef _WIN32
+		Client::RecordBones = (decltype(Client::RecordBones))Memory::Scan(client->Name(), "55 8B EC 81 EC ? ? ? ? 56 8B F1 E8 ? ? ? ? 84 C0 75 09 33 C0 5E 8B E5 5D C2 08 00");
+#else
+
+#endif
+	}
+
+	g_RecordBonesHook.SetFunc(Client::RecordBones);
 
 	// Get at gamerules
 	{

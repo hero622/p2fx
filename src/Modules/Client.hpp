@@ -69,6 +69,9 @@ public:
 	void OpenChat();
 
 public:
+	// C_BaseAnimating::RecordBones
+	DECL_DETOUR_T(void *, RecordBones, CStudioHdr *hdr, matrix3x4_t *pBoneState);
+
 	// CBaseViewModel::CalcViewModelLag
 	DECL_DETOUR_T(void, CalcViewModelLag, Vector &origin, QAngle &angles, QAngle &original_angles);
 

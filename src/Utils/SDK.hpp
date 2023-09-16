@@ -27,5 +27,6 @@
 #include "SDK/UserCmd.hpp"
 #include "SDK/UtlString.hpp"
 #include "SDK/Trace.hpp"
+#include "SDK/Studio.hpp"
 
 #include "SDK/Other.hpp"

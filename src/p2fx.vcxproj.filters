@@ -780,6 +780,9 @@
     <ClInclude Include="Modules\Tier0.hpp">
       <Filter>p2fx\Modules</Filter>
     </ClInclude>
+    <ClInclude Include="Utils\SDK\Studio.hpp">
+      <Filter>p2fx\Utils\SDK</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="lib">

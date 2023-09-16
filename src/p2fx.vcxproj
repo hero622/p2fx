@@ -295,6 +295,7 @@
     <ClInclude Include="P2FX.hpp" />
     <ClInclude Include="Modules\ShaderApi.hpp" />
     <ClInclude Include="Modules\Tier0.hpp" />
+    <ClInclude Include="Utils\SDK\Studio.hpp" />
     <ClInclude Include="Utils.hpp" />
     <ClInclude Include="Utils\json11.hpp" />
     <ClInclude Include="Utils\lodepng.hpp" />
