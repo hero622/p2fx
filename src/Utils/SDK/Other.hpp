@@ -77,3 +77,5 @@ public:
 	void *m_hTonemapController;
 	QAngle v_angle;
 };
+
+typedef unsigned int HTOOLHANDLE;

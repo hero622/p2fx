@@ -57,6 +57,8 @@ REDECL(Engine::OnGameOverlayActivated);
 REDECL(Engine::OnGameOverlayActivatedBase);
 REDECL(Engine::ReadCustomData);
 REDECL(Engine::ReadConsoleCommand);
+REDECL(Engine::PostToolMessage);
+REDECL(Engine::InToolMode);
 REDECL(Engine::plugin_load_callback);
 REDECL(Engine::plugin_unload_callback);
 REDECL(Engine::exit_callback);
@@ -421,6 +423,16 @@ _def:
 DETOUR_B(Engine::OnGameOverlayActivated, GameOverlayActivated_t *pGameOverlayActivated) {
 	engine->shouldSuppressPause = false;
 	return Engine::OnGameOverlayActivatedBase(thisptr, pGameOverlayActivated);
+}
+
+// CClientEngineTools::PostToolMessage
+DETOUR_T(void *, Engine::PostToolMessage, HTOOLHANDLE hEntity, KeyValues *msg) {
+	return Engine::PostToolMessage(thisptr, hEntity, msg);
+}
+
+// CClientEngineTools::InToolMode
+DETOUR_T(bool, Engine::InToolMode) {
+	return true;
 }
 
 DETOUR_COMMAND(Engine::plugin_load) {
@@ -836,6 +848,11 @@ bool Engine::Init() {
 		this->ClientTime = this->engineTool->Original<_ClientTime>(Offsets::ClientTime);
 
 		this->PrecacheModel = this->engineTool->Original<_PrecacheModel>(Offsets::PrecacheModel);
+	}
+
+	if (this->clientEngineTools = Interface::Create(this->Name(), "VCLIENTENGINETOOLS001")) {
+		this->clientEngineTools->Hook(Engine::PostToolMessage_Hook, Engine::PostToolMessage, 7);
+		this->clientEngineTools->Hook(Engine::InToolMode_Hook, Engine::InToolMode, 14);
 	}
 
 	if (auto s_EngineAPI = Interface::Create(this->Name(), "VENGINE_LAUNCHER_API_VERSION004", false)) {
