@@ -59,7 +59,7 @@ void DemoHud::Paint(int slot) {
 		auto cmtx = "Insert Camera Marker";
 		for (const auto &state : camera->states) {
 			float dist = (camera->currentState.origin - state.second.origin).Length();
-			if (dist < 50.0f) {
+			if (dist < 30.0f) {
 				cmtx = "Remove Camera Marker";
 				break;
 			}

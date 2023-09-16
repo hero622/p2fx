@@ -781,7 +781,7 @@ CON_COMMAND_F_COMPLETION(
 	if (args.ArgC() == 1) {
 		for (const auto &state : camera->states) {
 			float dist = (camera->currentState.origin - state.second.origin).Length();
-			if (dist < 50.0f) {
+			if (dist < 30.0f) {
 				camera->states.erase(state.first);
 				break;
 			}
