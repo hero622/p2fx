@@ -11,6 +11,7 @@
 #include "Features/OverlayRender.hpp"
 #include "Features/Renderer.hpp"
 #include "Features/Session.hpp"
+#include "Features/GameRecorder.hpp"
 #include "Game.hpp"
 #include "Hook.hpp"
 #include "Interface.hpp"
@@ -427,6 +428,7 @@ DETOUR_B(Engine::OnGameOverlayActivated, GameOverlayActivated_t *pGameOverlayAct
 
 // CClientEngineTools::PostToolMessage
 DETOUR_T(void *, Engine::PostToolMessage, HTOOLHANDLE hEntity, KeyValues *msg) {
+	gameRecorder->OnPostToolMessage(hEntity, msg);
 	return Engine::PostToolMessage(thisptr, hEntity, msg);
 }
 

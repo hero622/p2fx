@@ -14,7 +14,7 @@ enum class CMStatus {
 };
 
 class Client : public Module {
-private:
+public:
 	Interface *g_ClientDLL = nullptr;
 	Interface *g_pClientMode = nullptr;
 	Interface *g_pClientMode2 = nullptr;
@@ -26,6 +26,7 @@ private:
 	Interface *g_HudMultiplayerBasicInfo = nullptr;
 	Interface *g_HudSaveStatus = nullptr;
 	Interface *g_GameMovement = nullptr;
+	Interface *g_ClientTools = nullptr;
 
 public:
 	DECL_M(GetAbsOrigin, Vector);
@@ -43,6 +44,8 @@ public:
 	using _StartMessageMode = void(__rescall *)(void *thisptr, int type);
 	using _IN_ActivateMouse = void (*)(void *thisptr);
 	using _IN_DeactivateMouse = void (*)(void *thisptr);
+	using _GetToolRecordingState = void(__rescall *)(void *thisptr, KeyValues *msg);
+	using _GetEntity = void *(__rescall *)(void *thisptr, HTOOLHANDLE handle);
 
 	_GetClientEntity GetClientEntity = nullptr;
 	_GetAllClasses GetAllClasses = nullptr;
@@ -52,6 +55,8 @@ public:
 	_StartMessageMode StartMessageMode = nullptr;
 	_IN_ActivateMouse IN_ActivateMouse = nullptr;
 	_IN_DeactivateMouse IN_DeactivateMouse = nullptr;
+	_GetToolRecordingState GetToolRecordingState = nullptr;
+	_GetEntity GetEntity = nullptr;
 
 	std::string lastLevelName;
 	void **gamerules;

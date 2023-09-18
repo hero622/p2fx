@@ -532,6 +532,10 @@ bool Client::Init() {
 		this->GetClientEntity = this->s_EntityList->Original<_GetClientEntity>(Offsets::GetClientEntity, readJmp);
 	}
 
+	if (this->g_ClientTools = Interface::Create(this->Name(), "VCLIENTTOOLS001")) {
+		this->GetEntity = this->g_ClientTools->Original<_GetEntity>(3);
+	}
+
 #ifdef _WIN32
 	Client::DrawTranslucentRenderables = (decltype(Client::DrawTranslucentRenderables))Memory::Scan(client->Name(), "55 8B EC 81 EC 80 00 00 00 53 56 8B F1 8B 0D ? ? ? ? 8B 01 8B 90 C4 01 00 00 57 89 75 F0 FF D2 8B F8");
 	Client::DrawOpaqueRenderables = (decltype(Client::DrawOpaqueRenderables))Memory::Scan(client->Name(), "55 8B EC 83 EC 54 83 7D 0C 00 A1 ? ? ? ? 53 56 0F 9F 45 EC 83 78 30 00 57 8B F1 0F 84 BA 03 00 00");
@@ -567,6 +571,8 @@ bool Client::Init() {
 	}
 
 	g_RecordBonesHook.SetFunc(Client::RecordBones);
+
+	this->GetToolRecordingState = Memory::Scan<_GetToolRecordingState>(client->Name(), "55 8B EC 83 EC 08 53 56 57 8B F1 E8 ? ? ? ? 84 C0 0F 84 ? ? ? ?");
 
 	// Get at gamerules
 	{

@@ -79,3 +79,6 @@ public:
 };
 
 typedef unsigned int HTOOLHANDLE;
+enum {
+	HTOOLHANDLE_INVALID = 0
+};
