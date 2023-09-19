@@ -424,7 +424,7 @@ Hook g_CalcViewModelLagHook(&Client::CalcViewModelLag_Hook);
 
 extern Hook g_RecordBonesHook;
 DETOUR_T(void *, Client::RecordBones, CStudioHdr *hdr, matrix3x4_t *pBoneState) {
-	console->Warning("C_BaseAnimating::RecordBones()\n");
+	console->DevMsg("C_BaseAnimating::RecordBones()\n");
 
 	g_RecordBonesHook.Disable();
 	auto ret = Client::RecordBones(thisptr, hdr, pBoneState);
@@ -534,6 +534,9 @@ bool Client::Init() {
 
 	if (this->g_ClientTools = Interface::Create(this->Name(), "VCLIENTTOOLS001")) {
 		this->GetEntity = this->g_ClientTools->Original<_GetEntity>(3);
+		this->SetRecording = this->g_ClientTools->Original<_SetRecording>(10);
+		this->ShouldRecord = this->g_ClientTools->Original<_ShouldRecord>(11);
+		this->EnableRecordingMode = this->g_ClientTools->Original<_EnableRecordingMode>(32);
 	}
 
 #ifdef _WIN32
@@ -562,17 +565,8 @@ bool Client::Init() {
 
 	g_CalcViewModelLagHook.SetFunc(Client::CalcViewModelLag);
 
-	if (p2fx.game->Is(SourceGame_Portal2)) {
-#ifdef _WIN32
-		Client::RecordBones = (decltype(Client::RecordBones))Memory::Scan(client->Name(), "55 8B EC 81 EC ? ? ? ? 56 8B F1 E8 ? ? ? ? 84 C0 75 09 33 C0 5E 8B E5 5D C2 08 00");
-#else
-
-#endif
-	}
-
+	Client::RecordBones = (decltype(Client::RecordBones))Memory::Scan(client->Name(), "55 8B EC 81 EC ? ? ? ? 56 8B F1 E8 ? ? ? ? 84 C0 75 09 33 C0 5E 8B E5 5D C2 08 00");
 	g_RecordBonesHook.SetFunc(Client::RecordBones);
-
-	this->GetToolRecordingState = Memory::Scan<_GetToolRecordingState>(client->Name(), "55 8B EC 83 EC 08 53 56 57 8B F1 E8 ? ? ? ? 84 C0 0F 84 ? ? ? ?");
 
 	// Get at gamerules
 	{

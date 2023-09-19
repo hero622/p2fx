@@ -44,8 +44,10 @@ public:
 	using _StartMessageMode = void(__rescall *)(void *thisptr, int type);
 	using _IN_ActivateMouse = void (*)(void *thisptr);
 	using _IN_DeactivateMouse = void (*)(void *thisptr);
-	using _GetToolRecordingState = void(__rescall *)(void *thisptr, KeyValues *msg);
 	using _GetEntity = void *(__rescall *)(void *thisptr, HTOOLHANDLE handle);
+	using _SetRecording = void *(__rescall *)(void *thisptr, HTOOLHANDLE handle, bool recording);
+	using _ShouldRecord = bool(__rescall *)(void *thisptr, HTOOLHANDLE handle);
+	using _EnableRecordingMode = void(__rescall *)(void *thisptr, bool bEnable);
 
 	_GetClientEntity GetClientEntity = nullptr;
 	_GetAllClasses GetAllClasses = nullptr;
@@ -55,8 +57,10 @@ public:
 	_StartMessageMode StartMessageMode = nullptr;
 	_IN_ActivateMouse IN_ActivateMouse = nullptr;
 	_IN_DeactivateMouse IN_DeactivateMouse = nullptr;
-	_GetToolRecordingState GetToolRecordingState = nullptr;
 	_GetEntity GetEntity = nullptr;
+	_SetRecording SetRecording = nullptr;
+	_ShouldRecord ShouldRecord = nullptr;
+	_EnableRecordingMode EnableRecordingMode = nullptr;
 
 	std::string lastLevelName;
 	void **gamerules;

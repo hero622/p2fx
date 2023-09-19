@@ -7,6 +7,8 @@ class GameRecorder : public Feature {
 public:
 	GameRecorder();
 
+	void StartRecording();
+	void EndRecording();
 	void OnPostToolMessage(HTOOLHANDLE hEntity, KeyValues *msg);
 };
 
