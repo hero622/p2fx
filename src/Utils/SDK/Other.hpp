@@ -82,3 +82,16 @@ typedef unsigned int HTOOLHANDLE;
 enum {
 	HTOOLHANDLE_INVALID = 0
 };
+
+struct BaseEntityRecordingState_t {
+	float m_flTime;
+	const char *m_pModelName;
+	int m_nOwner;
+	int m_fEffects;
+	bool m_bVisible : 1;
+	bool m_bRecordFinalVisibleSample : 1;
+	Vector m_vecRenderOrigin;
+	QAngle m_vecRenderAngles;
+	int m_nFollowEntity;
+	int m_numEffects;
+};

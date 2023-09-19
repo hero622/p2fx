@@ -226,7 +226,7 @@
     <ClCompile Include="Modules\Tier0.cpp">
       <Filter>p2fx\Modules</Filter>
     </ClCompile>
-    <ClCompile Include="Features\GameRecorder.cpp">
+    <ClCompile Include="Features\GameRecord.cpp">
       <Filter>p2fx\Features</Filter>
     </ClCompile>
   </ItemGroup>
@@ -786,7 +786,7 @@
     <ClInclude Include="Utils\SDK\Studio.hpp">
       <Filter>p2fx\Utils\SDK</Filter>
     </ClInclude>
-    <ClInclude Include="Features\GameRecorder.hpp">
+    <ClInclude Include="Features\GameRecord.hpp">
       <Filter>p2fx\Features</Filter>
     </ClInclude>
   </ItemGroup>

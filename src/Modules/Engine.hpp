@@ -183,7 +183,7 @@ public:
 	DECL_DETOUR_B(OnGameOverlayActivated, GameOverlayActivated_t *pGameOverlayActivated);
 
 	// CClientEngineTools::PostToolMessage
-	DECL_DETOUR_T(void *, PostToolMessage, HTOOLHANDLE hEntity, KeyValues *msg);
+	DECL_DETOUR_T(void, PostToolMessage, HTOOLHANDLE hEntity, KeyValues *msg);
 
 	// CClientEngineTools::PostToolMessage
 	DECL_DETOUR_T(bool, InToolMode);

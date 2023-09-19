@@ -8,6 +8,7 @@
 #include "Features/FovChanger.hpp"
 #include "Features/OverlayRender.hpp"
 #include "Features/Session.hpp"
+#include "Features/GameRecord.hpp"
 #include "Game.hpp"
 #include "Hook.hpp"
 #include "Interface.hpp"
@@ -424,11 +425,12 @@ Hook g_CalcViewModelLagHook(&Client::CalcViewModelLag_Hook);
 
 extern Hook g_RecordBonesHook;
 DETOUR_T(void *, Client::RecordBones, CStudioHdr *hdr, matrix3x4_t *pBoneState) {
-	console->DevMsg("C_BaseAnimating::RecordBones()\n");
-
 	g_RecordBonesHook.Disable();
 	auto ret = Client::RecordBones(thisptr, hdr, pBoneState);
 	g_RecordBonesHook.Enable();
+
+	gameRecord->CaptureBones(hdr, pBoneState);
+
 	return ret;
 }
 Hook g_RecordBonesHook(&Client::RecordBones_Hook);

@@ -93,6 +93,88 @@ int Math::RandomNumber(const int &min, const int &max) {
 
 	return dist_pitch(mt);
 }
+bool Math::LUdecomposition(const double matrix[4][4], unsigned char outP[4], unsigned char outQ[4], double outL[4][4], double outU[4][4]) {
+	const double *nMatrix[4] = {matrix[0], matrix[1], matrix[2], matrix[3]};
+	double *nOutL[4] = {outL[0], outL[1], outL[2], outL[3]};
+	double *nOutU[4] = {outU[0], outU[1], outU[2], outU[3]};
+
+	for (int i = 0; i < 4; ++i) {
+		outP[i] = i;
+		outQ[i] = i;
+
+		for (int j = 0; j < 4; ++j) {
+			outU[i][j] = matrix[i][j];
+		}
+	}
+
+	for (int n = 0; n < 4 - 1; ++n) {
+		int t = -1;
+		double maxVal = 0;
+		for (int i = n; i < 4; ++i) {
+			double tabs = abs(outU[i][n]);
+			if (maxVal < tabs) {
+				t = i;
+				maxVal = tabs;
+			}
+		}
+
+		if (t < 0)
+			return false;
+
+		if (n != t) {
+			unsigned char ucTmp = outP[n];
+			outP[n] = outP[t];
+			outP[t] = ucTmp;
+
+			for (int i = 0; i < 4; ++i) {
+				double dTmp = outU[n][i];
+				outU[n][i] = outU[t][i];
+				outU[t][i] = dTmp;
+			}
+		}
+
+		for (int i = n + 1; i < 4; ++i) {
+			outU[i][n] = outU[i][n] / outU[n][n];
+			for (int j = n + 1; j < 4; ++j) {
+				outU[i][j] = outU[i][j] - outU[i][n] * outU[n][j];
+			}
+		}
+	}
+
+	for (int i = 0; i < 4; ++i) {
+		for (int j = 0; j < i; ++j) {
+			outL[i][j] = outU[i][j];
+			outU[i][j] = 0;
+		}
+		outL[i][i] = 1;
+		for (int j = i + 1; j < 4; ++j) {
+			outL[i][j] = 0;
+		}
+	}
+
+	return true;
+}
+void Math::SolveWithLU(const double L[4][4], const double U[4][4], const unsigned char P[4], const unsigned char Q[4], const double b[4], double outX[4]) {
+	double y[4];
+	const double *nL[4] = {L[0], L[1], L[2], L[3]};
+	const double *nU[4] = {U[0], U[1], U[2], U[3]};
+
+	for (int i = 0; i < 4; i++) {
+		double sum = 0;
+		for (int k = 0; k < i; k++)
+			sum += L[i][k] * y[k];
+
+		y[i] = 1.0 / L[i][i] * (b[P[i]] - sum);
+	}
+
+	for (int i = 4 - 1; i >= 0; i--) {
+		double sum = 0;
+		for (int k = i + 1; k < 4; k++)
+			sum += U[i][k] * outX[Q[k]];
+
+		outX[Q[i]] = 1.0 / U[i][i] * (y[i] - sum);
+	}
+}
 
 
 Matrix::Matrix(int rows, int cols, const double init)

@@ -25,6 +25,8 @@ namespace Math {
 	float Distance(const Vector &a, const Vector &b);
 	float Distance(const QAngle &a, const QAngle &b);
 	void Lerp(const Vector &oldPos, const Vector &newPos, float time, Vector &outPut);
+	bool LUdecomposition(const double matrix[4][4], unsigned char outP[4], unsigned char outQ[4], double outL[4][4], double outU[4][4]);
+	void SolveWithLU(const double L[4][4], const double U[4][4], const unsigned char P[4], const unsigned char Q[4], const double b[4], double outX[4]);
 }  // namespace Math
 
 inline void Math::SinCos(float radians, float *sine, float *cosine) {
