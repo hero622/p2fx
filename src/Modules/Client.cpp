@@ -538,6 +538,7 @@ bool Client::Init() {
 		this->GetEntity = this->g_ClientTools->Original<_GetEntity>(3);
 		this->SetRecording = this->g_ClientTools->Original<_SetRecording>(10);
 		this->ShouldRecord = this->g_ClientTools->Original<_ShouldRecord>(11);
+		this->GetClassname = this->g_ClientTools->Original<_GetClassname>(15);
 		this->EnableRecordingMode = this->g_ClientTools->Original<_EnableRecordingMode>(32);
 	}
 

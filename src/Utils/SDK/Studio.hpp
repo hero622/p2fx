@@ -27,6 +27,13 @@ struct mstudiobone_t {
 	matrix3x4_t poseToBone;
 	Quaternion qAlignment;
 	int flags;
+	int proctype;
+	int procindex;
+	mutable int physicsbone;
+	int surfacepropidx;
+	int contents;
+	int surfacepropLookup;
+	int unused[7];
 };
 
 struct studiohdr_t {
@@ -47,6 +54,70 @@ struct studiohdr_t {
 	inline mstudiobone_t *pBone(int i) const {
 		return (mstudiobone_t *)(((byte *)this) + boneindex) + i;
 	}
+	int numbonecontrollers;
+	int bonecontrollerindex;
+	int numhitboxsets;
+	int hitboxsetindex;
+	int numlocalanim;
+	int localanimindex;
+	int numlocalseq;
+	int localseqindex;
+	mutable int activitylistversion;
+	mutable int eventsindexed;
+	int numtextures;
+	int textureindex;
+	int numcdtextures;
+	int cdtextureindex;
+	int numskinref;
+	int numskinfamilies;
+	int skinindex;
+	int numbodyparts;
+	int bodypartindex;
+	int numlocalattachments;
+	int localattachmentindex;
+	int numlocalnodes;
+	int localnodeindex;
+	int localnodenameindex;
+	int numflexdesc;
+	int flexdescindex;
+	int numflexcontrollers;
+	int flexcontrollerindex;
+	int numflexrules;
+	int flexruleindex;
+	int numikchains;
+	int ikchainindex;
+	int nummouths;
+	int mouthindex;
+	int numlocalposeparameters;
+	int localposeparamindex;
+	int surfacepropindex;
+	int keyvalueindex;
+	int keyvaluesize;
+	int numlocalikautoplaylocks;
+	int localikautoplaylockindex;
+	float mass;
+	int contents;
+	int numincludemodels;
+	int includemodelindex;
+	mutable void *virtualModel;
+	int szanimblocknameindex;
+	int numanimblocks;
+	int animblockindex;
+	mutable void *animblockModel;
+	int bonetablebynameindex;
+	void *pVertexBase;
+	void *pIndexBase;
+	byte constdirectionallightdot;
+	byte rootLOD;
+	byte numAllowedRootLODs;
+	byte unused[1];
+	int unused4;
+	int numflexcontrollerui;
+	int flexcontrolleruiindex;
+	float flVertAnimFixedPointScale;
+	mutable int surfacepropLookup;
+	int studiohdr2index;
+	int unused2[1];
 };
 
 class CStudioHdr {

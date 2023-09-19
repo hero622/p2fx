@@ -83,6 +83,13 @@ enum {
 	HTOOLHANDLE_INVALID = 0
 };
 
+class CBoneList {
+public:
+	uint16_t m_nBones : 15;
+	Vector m_vecPos[128];
+	Quaternion m_quatRot[128];
+};
+
 struct BaseEntityRecordingState_t {
 	float m_flTime;
 	const char *m_pModelName;
@@ -94,4 +101,26 @@ struct BaseEntityRecordingState_t {
 	QAngle m_vecRenderAngles;
 	int m_nFollowEntity;
 	int m_numEffects;
+};
+
+struct BaseAnimatingHighLevelRecordingState_t {
+	bool m_bClearIkTargets;
+	bool m_bIsRagdoll;
+	bool m_bShouldCreateIkContext;
+	int m_nNumPoseParams;
+	float m_flCycle;
+	float m_flPlaybackRate;
+	float m_flCycleRate;
+	int m_nFrameCount;
+	float m_flPoseParameter[24];
+	bool m_bInterpEffectActive;
+};
+
+struct BaseAnimatingRecordingState_t {
+	BaseAnimatingHighLevelRecordingState_t m_highLevelState;
+
+	int m_nSkin;
+	int m_nBody;
+	int m_nSequence;
+	CBoneList *m_pBoneList;
 };

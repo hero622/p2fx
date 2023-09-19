@@ -47,6 +47,7 @@ public:
 	using _GetEntity = void *(__rescall *)(void *thisptr, HTOOLHANDLE handle);
 	using _SetRecording = void *(__rescall *)(void *thisptr, HTOOLHANDLE handle, bool recording);
 	using _ShouldRecord = bool(__rescall *)(void *thisptr, HTOOLHANDLE handle);
+	using _GetClassname = const char *(__rescall *)(void *thisptr, HTOOLHANDLE handle);
 	using _EnableRecordingMode = void(__rescall *)(void *thisptr, bool bEnable);
 
 	_GetClientEntity GetClientEntity = nullptr;
@@ -60,6 +61,7 @@ public:
 	_GetEntity GetEntity = nullptr;
 	_SetRecording SetRecording = nullptr;
 	_ShouldRecord ShouldRecord = nullptr;
+	_GetClassname GetClassname = nullptr;
 	_EnableRecordingMode EnableRecordingMode = nullptr;
 
 	std::string lastLevelName;

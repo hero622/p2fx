@@ -87,7 +87,10 @@ public:
 	static bool InvertMatrix(const matrix3x4_t &matrix, matrix3x4_t &out_matrix);
 
 	void CaptureBones(CStudioHdr *hdr, matrix3x4_t *pBoneState);
+
 	void OnPostToolMessage(HTOOLHANDLE hEntity, KeyValues *msg);
+	void OnBeforeFrameRenderStart();
+	void OnAfterFrameRenderEnd();
 };
 
 extern GameRecord *gameRecord;

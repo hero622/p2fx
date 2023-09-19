@@ -175,6 +175,56 @@ void Math::SolveWithLU(const double L[4][4], const double U[4][4], const unsigne
 		outX[Q[i]] = 1.0 / U[i][i] * (y[i] - sum);
 	}
 }
+void Math::ConcatTransforms(const matrix3x4_t &in1, const matrix3x4_t &in2, matrix3x4_t &out) {
+	out.m_flMatVal[0][0] = in1.m_flMatVal[0][0] * in2.m_flMatVal[0][0] + in1.m_flMatVal[0][1] * in2.m_flMatVal[1][0] + in1.m_flMatVal[0][2] * in2.m_flMatVal[2][0];
+	out.m_flMatVal[0][1] = in1.m_flMatVal[0][0] * in2.m_flMatVal[0][1] + in1.m_flMatVal[0][1] * in2.m_flMatVal[1][1] + in1.m_flMatVal[0][2] * in2.m_flMatVal[2][1];
+	out.m_flMatVal[0][2] = in1.m_flMatVal[0][0] * in2.m_flMatVal[0][2] + in1.m_flMatVal[0][1] * in2.m_flMatVal[1][2] + in1.m_flMatVal[0][2] * in2.m_flMatVal[2][2];
+	out.m_flMatVal[0][3] = in1.m_flMatVal[0][0] * in2.m_flMatVal[0][3] + in1.m_flMatVal[0][1] * in2.m_flMatVal[1][3] + in1.m_flMatVal[0][2] * in2.m_flMatVal[2][3] + in1.m_flMatVal[0][3];
+	out.m_flMatVal[1][0] = in1.m_flMatVal[1][0] * in2.m_flMatVal[0][0] + in1.m_flMatVal[1][1] * in2.m_flMatVal[1][0] + in1.m_flMatVal[1][2] * in2.m_flMatVal[2][0];
+	out.m_flMatVal[1][1] = in1.m_flMatVal[1][0] * in2.m_flMatVal[0][1] + in1.m_flMatVal[1][1] * in2.m_flMatVal[1][1] + in1.m_flMatVal[1][2] * in2.m_flMatVal[2][1];
+	out.m_flMatVal[1][2] = in1.m_flMatVal[1][0] * in2.m_flMatVal[0][2] + in1.m_flMatVal[1][1] * in2.m_flMatVal[1][2] + in1.m_flMatVal[1][2] * in2.m_flMatVal[2][2];
+	out.m_flMatVal[1][3] = in1.m_flMatVal[1][0] * in2.m_flMatVal[0][3] + in1.m_flMatVal[1][1] * in2.m_flMatVal[1][3] + in1.m_flMatVal[1][2] * in2.m_flMatVal[2][3] + in1.m_flMatVal[1][3];
+	out.m_flMatVal[2][0] = in1.m_flMatVal[2][0] * in2.m_flMatVal[0][0] + in1.m_flMatVal[2][1] * in2.m_flMatVal[1][0] + in1.m_flMatVal[2][2] * in2.m_flMatVal[2][0];
+	out.m_flMatVal[2][1] = in1.m_flMatVal[2][0] * in2.m_flMatVal[0][1] + in1.m_flMatVal[2][1] * in2.m_flMatVal[1][1] + in1.m_flMatVal[2][2] * in2.m_flMatVal[2][1];
+	out.m_flMatVal[2][2] = in1.m_flMatVal[2][0] * in2.m_flMatVal[0][2] + in1.m_flMatVal[2][1] * in2.m_flMatVal[1][2] + in1.m_flMatVal[2][2] * in2.m_flMatVal[2][2];
+	out.m_flMatVal[2][3] = in1.m_flMatVal[2][0] * in2.m_flMatVal[0][3] + in1.m_flMatVal[2][1] * in2.m_flMatVal[1][3] + in1.m_flMatVal[2][2] * in2.m_flMatVal[2][3] + in1.m_flMatVal[2][3];
+}
+void Math::AngleMatrix(const QAngle &angles, matrix3x4_t &mat) {
+	float sr, sp, sy, cr, cp, cy;
+
+	SinCos(DEG2RAD(angles.y), &sy, &cy);
+	SinCos(DEG2RAD(angles.x), &sp, &cp);
+	SinCos(DEG2RAD(angles.z), &sr, &cr);
+
+	mat.m_flMatVal[0][0] = cp * cy;
+	mat.m_flMatVal[1][0] = cp * sy;
+	mat.m_flMatVal[2][0] = -sp;
+
+	float crcy = cr * cy;
+	float crsy = cr * sy;
+	float srcy = sr * cy;
+	float srsy = sr * sy;
+	mat.m_flMatVal[0][1] = sp * srcy - crsy;
+	mat.m_flMatVal[1][1] = sp * srsy + crcy;
+	mat.m_flMatVal[2][1] = sr * cp;
+
+	mat.m_flMatVal[0][2] = (sp * crcy + srsy);
+	mat.m_flMatVal[1][2] = (sp * crsy - srcy);
+	mat.m_flMatVal[2][2] = cr * cp;
+
+	mat.m_flMatVal[0][3] = 0.0f;
+	mat.m_flMatVal[1][3] = 0.0f;
+	mat.m_flMatVal[2][3] = 0.0f;
+}
+void Math::AngleMatrix(const QAngle& angles, const Vector& position, matrix3x4_t& mat) {
+	AngleMatrix(angles, mat);
+	MatrixSetColumn(position, 3, mat);
+}
+void Math::MatrixSetColumn(const Vector &in, int column, matrix3x4_t &out) {
+	out.m_flMatVal[0][column] = in.x;
+	out.m_flMatVal[1][column] = in.y;
+	out.m_flMatVal[2][column] = in.z;
+}
 
 
 Matrix::Matrix(int rows, int cols, const double init)
