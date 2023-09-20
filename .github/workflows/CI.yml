@@ -42,5 +42,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: p2fx-blender-scripts
-          path: blender\p2fx
+          path: blender
           if-no-files-found: error
