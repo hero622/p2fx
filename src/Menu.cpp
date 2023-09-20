@@ -1,7 +1,7 @@
 #include "Menu.hpp"
 
 #include "Config.hpp"
-#include "Modules/Surface.hpp"
+#include "Features/GameRecord.hpp"
 
 void Menu::Draw() {
 	if (!g_shouldDraw)
@@ -28,12 +28,16 @@ void Menu::Draw() {
 			tab = 3;
 		}
 		ImGui::SameLine();
-		if (ImGui::Button("CAM", ImVec2(100.0f, 30.0f))) {
+		if (ImGui::Button("GAMERECORD", ImVec2(100.0f, 30.0f))) {
 			tab = 4;
 		}
 		ImGui::SameLine();
-		if (ImGui::Button("CFG", ImVec2(100.0f, 30.0f))) {
+		if (ImGui::Button("CAM", ImVec2(100.0f, 30.0f))) {
 			tab = 5;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("CFG", ImVec2(100.0f, 30.0f))) {
+			tab = 6;
 		}
 
 		ImGui::Separator();
@@ -110,6 +114,24 @@ void Menu::Draw() {
 			CImGui::Checkbox("Skip Coop Videos", "p2fx_render_skip_coop_videos");
 			break;
 		case 4:
+			CImGui::Checkbox("Record Players", "p2gr_record_players");
+			CImGui::Checkbox("Record Player Cameras", "p2gr_record_cameras");
+			CImGui::Checkbox("Record Player Viewmodels", "p2gr_record_viewmodels");
+			CImGui::Checkbox("Record Other Entities", "p2gr_record_others");
+			CImGui::Slider("Frame Rate", "p2gr_framerate", 0, 240, "%dfps");
+			static char grFileName[32];
+			ImGui::InputText("Filename", grFileName, IM_ARRAYSIZE(grFileName));
+			if (!gameRecord->GetRecording()) {
+				if (ImGui::Button("Start Recording", ImVec2(208.0f, 19.0f))) {
+					engine->ExecuteCommand(Utils::ssprintf("p2gr_start %s", grFileName).c_str());
+				}
+			} else {
+				if (ImGui::Button("Stop Recording", ImVec2(208.0f, 19.0f))) {
+					engine->ExecuteCommand("p2gr_end");
+				}
+			}
+			break;
+		case 5:
 			CImGui::Combo("Camera Interpolation", "p2fx_cam_path_interp", "Linear\0Cubic Spline\0");
 			CImGui::Button("Remove All Camera Markers", "p2fx_cam_path_remkfs");
 
@@ -163,7 +185,7 @@ void Menu::Draw() {
 				Campath::EnumerateCfgs();
 			}
 			break;
-		case 5:
+		case 6:
 			ImGui::Columns(2, "Columns", false);
 
 			ImGui::SetColumnOffset(1, 240.0f);

@@ -4,3 +4,4 @@
 #include "Features/FovChanger.hpp"
 #include "Features/Session.hpp"
 #include "Features/DemoViewer.hpp"
+#include "Features/GameRecord.hpp"

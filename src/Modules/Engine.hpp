@@ -19,6 +19,7 @@ public:
 	Interface *debugoverlay = nullptr;
 	Interface *s_ServerPlugin = nullptr;
 	Interface *engineTool = nullptr;
+	Interface *clientEngineTools = nullptr;
 	Interface *engineTrace = nullptr;
 	Interface *g_VEngineServer = nullptr;
 
@@ -180,6 +181,12 @@ public:
 
 	// CSteam3Client::OnGameOverlayActivated
 	DECL_DETOUR_B(OnGameOverlayActivated, GameOverlayActivated_t *pGameOverlayActivated);
+
+	// CClientEngineTools::PostToolMessage
+	DECL_DETOUR(PostToolMessage, HTOOLHANDLE hEntity, KeyValues *msg);
+
+	// CClientEngineTools::PostToolMessage
+	DECL_DETOUR_T(bool, InToolMode);
 
 	DECL_DETOUR_COMMAND(plugin_load);
 	DECL_DETOUR_COMMAND(plugin_unload);

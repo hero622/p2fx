@@ -102,6 +102,10 @@ struct QAngle {
 	float x, y, z;
 };
 
+struct Quaternion {
+	float x, y, z, w;
+};
+
 inline QAngle VectorToQAngle(const Vector &v) {
 	return {v.x, v.y, v.z};
 }

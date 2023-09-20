@@ -8,6 +8,7 @@
 #include "Features/FovChanger.hpp"
 #include "Features/OverlayRender.hpp"
 #include "Features/Session.hpp"
+#include "Features/GameRecord.hpp"
 #include "Game.hpp"
 #include "Hook.hpp"
 #include "Interface.hpp"
@@ -53,6 +54,8 @@ REDECL(Client::ProcessMovement);
 REDECL(Client::DrawTranslucentRenderables);
 REDECL(Client::DrawOpaqueRenderables);
 REDECL(Client::CalcViewModelLag);
+REDECL(Client::RecordBones);
+REDECL(Client::FrameStageNotify);
 
 CMDECL(Client::GetAbsOrigin, Vector, m_vecAbsOrigin);
 CMDECL(Client::GetAbsAngles, QAngle, m_angAbsRotation);
@@ -389,6 +392,20 @@ DETOUR(Client::ProcessMovement, void *player, CMoveData *move) {
 	return Client::ProcessMovement(thisptr, player, move);
 }
 
+DETOUR(Client::FrameStageNotify, int curStage) {
+	// FRAME_RENDER_START
+	if (curStage == 5)
+		gameRecord->OnBeforeFrameRenderStart();
+
+	auto ret = Client::FrameStageNotify(thisptr, curStage);
+
+	// FRAME_RENDER_END
+	if (curStage == 6) 
+		gameRecord->OnAfterFrameRenderEnd();
+
+	return ret;
+}
+
 extern Hook g_DrawTranslucentRenderablesHook;
 DETOUR(Client::DrawTranslucentRenderables, bool inSkybox, bool shadowDepth) {
 	g_DrawTranslucentRenderablesHook.Disable();
@@ -421,6 +438,18 @@ DETOUR_T(void, Client::CalcViewModelLag, Vector &origin, QAngle &angles, QAngle 
 }
 Hook g_CalcViewModelLagHook(&Client::CalcViewModelLag_Hook);
 
+extern Hook g_RecordBonesHook;
+DETOUR_T(void *, Client::RecordBones, CStudioHdr *hdr, matrix3x4_t *pBoneState) {
+	g_RecordBonesHook.Disable();
+	auto ret = Client::RecordBones(thisptr, hdr, pBoneState);
+	g_RecordBonesHook.Enable();
+
+	gameRecord->CaptureBones(hdr, pBoneState);
+
+	return ret;
+}
+Hook g_RecordBonesHook(&Client::RecordBones_Hook);
+
 bool Client::Init() {
 	bool readJmp = false;
 
@@ -434,7 +463,7 @@ bool Client::Init() {
 
 	if (this->g_ClientDLL) {
 		this->GetAllClasses = this->g_ClientDLL->Original<_GetAllClasses>(Offsets::GetAllClasses, readJmp);
-		this->FrameStageNotify = this->g_ClientDLL->Original<_FrameStageNotify>(Offsets::GetAllClasses + 27);
+		this->g_ClientDLL->Hook(Client::FrameStageNotify_Hook, Client::FrameStageNotify, Offsets::GetAllClasses + 27);
 
 		this->g_ClientDLL->Hook(Client::LevelInitPreEntity_Hook, Client::LevelInitPreEntity, Offsets::LevelInitPreEntity);
 
@@ -520,6 +549,17 @@ bool Client::Init() {
 		this->GetClientEntity = this->s_EntityList->Original<_GetClientEntity>(Offsets::GetClientEntity, readJmp);
 	}
 
+	if (this->g_ClientTools = Interface::Create(this->Name(), "VCLIENTTOOLS001")) {
+		this->GetEntity = this->g_ClientTools->Original<_GetEntity>(3);
+		this->SetRecording = this->g_ClientTools->Original<_SetRecording>(10);
+		this->ShouldRecord = this->g_ClientTools->Original<_ShouldRecord>(11);
+		this->GetClassname = this->g_ClientTools->Original<_GetClassname>(15);
+		this->EnableRecordingMode = this->g_ClientTools->Original<_EnableRecordingMode>(32);
+		this->IsPlayer = this->g_ClientTools->Original<_IsPlayer>(40);
+		this->IsViewModel = this->g_ClientTools->Original<_IsViewModel>(44);
+		this->IsWeapon = this->g_ClientTools->Original<_IsWeapon>(46);
+	}
+
 #ifdef _WIN32
 	Client::DrawTranslucentRenderables = (decltype(Client::DrawTranslucentRenderables))Memory::Scan(client->Name(), "55 8B EC 81 EC 80 00 00 00 53 56 8B F1 8B 0D ? ? ? ? 8B 01 8B 90 C4 01 00 00 57 89 75 F0 FF D2 8B F8");
 	Client::DrawOpaqueRenderables = (decltype(Client::DrawOpaqueRenderables))Memory::Scan(client->Name(), "55 8B EC 83 EC 54 83 7D 0C 00 A1 ? ? ? ? 53 56 0F 9F 45 EC 83 78 30 00 57 8B F1 0F 84 BA 03 00 00");
@@ -545,6 +585,9 @@ bool Client::Init() {
 	}
 
 	g_CalcViewModelLagHook.SetFunc(Client::CalcViewModelLag);
+
+	Client::RecordBones = (decltype(Client::RecordBones))Memory::Scan(client->Name(), "55 8B EC 81 EC ? ? ? ? 56 8B F1 E8 ? ? ? ? 84 C0 75 09 33 C0 5E 8B E5 5D C2 08 00");
+	g_RecordBonesHook.SetFunc(Client::RecordBones);
 
 	// Get at gamerules
 	{

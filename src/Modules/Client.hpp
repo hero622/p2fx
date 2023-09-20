@@ -14,7 +14,7 @@ enum class CMStatus {
 };
 
 class Client : public Module {
-private:
+public:
 	Interface *g_ClientDLL = nullptr;
 	Interface *g_pClientMode = nullptr;
 	Interface *g_pClientMode2 = nullptr;
@@ -26,6 +26,7 @@ private:
 	Interface *g_HudMultiplayerBasicInfo = nullptr;
 	Interface *g_HudSaveStatus = nullptr;
 	Interface *g_GameMovement = nullptr;
+	Interface *g_ClientTools = nullptr;
 
 public:
 	DECL_M(GetAbsOrigin, Vector);
@@ -37,21 +38,37 @@ public:
 
 	using _GetClientEntity = ClientEnt *(__rescall *)(void *thisptr, int entnum);
 	using _GetAllClasses = ClientClass *(*)();
-	using _FrameStageNotify = void(__rescall *)(void *thisptr, int stage);
 	using _ShouldDraw = bool(__rescall *)(void *thisptr);
 	using _ChatPrintf = void (*)(void *thisptr, int iPlayerIndex, int iFilter, const char *fmt, ...);
 	using _StartMessageMode = void(__rescall *)(void *thisptr, int type);
 	using _IN_ActivateMouse = void (*)(void *thisptr);
 	using _IN_DeactivateMouse = void (*)(void *thisptr);
 
+	using _GetEntity = void *(__rescall *)(void *thisptr, HTOOLHANDLE handle);
+	using _SetRecording = void *(__rescall *)(void *thisptr, HTOOLHANDLE handle, bool recording);
+	using _ShouldRecord = bool(__rescall *)(void *thisptr, HTOOLHANDLE handle);
+	using _GetClassname = const char *(__rescall *)(void *thisptr, HTOOLHANDLE handle);
+	using _EnableRecordingMode = void(__rescall *)(void *thisptr, bool bEnable);
+	using _IsPlayer = bool(__rescall *)(void *thisptr, void *currentEnt);
+	using _IsViewModel = bool(__rescall *)(void *thisptr, void *currentEnt);
+	using _IsWeapon = bool(__rescall *)(void *thisptr, void *currentEnt);
+
 	_GetClientEntity GetClientEntity = nullptr;
 	_GetAllClasses GetAllClasses = nullptr;
-	_FrameStageNotify FrameStageNotify = nullptr;
 	_ShouldDraw ShouldDraw = nullptr;
 	_ChatPrintf ChatPrintf = nullptr;
 	_StartMessageMode StartMessageMode = nullptr;
 	_IN_ActivateMouse IN_ActivateMouse = nullptr;
 	_IN_DeactivateMouse IN_DeactivateMouse = nullptr;
+
+	_GetEntity GetEntity = nullptr;
+	_SetRecording SetRecording = nullptr;
+	_ShouldRecord ShouldRecord = nullptr;
+	_GetClassname GetClassname = nullptr;
+	_EnableRecordingMode EnableRecordingMode = nullptr;
+	_IsPlayer IsPlayer = nullptr;
+	_IsViewModel IsViewModel = nullptr;
+	_IsWeapon IsWeapon = nullptr;
 
 	std::string lastLevelName;
 	void **gamerules;
@@ -69,6 +86,12 @@ public:
 	void OpenChat();
 
 public:
+	// CHLClient::FrameStageNotify 
+	DECL_DETOUR(FrameStageNotify, int curStage);
+
+	// C_BaseAnimating::RecordBones
+	DECL_DETOUR_T(void *, RecordBones, CStudioHdr *hdr, matrix3x4_t *pBoneState);
+
 	// CBaseViewModel::CalcViewModelLag
 	DECL_DETOUR_T(void, CalcViewModelLag, Vector &origin, QAngle &angles, QAngle &original_angles);
 

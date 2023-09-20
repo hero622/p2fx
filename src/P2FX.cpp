@@ -72,6 +72,7 @@ bool P2FX::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServer
 				this->features->AddFeature<FovChanger>(&fovChanger);
 				this->features->AddFeature<Camera>(&camera);
 				this->features->AddFeature<DemoViewer>(&demoViewer);
+				this->features->AddFeature<GameRecord>(&gameRecord);
 
 				this->modules->AddModule<InputSystem>(&inputSystem);
 				this->modules->AddModule<Scheme>(&scheme);

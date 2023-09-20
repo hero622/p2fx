@@ -144,6 +144,7 @@
     <ClCompile Include="Features\Hud\DemoHud.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="Event.cpp" />
+    <ClCompile Include="Features\GameRecord.cpp" />
     <ClCompile Include="Games\Portal2.cpp" />
     <ClCompile Include="Menu.cpp" />
     <ClCompile Include="Modules\FileSystem.cpp" />
@@ -256,6 +257,7 @@
     <ClInclude Include="Features\Hud\DemoHud.hpp" />
     <ClInclude Include="Entity.hpp" />
     <ClInclude Include="Event.hpp" />
+    <ClInclude Include="Features\GameRecord.hpp" />
     <ClInclude Include="Games\Portal2.hpp" />
     <ClInclude Include="Menu.hpp" />
     <ClInclude Include="Modules\FileSystem.hpp" />
@@ -295,6 +297,7 @@
     <ClInclude Include="P2FX.hpp" />
     <ClInclude Include="Modules\ShaderApi.hpp" />
     <ClInclude Include="Modules\Tier0.hpp" />
+    <ClInclude Include="Utils\SDK\Studio.hpp" />
     <ClInclude Include="Utils.hpp" />
     <ClInclude Include="Utils\json11.hpp" />
     <ClInclude Include="Utils\lodepng.hpp" />

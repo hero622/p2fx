@@ -90,16 +90,16 @@ public:
 	DECL_DETOUR(PaintTraverse, VPANEL vguiPanel, bool forceRepaint, bool allowForce);
 
 	// CExtrasDialog::PopulateSaveGameList
-	DECL_DETOUR_T(void, PopulateFromScript);
+	DECL_DETOUR(PopulateFromScript);
 
 	// CExtrasDialog::ApplySchemeSettings
-	DECL_DETOUR_T(void, ApplySchemeSettings, void *pScheme);
+	DECL_DETOUR(ApplySchemeSettings, void *pScheme);
 
 	// MainMenu::OnCommand
-	DECL_DETOUR_T(void, MainMenuOnCommand, const char *command);
+	DECL_DETOUR(MainMenuOnCommand, const char *command);
 
 	// InGameMainMenu::OnCommand
-	DECL_DETOUR_T(void, InGameMainMenuOnCommand, const char *command);
+	DECL_DETOUR(InGameMainMenuOnCommand, const char *command);
 	
 	// CBaseModPanel::OpenWindow
 	DECL_DETOUR_T(void *, OpenWindow, const int &wt, void *caller, bool hidePrevious, KeyValues *pParameter);
