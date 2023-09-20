@@ -38,7 +38,6 @@ public:
 
 	using _GetClientEntity = ClientEnt *(__rescall *)(void *thisptr, int entnum);
 	using _GetAllClasses = ClientClass *(*)();
-	using _FrameStageNotify = void(__rescall *)(void *thisptr, int stage);
 	using _ShouldDraw = bool(__rescall *)(void *thisptr);
 	using _ChatPrintf = void (*)(void *thisptr, int iPlayerIndex, int iFilter, const char *fmt, ...);
 	using _StartMessageMode = void(__rescall *)(void *thisptr, int type);
@@ -52,7 +51,6 @@ public:
 
 	_GetClientEntity GetClientEntity = nullptr;
 	_GetAllClasses GetAllClasses = nullptr;
-	_FrameStageNotify FrameStageNotify = nullptr;
 	_ShouldDraw ShouldDraw = nullptr;
 	_ChatPrintf ChatPrintf = nullptr;
 	_StartMessageMode StartMessageMode = nullptr;
@@ -80,6 +78,9 @@ public:
 	void OpenChat();
 
 public:
+	// CHLClient::FrameStageNotify 
+	DECL_DETOUR(FrameStageNotify, int curStage);
+
 	// C_BaseAnimating::RecordBones
 	DECL_DETOUR_T(void *, RecordBones, CStudioHdr *hdr, matrix3x4_t *pBoneState);
 

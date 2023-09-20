@@ -427,9 +427,12 @@ DETOUR_B(Engine::OnGameOverlayActivated, GameOverlayActivated_t *pGameOverlayAct
 }
 
 // CClientEngineTools::PostToolMessage
-DETOUR_T(void, Engine::PostToolMessage, HTOOLHANDLE hEntity, KeyValues *msg) {
-	Engine::PostToolMessage(thisptr, hEntity, msg);
+DETOUR(Engine::PostToolMessage, HTOOLHANDLE hEntity, KeyValues *msg) {
+	auto ret = Engine::PostToolMessage(thisptr, hEntity, msg);
+
 	gameRecord->OnPostToolMessage(hEntity, msg);
+
+	return ret;
 }
 
 // CClientEngineTools::InToolMode

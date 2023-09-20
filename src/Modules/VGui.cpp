@@ -203,52 +203,60 @@ void VGui::EnumerateFiles(CUtlVector<ExtraInfo_t> &m_ExtraInfos, std::string pat
 	}
 }
 
-DETOUR_T(void, VGui::PopulateFromScript) {
+DETOUR(VGui::PopulateFromScript) {
 	vgui->g_ExtraInfos = (uintptr_t)thisptr + 0x830;
 	auto &m_ExtraInfos = *(CUtlVector<ExtraInfo_t> *)vgui->g_ExtraInfos;
 
 	vgui->EnumerateFiles(m_ExtraInfos, vgui->g_curDirectory);
+
+	return 0;
 }
 Hook g_PopulateFromScriptHook(&VGui::PopulateFromScript_Hook);
 
-DETOUR_T(void, VGui::ApplySchemeSettings, void *pScheme) {
+DETOUR(VGui::ApplySchemeSettings, void *pScheme) {
 	vgui->g_extrasDialog = thisptr;
 	vgui->g_pScheme = pScheme;
 	vgui->g_pInfoList = *reinterpret_cast<GenericPanelList **>((uintptr_t)thisptr + 0x84C);
 
 	g_ApplySchemeSettingsHook.Disable();
-	VGui::ApplySchemeSettings(thisptr, pScheme);
+	auto ret = VGui::ApplySchemeSettings(thisptr, pScheme);
 	g_ApplySchemeSettingsHook.Enable();
+
+	return ret;
 }
 Hook g_ApplySchemeSettingsHook(&VGui::ApplySchemeSettings_Hook);
 
-DETOUR_T(void, VGui::MainMenuOnCommand, const char *command) {
+DETOUR(VGui::MainMenuOnCommand, const char *command) {
 	if (!strcmp(command, "CreateChambers")) {
 		command = "Extras";
 	}
 
 	g_MainMenuOnCommandHook.Disable();
-	VGui::MainMenuOnCommand(thisptr, command);
+	auto ret = VGui::MainMenuOnCommand(thisptr, command);
 	g_MainMenuOnCommandHook.Enable();
+
+	return ret;
 }
 Hook g_MainMenuOnCommandHook(&VGui::MainMenuOnCommand_Hook);
 
-DETOUR_T(void, VGui::InGameMainMenuOnCommand, const char *command) {
+DETOUR(VGui::InGameMainMenuOnCommand, const char *command) {
 	if (!strcmp(command, "RestartLevel")) {
 		// previous demo
 		int curIdx = std::distance(vgui->g_demos.begin(), std::find(vgui->g_demos.begin(), vgui->g_demos.end(), std::string(engine->demoplayer->DemoName)));
 		engine->ExecuteCommand(Utils::ssprintf("playdemo %s", vgui->g_demos[curIdx + 1]).c_str(), true);
-		return;
+		return 0;
 	} else if (!strcmp(command, "Leaderboards_")) {
 		// change demo
 		engine->ExecuteCommand("gameui_preventescape", true);              // GameUI().PreventEngineHideGameUI();
 		VGui::OpenWindow(vgui->g_CBaseModPanel, 63, thisptr, true, NULL);  // WT_EXTRAS = 63
-		return;
+		return 0;
 	}
 
 	g_InGameMainMenuOnCommandHook.Disable();
-	VGui::InGameMainMenuOnCommand(thisptr, command);
+	auto ret = VGui::InGameMainMenuOnCommand(thisptr, command);
 	g_InGameMainMenuOnCommandHook.Enable();
+
+	return ret;
 }
 Hook g_InGameMainMenuOnCommandHook(&VGui::InGameMainMenuOnCommand_Hook);
 

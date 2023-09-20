@@ -55,6 +55,7 @@ REDECL(Client::DrawTranslucentRenderables);
 REDECL(Client::DrawOpaqueRenderables);
 REDECL(Client::CalcViewModelLag);
 REDECL(Client::RecordBones);
+REDECL(Client::FrameStageNotify);
 
 CMDECL(Client::GetAbsOrigin, Vector, m_vecAbsOrigin);
 CMDECL(Client::GetAbsAngles, QAngle, m_angAbsRotation);
@@ -391,6 +392,20 @@ DETOUR(Client::ProcessMovement, void *player, CMoveData *move) {
 	return Client::ProcessMovement(thisptr, player, move);
 }
 
+DETOUR(Client::FrameStageNotify, int curStage) {
+	// FRAME_RENDER_START
+	if (curStage == 5)
+		gameRecord->OnBeforeFrameRenderStart();
+
+	auto ret = Client::FrameStageNotify(thisptr, curStage);
+
+	// FRAME_RENDER_END
+	if (curStage == 6) 
+		gameRecord->OnAfterFrameRenderEnd();
+
+	return ret;
+}
+
 extern Hook g_DrawTranslucentRenderablesHook;
 DETOUR(Client::DrawTranslucentRenderables, bool inSkybox, bool shadowDepth) {
 	g_DrawTranslucentRenderablesHook.Disable();
@@ -448,7 +463,7 @@ bool Client::Init() {
 
 	if (this->g_ClientDLL) {
 		this->GetAllClasses = this->g_ClientDLL->Original<_GetAllClasses>(Offsets::GetAllClasses, readJmp);
-		this->FrameStageNotify = this->g_ClientDLL->Original<_FrameStageNotify>(Offsets::GetAllClasses + 27);
+		this->g_ClientDLL->Hook(Client::FrameStageNotify_Hook, Client::FrameStageNotify, Offsets::GetAllClasses + 27);
 
 		this->g_ClientDLL->Hook(Client::LevelInitPreEntity_Hook, Client::LevelInitPreEntity, Offsets::LevelInitPreEntity);
 

@@ -3,6 +3,7 @@
 #include "Modules/Client.hpp"
 #include "Modules/Engine.hpp"
 #include "Modules/Console.hpp"
+#include "Modules/Server.hpp"
 #include "Event.hpp"
 
 GameRecordFs::GameRecordFs()
@@ -380,7 +381,7 @@ void GameRecord::OnBeforeFrameRenderStart() {
 	if (!gameRecordFs->GetRecording())
 		return;
 	
-	gameRecordFs->BeginFrame(engine->GetHostFrameTime());
+	gameRecordFs->BeginFrame(server->gpGlobals->absoluteframetime);
 }
 
 void GameRecord::OnAfterFrameRenderEnd() {
