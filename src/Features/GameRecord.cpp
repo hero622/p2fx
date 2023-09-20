@@ -347,9 +347,21 @@ void GameRecord::OnPostToolMessage(HTOOLHANDLE hEntity, KeyValues *msg) {
 			bool hasParentTransform = false;
 			matrix3x4_t parentTransform;
 
+			auto baseEntRs = (BaseEntityRecordingState_t *)(msg->GetPtr("baseentity"));
+
+			if (baseEntRs && !baseEntRs->m_bVisible) {
+				std::map<HTOOLHANDLE, bool>::iterator it = trackedHandles.find(hEntity);
+				if (it != trackedHandles.end() && it->second) {
+					MarkHidden((int)(it->first));
+
+					it->second = false;
+				}
+
+				return;
+			}
+
 			WriteDictionary("entity_state");
 			Write((int)hEntity);
-			auto baseEntRs = (BaseEntityRecordingState_t *)(msg->GetPtr("baseentity"));
 			if (baseEntRs) {
 				wasVisible = baseEntRs->m_bVisible;
 
@@ -361,6 +373,8 @@ void GameRecord::OnPostToolMessage(HTOOLHANDLE hEntity, KeyValues *msg) {
 				Math::AngleMatrix(baseEntRs->m_vecRenderAngles, baseEntRs->m_vecRenderOrigin, parentTransform);
 				WriteMatrix3x4(parentTransform);
 			}
+
+			trackedHandles[hEntity] = wasVisible;
 
 			auto baseAnimRs = (BaseAnimatingRecordingState_t *)(msg->GetPtr("baseanimating"));
 			if (baseAnimRs && hasParentTransform) {
@@ -374,7 +388,18 @@ void GameRecord::OnPostToolMessage(HTOOLHANDLE hEntity, KeyValues *msg) {
 
 			Write((bool)viewModel);
 		}
-	} else if (!strcmp(msgName, "created")) {
+	} else if (!strcmp(msgName, "deleted")) {
+		std::map<HTOOLHANDLE, bool>::iterator it = trackedHandles.find(hEntity);
+		if (it != trackedHandles.end()) {
+			if (GetRecording()) {
+				WriteDictionary("deleted");
+				Write((int)(it->first));
+			}
+
+			trackedHandles.erase(it);
+		}
+	} 
+	else if (!strcmp(msgName, "created")) {
 		if (client->ShouldRecord(client->g_ClientTools->ThisPtr(), hEntity)) {
 			client->SetRecording(client->g_ClientTools->ThisPtr(), hEntity, true);
 		}

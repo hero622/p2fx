@@ -54,6 +54,8 @@ private:
 		int flags;
 	};
 	std::vector<BoneState> boneStates;
+
+	std::map<HTOOLHANDLE, bool> trackedHandles;
 	
 	GameRecordFs *gameRecordFs;
 
