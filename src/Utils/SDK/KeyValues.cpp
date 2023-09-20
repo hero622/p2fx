@@ -73,6 +73,22 @@ KeyValues *KeyValues::FindKey(const char *name, bool create) {
 	return cur;
 }
 
+int KeyValues::GetInt(const char *key) {
+	auto kv = this->FindKey(key, false);
+	if (kv)
+		return kv->val.i;
+
+	return 0;
+}
+
+void *KeyValues::GetPtr(const char *key) {
+	auto kv = this->FindKey(key, false);
+	if (kv)
+		return kv->val.p;
+	
+	return nullptr;
+}
+
 void KeyValues::SetInt(const char *key, int val) {
 	auto kv = this->FindKey(key, true);
 	if (kv) {

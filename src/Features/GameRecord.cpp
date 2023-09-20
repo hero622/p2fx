@@ -176,11 +176,13 @@ GameRecord::~GameRecord() {
 }
 
 void GameRecord::StartRecording(const char *fileName) {
-	gameRecordFs->StartRecording(fileName, 1);
+	gameRecordFs->StartRecording(fileName, GetP2grVersion());
 
 	if (GetRecording()) {
 		client->EnableRecordingMode(client->g_ClientTools->ThisPtr(), true);
 	}
+
+	console->Print("P2FX: Started recording game.\n");
 }
 
 void GameRecord::EndRecording() {
@@ -189,6 +191,8 @@ void GameRecord::EndRecording() {
 	}
 
 	gameRecordFs->EndRecording();
+
+	console->Print("P2FX: Stopped recording.\n");
 }
 
 void GameRecord::Write(Vector const &value) {
@@ -337,7 +341,7 @@ void GameRecord::OnPostToolMessage(HTOOLHANDLE hEntity, KeyValues *msg) {
 
 	if (!strcmp(msgName, "entity_state")) {
 		if (GetRecording()) {
-			const char *className = client->GetClassname(client->g_ClientTools->ThisPtr(), hEntity);
+			// const char *className = client->GetClassname(client->g_ClientTools->ThisPtr(), hEntity);
 
 			bool wasVisible = false;
 			bool hasParentTransform = false;
@@ -345,30 +349,30 @@ void GameRecord::OnPostToolMessage(HTOOLHANDLE hEntity, KeyValues *msg) {
 
 			WriteDictionary("entity_state");
 			Write((int)hEntity);
-			auto baseEnt = msg->FindKey("baseentity", false);
-			if (baseEnt) {
-				auto baseEntRs = (BaseEntityRecordingState_t *)(baseEnt->val.p);
-				if (baseEntRs) {
-					wasVisible = baseEntRs->m_bVisible;
+			auto baseEntRs = (BaseEntityRecordingState_t *)(msg->GetPtr("baseentity"));
+			if (baseEntRs) {
+				wasVisible = baseEntRs->m_bVisible;
 
-					WriteDictionary("baseentity");
-					WriteDictionary(baseEntRs->m_pModelName);
-					Write((bool)wasVisible);
+				WriteDictionary("baseentity");
+				WriteDictionary(baseEntRs->m_pModelName);
+				Write((bool)wasVisible);
 
-					hasParentTransform = true;
-					Math::AngleMatrix(baseEntRs->m_vecRenderAngles, baseEntRs->m_vecRenderOrigin, parentTransform);
-					WriteMatrix3x4(parentTransform);
-				}
+				hasParentTransform = true;
+				Math::AngleMatrix(baseEntRs->m_vecRenderAngles, baseEntRs->m_vecRenderOrigin, parentTransform);
+				WriteMatrix3x4(parentTransform);
 			}
 
-			auto baseAnim = msg->FindKey("baseanimating", false);
-			if (baseAnim) {
-				auto baseAnimRs = (BaseAnimatingRecordingState_t *)(baseAnim->val.p);
-				if (baseAnimRs && hasParentTransform) {
-					WriteDictionary("baseanimating");
-					WriteBones(baseAnimRs->m_pBoneList != nullptr, parentTransform);
-				}
+			auto baseAnimRs = (BaseAnimatingRecordingState_t *)(msg->GetPtr("baseanimating"));
+			if (baseAnimRs && hasParentTransform) {
+				WriteDictionary("baseanimating");
+				WriteBones(baseAnimRs->m_pBoneList != nullptr, parentTransform);
 			}
+
+			WriteDictionary("/");
+
+			bool viewModel = msg->GetBool("viewmodel");
+
+			Write((bool)viewModel);
 		}
 	} else if (!strcmp(msgName, "created")) {
 		if (client->ShouldRecord(client->g_ClientTools->ThisPtr(), hEntity)) {
@@ -393,7 +397,7 @@ void GameRecord::OnAfterFrameRenderEnd() {
 
 CON_COMMAND(p2fx_startrecording, "") {
 	if (args.ArgC() >= 2) {
-		gameRecord->StartRecording(args[1]);
+		gameRecord->StartRecording(Utils::ssprintf("%s.%s", args[1], "p2gr").c_str());
 	}
 }
 

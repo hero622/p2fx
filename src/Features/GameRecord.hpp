@@ -81,6 +81,10 @@ public:
 	GameRecord();
 	~GameRecord();
 
+	int GetP2grVersion() {
+		return 1;
+	}
+
 	void StartRecording(const char *fileName);
 	void EndRecording();
 

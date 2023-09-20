@@ -25,6 +25,9 @@ public:
 	KeyValues(const char *name);
 	~KeyValues();
 	KeyValues *FindKey(const char *name, bool create = true);
+	int GetInt(const char *key);
+	void *GetPtr(const char *key);
+	bool GetBool(const char *key) { return GetInt(key); }
 	void SetInt(const char *key, int val);
 	void SetString(const char *key, const char *val);
 	const char *GetName();
