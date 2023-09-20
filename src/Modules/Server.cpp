@@ -38,8 +38,6 @@ Variable sv_stopspeed;
 Variable sv_maxvelocity;
 Variable sv_gravity;
 
-REDECL(Server::CheckJumpButton);
-REDECL(Server::CheckJumpButtonBase);
 REDECL(Server::GameFrame);
 REDECL(Server::OnRemoveEntity);
 REDECL(Server::ProcessMovement);
