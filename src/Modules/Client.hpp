@@ -17,7 +17,6 @@ class Client : public Module {
 public:
 	Interface *g_ClientDLL = nullptr;
 	Interface *g_pClientMode = nullptr;
-	Interface *g_pClientMode2 = nullptr;
 	Interface *g_HUDChallengeStats = nullptr;
 	Interface *g_HUDQuickInfo = nullptr;
 	Interface *s_EntityList = nullptr;
@@ -109,7 +108,6 @@ public:
 
 	// ClientModeShared::CreateMove
 	DECL_DETOUR(CreateMove, float flInputSampleTime, CUserCmd *cmd);
-	DECL_DETOUR(CreateMove2, float flInputSampleTime, CUserCmd *cmd);
 
 	// CHud::GetName
 	DECL_DETOUR_T(const char *, GetName);
@@ -133,19 +131,8 @@ public:
 	// CInput::_DecodeUserCmdFromBuffer
 	DECL_DETOUR(DecodeUserCmdFromBuffer, int nSlot, int buf, signed int sequence_number);
 
-	// CInput::CreateMove
-	DECL_DETOUR(CInput_CreateMove, int sequence_number, float input_sample_frametime, bool active);
-
-	// CInput::GetButtonBits
-	DECL_DETOUR(GetButtonBits, bool bResetState);
-
-	// CInput::SteamControllerMove
-	DECL_DETOUR(SteamControllerMove, int nSlot, float flFrametime, CUserCmd *cmd);  //	is it slot though? :thinking:
-
 	// ClientModeShared::OverrideView
 	DECL_DETOUR_T(void, OverrideView, CViewSetup *m_View);
-
-	DECL_DETOUR_COMMAND(playvideo_end_level_transition);
 
 	bool Init() override;
 	void Shutdown() override;

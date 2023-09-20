@@ -48,7 +48,6 @@ float g_cur_fps = 0.0f;
 REDECL(Engine::Disconnect);
 REDECL(Engine::SetSignonState);
 REDECL(Engine::ChangeLevel);
-REDECL(Engine::ClientCommandKeyValues);
 #ifndef _WIN32
 REDECL(Engine::GetMouseDelta);
 #endif
@@ -297,11 +296,6 @@ DETOUR(Engine::SetSignonState, int state, int count, void *unk) {
 DETOUR(Engine::ChangeLevel, const char *s1, const char *s2) {
 	if (s1 && engine->GetCurrentMapName() != s1) engine->isLevelTransition = true;
 	return Engine::ChangeLevel(thisptr, s1, s2);
-}
-
-// CVEngineServer::ClientCommandKeyValues
-DETOUR(Engine::ClientCommandKeyValues, void* pEdict, KeyValues* pKeyValues) {
-	return Engine::ClientCommandKeyValues(thisptr, pEdict, pKeyValues);
 }
 
 #ifndef _WIN32
@@ -800,7 +794,6 @@ bool Engine::Init() {
 
 		if (this->g_VEngineServer = Interface::Create(this->Name(), "VEngineServer022")) {
 			this->g_VEngineServer->Hook(Engine::ChangeLevel_Hook, Engine::ChangeLevel, Offsets::ChangeLevel);
-			this->g_VEngineServer->Hook(Engine::ClientCommandKeyValues_Hook, Engine::ClientCommandKeyValues, Offsets::ClientCommandKeyValues);
 			this->ClientCommand = this->g_VEngineServer->Original<_ClientCommand>(Offsets::ClientCommand);
 			this->IsServerPaused = this->g_VEngineServer->Original<_IsServerPaused>(Offsets::IsServerPaused);
 			this->ServerPause = this->g_VEngineServer->Original<_ServerPause>(Offsets::ServerPause);

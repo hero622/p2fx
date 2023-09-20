@@ -56,11 +56,6 @@ public:
 	int tickCount = 0;
 	bool isSimulating = false;
 
-private:
-	bool jumpedLastTime = false;
-	float savedVerticalVelocity = 0.0f;
-	bool callFromCheckJumpButton = false;
-
 public:
 	DECL_M(GetPortals, int);
 	DECL_M(GetAbsOrigin, Vector);
@@ -84,44 +79,13 @@ public:
 	float GetCMTimer();
 
 public:
-	// CPortal_Player::PlayerRunCommand
-	DECL_DETOUR(PlayerRunCommand, CUserCmd *cmd, void *moveHelper);
-
-	// CBasePlayer::ViewPunch
-	DECL_DETOUR_T(void, ViewPunch, const QAngle &offset);
-
-	// CServerNetworkProperty::IsInPVS
-	DECL_DETOUR_T(bool, IsInPVS, void *info);
-
 	// CGameMovement::ProcessMovement
 	DECL_DETOUR(ProcessMovement, void *pPlayer, CMoveData *pMove);
 
-	// CGameMovement::ProcessMovement
-	DECL_DETOUR_T(Vector *, GetPlayerViewOffset, bool ducked);
-
 	DECL_DETOUR(StartTouchChallengeNode, void *entity);
-
-	// CGameMovement::CheckJumpButton
-	DECL_DETOUR_T(bool, CheckJumpButton);
-
-	static _CheckJumpButton CheckJumpButtonBase;
-
-	// CGameMovement::PlayerMove
-	DECL_DETOUR(PlayerMove);
-
-	// CGameMovement::FinishGravity
-	DECL_DETOUR(FinishGravity);
-
-	// CGameMovement::AirMove
-	DECL_DETOUR_B(AirMove);
-
-	float *aircontrol_fling_speed_addr;
 
 	// CServerGameDLL::GameFrame
 	DECL_DETOUR(GameFrame, bool simulating);
-
-	// CServerGameDLL::ApplyGameSettings
-	DECL_DETOUR(ApplyGameSettings, KeyValues *pKV);
 
 	// CGlobalEntityList::OnRemoveEntity
 	DECL_DETOUR_T(void, OnRemoveEntity, IHandleEntity *ent, CBaseHandle handle);

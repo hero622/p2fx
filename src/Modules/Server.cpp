@@ -40,18 +40,9 @@ Variable sv_gravity;
 
 REDECL(Server::CheckJumpButton);
 REDECL(Server::CheckJumpButtonBase);
-REDECL(Server::PlayerMove);
-REDECL(Server::FinishGravity);
-REDECL(Server::AirMove);
-REDECL(Server::AirMoveBase);
 REDECL(Server::GameFrame);
-REDECL(Server::ApplyGameSettings);
 REDECL(Server::OnRemoveEntity);
-REDECL(Server::PlayerRunCommand);
-REDECL(Server::ViewPunch);
-REDECL(Server::IsInPVS);
 REDECL(Server::ProcessMovement);
-REDECL(Server::GetPlayerViewOffset);
 REDECL(Server::StartTouchChallengeNode);
 REDECL(Server::say_callback);
 
@@ -105,54 +96,6 @@ float Server::GetCMTimer() {
 	return sv_player->field<float>("fNumSecondsTaken");
 }
 
-// CGameMovement::CheckJumpButton
-DETOUR_T(bool, Server::CheckJumpButton) {
-	auto jumped = false;
-
-	if (server->AllowsMovementChanges()) {
-		auto mv = *reinterpret_cast<CHLMoveData **>((uintptr_t)thisptr + Offsets::mv);
-
-		server->jumpedLastTime = false;
-		server->savedVerticalVelocity = mv->m_vecVelocity[2];
-
-		server->callFromCheckJumpButton = true;
-		jumped = Server::CheckJumpButton(thisptr);
-		server->callFromCheckJumpButton = false;
-
-		if (jumped) {
-			server->jumpedLastTime = true;
-		}
-	} else {
-		jumped = Server::CheckJumpButton(thisptr);
-	}
-
-	return jumped;
-}
-
-// CGameMovement::PlayerMove
-DETOUR(Server::PlayerMove) {
-	return Server::PlayerMove(thisptr);
-}
-
-extern Hook g_playerRunCommandHook;
-// CPortal_Player::PlayerRunCommand
-DETOUR(Server::PlayerRunCommand, CUserCmd *cmd, void *moveHelper) {
-	g_playerRunCommandHook.Disable();
-	auto ret = Server::PlayerRunCommand(thisptr, cmd, moveHelper);
-	g_playerRunCommandHook.Enable();
-
-	return ret;
-}
-Hook g_playerRunCommandHook(&Server::PlayerRunCommand_Hook);
-
-extern Hook g_ViewPunch_Hook;
-DETOUR_T(void, Server::ViewPunch, const QAngle &offset) {
-	g_ViewPunch_Hook.Disable();
-	Server::ViewPunch(thisptr, offset);
-	g_ViewPunch_Hook.Enable();
-}
-Hook g_ViewPunch_Hook(&Server::ViewPunch_Hook);
-
 // CGameMovement::ProcessMovement
 DETOUR(Server::ProcessMovement, void *player, CMoveData *move) {
 	int slot = server->GetSplitScreenPlayerSlot(player);
@@ -160,21 +103,6 @@ DETOUR(Server::ProcessMovement, void *player, CMoveData *move) {
 
 	return Server::ProcessMovement(thisptr, player, move);
 }
-
-// CGameMovement::GetPlayerViewOffset
-DETOUR_T(Vector*, Server::GetPlayerViewOffset, bool ducked) {
-	return Server::GetPlayerViewOffset(thisptr, ducked);
-}
-
-extern Hook g_IsInPVS_Hook;
-DETOUR_T(bool, Server::IsInPVS, void *info) {
-	g_IsInPVS_Hook.Disable();
-	auto res = Server::IsInPVS(thisptr, info);
-	g_IsInPVS_Hook.Enable();
-
-	return res;
-}
-Hook g_IsInPVS_Hook(&Server::IsInPVS_Hook);
 
 static inline bool hasSlotCompleted(void *thisptr, int slot) {
 #ifdef _WIN32
@@ -210,16 +138,6 @@ DETOUR(Server::StartTouchChallengeNode, void *entity) {
 	return ret;
 }
 Hook g_flagStartTouchHook(&Server::StartTouchChallengeNode_Hook);
-
-// CGameMovement::FinishGravity
-DETOUR(Server::FinishGravity) {
-	return Server::FinishGravity(thisptr);
-}
-
-// CGameMovement::AirMove
-DETOUR_B(Server::AirMove) {
-	return Server::AirMove(thisptr);
-}
 
 extern Hook g_AcceptInputHook;
 
@@ -292,21 +210,11 @@ static void InitCMFlagHook() {
 	}
 }
 
-static bool g_IsPlayerRunCommandHookInitialized = false;
-static void InitPlayerRunCommandHook() {
-	void *player = server->GetPlayer(1);
-	if (!player) return;
-	Server::PlayerRunCommand = Memory::VMT<Server::_PlayerRunCommand>(player, Offsets::PlayerRunCommand);
-	g_playerRunCommandHook.SetFunc(Server::PlayerRunCommand);
-	g_IsPlayerRunCommandHookInitialized = true;
-}
-
 // CServerGameDLL::GameFrame
 DETOUR(Server::GameFrame, bool simulating)
 {
 	if (!IsAcceptInputTrampolineInitialized) InitAcceptInputTrampoline();
 	if (!g_IsCMFlagHookInitialized) InitCMFlagHook();
-	if (!g_IsPlayerRunCommandHookInitialized) InitPlayerRunCommandHook();
 
 	int tick = session->GetTick();
 
@@ -321,11 +229,6 @@ DETOUR(Server::GameFrame, bool simulating)
 	++server->tickCount;
 
 	return result;
-}
-
-// CServerGameDLL::ApplyGameSettings
-DETOUR(Server::ApplyGameSettings, KeyValues *pKV) {
-	return Server::ApplyGameSettings(thisptr, pKV);
 }
 
 DETOUR_T(void, Server::OnRemoveEntity, IHandleEntity *ent, CBaseHandle handle) {
@@ -391,37 +294,7 @@ bool Server::Init() {
 	this->g_ServerGameDLL = Interface::Create(this->Name(), "ServerGameDLL005");
 
 	if (this->g_GameMovement) {
-		this->g_GameMovement->Hook(Server::CheckJumpButton_Hook, Server::CheckJumpButton, Offsets::CheckJumpButton);
-		this->g_GameMovement->Hook(Server::PlayerMove_Hook, Server::PlayerMove, Offsets::PlayerMove);
-
 		this->g_GameMovement->Hook(Server::ProcessMovement_Hook, Server::ProcessMovement, Offsets::ProcessMovement);
-		this->g_GameMovement->Hook(Server::GetPlayerViewOffset_Hook, Server::GetPlayerViewOffset, Offsets::GetPlayerViewOffset);
-		this->g_GameMovement->Hook(Server::FinishGravity_Hook, Server::FinishGravity, Offsets::FinishGravity);
-		this->g_GameMovement->Hook(Server::AirMove_Hook, Server::AirMove, Offsets::AirMove);
-
-		auto ctor = this->g_GameMovement->Original(0);
-		auto baseCtor = Memory::Read(ctor + Offsets::AirMove_Offset1);
-		uintptr_t baseOffset;
-		baseOffset = Memory::Deref<uintptr_t>(baseCtor + Offsets::AirMove_Offset2);
-		Memory::Deref<_AirMove>(baseOffset + Offsets::AirMove * sizeof(uintptr_t *), &Server::AirMoveBase);
-
-		Memory::Deref<_CheckJumpButton>(baseOffset + Offsets::CheckJumpButton * sizeof(uintptr_t *), &Server::CheckJumpButtonBase);
-
-		uintptr_t airMove = (uintptr_t)AirMove;
-#ifdef _WIN32
-		if (p2fx.game->Is(SourceGame_Portal2)) {
-			this->aircontrol_fling_speed_addr = *(float **)(airMove + 791);
-		} else {
-			this->aircontrol_fling_speed_addr = *(float **)(airMove + 662);
-		}
-#else
-		if (p2fx.game->Is(SourceGame_EIPRelPIC)) {
-			this->aircontrol_fling_speed_addr = *(float **)(airMove + 641);
-		} else {
-			this->aircontrol_fling_speed_addr = *(float **)(airMove + 524);
-		}
-#endif
-		Memory::UnProtect(this->aircontrol_fling_speed_addr, 4);
 	}
 
 	if (auto g_ServerTools = Interface::Create(this->Name(), "VSERVERTOOLS001")) {
@@ -454,7 +327,6 @@ bool Server::Init() {
 		this->IsRestoring = this->g_ServerGameDLL->Original<_IsRestoring>(Offsets::IsRestoring);
 
 		this->g_ServerGameDLL->Hook(Server::GameFrame_Hook, Server::GameFrame, Offsets::GameFrame);
-		this->g_ServerGameDLL->Hook(Server::ApplyGameSettings_Hook, Server::ApplyGameSettings, Offsets::ApplyGameSettings);
 	}
 
 #ifdef _WIN32
@@ -502,17 +374,6 @@ bool Server::Init() {
 	}
 #endif
 
-#ifdef _WIN32
-	ViewPunch = (decltype (ViewPunch))Memory::Scan(server->Name(), "55 8B EC A1 ? ? ? ? 83 EC 0C 83 78 30 00 56 8B F1 0F 85 ? ? ? ? 8B 16 8B 82 00 05 00 00 FF D0 84 C0 0F 85 ? ? ? ? 8B 45 08 F3 0F 10 1D ? ? ? ? F3 0F 10 00");
-#else
-	if (p2fx.game->Is(SourceGame_EIPRelPIC)) {
-		ViewPunch = (decltype (ViewPunch))Memory::Scan(server->Name(), "55 57 56 53 83 EC 1C A1 ? ? ? ? 8B 5C 24 30 8B 74 24 34 8B 40 30 85 C0 75 38 8B 03 8B 80 04 05 00 00 3D ? ? ? ? 75 36 8B 83 B8 0B 00 00 8B 0D ? ? ? ?");
-	} else {
-		ViewPunch = (decltype (ViewPunch))Memory::Scan(server->Name(), "55 89 E5 53 83 EC 24 A1 ? ? ? ? 8B 5D 08 8B 40 30 85 C0 74 0A 83 C4 24 5B 5D C3 8D 74 26 00 8B 03 89 1C 24 FF 90 04 05 00 00 84 C0 75 E7 8B 45 0C");
-	}
-#endif
-	g_ViewPunch_Hook.SetFunc(ViewPunch);
-
 	{
 		// a call to Plat_FloatTime in CGameMovement::CheckStuck
 #ifdef _WIN32
@@ -535,16 +396,6 @@ bool Server::Init() {
 #endif
 
 		g_check_stuck_code = (void *)code;
-	}
-
-	if (p2fx.game->Is(SourceGame_Portal2)) {
-#ifdef _WIN32
-		Server::IsInPVS = (Server::_IsInPVS)Memory::Scan(this->Name(), "55 8B EC 51 53 8B 5D 08 56 57 33 FF 89 4D FC 66 39 79 1A 75 57 3B BB 10 20 00 00 0F 8D C0 00 00 00 8D B3 14 20 00 00");
-#else
-		// this only really matters for coop so this pattern is just for the base game
-		Server::IsInPVS = (Server::_IsInPVS)Memory::Scan(this->Name(), "55 57 56 53 31 DB 83 EC 0C 8B 74 24 20 8B 7C 24 24 66 83 7E 1A 00 8B 87 10 20 00 00 89 C2 0F 85 BC 00 00 00 85 C0 7F 75 8D B4 26");
-#endif
-		g_IsInPVS_Hook.SetFunc(IsInPVS);
 	}
 
 	sv_cheats = Variable("sv_cheats");

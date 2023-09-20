@@ -38,17 +38,12 @@ Variable p2fx_disable_save_status_hud("p2fx_disable_save_status_hud", "0", "Disa
 
 REDECL(Client::LevelInitPreEntity);
 REDECL(Client::CreateMove);
-REDECL(Client::CreateMove2);
 REDECL(Client::GetName);
 REDECL(Client::ShouldDraw_BasicInfo);
 REDECL(Client::ShouldDraw_SaveStatus);
 REDECL(Client::MsgFunc_SayText2);
 REDECL(Client::GetTextColorForClient);
 REDECL(Client::DecodeUserCmdFromBuffer);
-REDECL(Client::CInput_CreateMove);
-REDECL(Client::GetButtonBits);
-REDECL(Client::SteamControllerMove);
-REDECL(Client::playvideo_end_level_transition_callback);
 REDECL(Client::OverrideView);
 REDECL(Client::ProcessMovement);
 REDECL(Client::DrawTranslucentRenderables);
@@ -181,9 +176,6 @@ DETOUR(Client::CreateMove, float flInputSampleTime, CUserCmd *cmd) {
 	}
 
 	return Client::CreateMove(thisptr, flInputSampleTime, cmd);
-}
-DETOUR(Client::CreateMove2, float flInputSampleTime, CUserCmd *cmd) {
-	return Client::CreateMove2(thisptr, flInputSampleTime, cmd);
 }
 
 // CHud::GetName
@@ -334,32 +326,6 @@ DETOUR(Client::DecodeUserCmdFromBuffer, int nSlot, int buf, signed int sequence_
 	}
 
 	return result;
-}
-
-// CInput::CreateMove
-DETOUR(Client::CInput_CreateMove, int sequence_number, float input_sample_frametime, bool active) {
-	auto result = Client::CInput_CreateMove(thisptr, sequence_number, input_sample_frametime, active);
-
-	return result;
-}
-
-// CInput::GetButtonBits
-DETOUR(Client::GetButtonBits, bool bResetState) {
-	auto bits = Client::GetButtonBits(thisptr, bResetState);
-
-	return bits;
-}
-
-// CInput::SteamControllerMove
-DETOUR(Client::SteamControllerMove, int nSlot, float flFrametime, CUserCmd *cmd) {
-	return Client::SteamControllerMove(thisptr, nSlot, flFrametime, cmd);
-}
-
-DETOUR_COMMAND(Client::playvideo_end_level_transition) {
-	console->DevMsg("%s\n", args.m_pArgSBuffer);
-	//	session->Ended();
-
-	return Client::playvideo_end_level_transition_callback(args);
 }
 
 DETOUR_T(void, Client::OverrideView, CViewSetup *m_View) {
@@ -516,15 +482,8 @@ bool Client::Init() {
 
 		if (g_Input = Interface::Create(g_InputAddr)) {
 			g_Input->Hook(Client::DecodeUserCmdFromBuffer_Hook, Client::DecodeUserCmdFromBuffer, Offsets::DecodeUserCmdFromBuffer);
-			g_Input->Hook(Client::GetButtonBits_Hook, Client::GetButtonBits, Offsets::GetButtonBits);
-			g_Input->Hook(Client::SteamControllerMove_Hook, Client::SteamControllerMove, Offsets::SteamControllerMove);
 
 			in_forceuser = Variable("in_forceuser");
-			if (!!in_forceuser && this->g_Input) {
-				this->g_Input->Hook(CInput_CreateMove_Hook, CInput_CreateMove, Offsets::GetButtonBits + 1);
-			}
-
-			Command::Hook("playvideo_end_level_transition", Client::playvideo_end_level_transition_callback_hook, Client::playvideo_end_level_transition_callback);
 		}
 
 		auto HudProcessInput = this->g_ClientDLL->Original(Offsets::HudProcessInput, readJmp);
@@ -536,10 +495,6 @@ bool Client::Init() {
 		if (this->g_pClientMode = Interface::Create(clientMode)) {
 			this->g_pClientMode->Hook(Client::CreateMove_Hook, Client::CreateMove, Offsets::CreateMove);
 			this->g_pClientMode->Hook(Client::OverrideView_Hook, Client::OverrideView, Offsets::OverrideView);
-		}
-
-		if (this->g_pClientMode2 = Interface::Create(clientMode2)) {
-			this->g_pClientMode2->Hook(Client::CreateMove2_Hook, Client::CreateMove2, Offsets::CreateMove);
 		}
 	}
 
@@ -627,7 +582,6 @@ void Client::Shutdown() {
 	r_portaltestents.AddFlag(FCVAR_CHEAT);
 	Interface::Delete(this->g_ClientDLL);
 	Interface::Delete(this->g_pClientMode);
-	Interface::Delete(this->g_pClientMode2);
 	Interface::Delete(this->g_HUDChallengeStats);
 	Interface::Delete(this->s_EntityList);
 	Interface::Delete(this->g_Input);
@@ -636,7 +590,6 @@ void Client::Shutdown() {
 	Interface::Delete(this->g_HudMultiplayerBasicInfo);
 	Interface::Delete(this->g_HudSaveStatus);
 	Interface::Delete(this->g_GameMovement);
-	Command::Unhook("playvideo_end_level_transition", Client::playvideo_end_level_transition_callback);
 }
 
 Client *client;
