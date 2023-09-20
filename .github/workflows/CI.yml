@@ -38,17 +38,9 @@ jobs:
             bin\p2fx.dll
             bin\p2fx.pdb
           if-no-files-found: error
-  blender-scripts:
-    name: Blender Scripts
-    runs-on: ubuntu-latest
-    steps:
-      - name: Zip File
-        uses: montudor/action-zip@v1
-        with:
-          args: zip -qq -r p2fx-blender-scripts.zip . -i blender\p2fx
-      - name: Upload Zip Artifact
+      - name: Upload Blender Scripts Artifact
         uses: actions/upload-artifact@v3
         with:
           name: p2fx-blender-scripts
-          path: p2fx-blender-scripts.zip
+          path: blender\p2fx
           if-no-files-found: error
