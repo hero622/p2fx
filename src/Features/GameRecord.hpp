@@ -60,8 +60,6 @@ private:
 	GameRecordFs *gameRecordFs;
 
 private:
-	bool GetRecording() { return gameRecordFs->GetRecording(); }
-
 	void WriteDictionary(const char *value) { gameRecordFs->WriteDictionary(value); }
 
 	void Write(bool value) { gameRecordFs->Write(value); }
@@ -86,6 +84,8 @@ public:
 	int GetP2grVersion() {
 		return 1;
 	}
+
+	bool GetRecording() { return gameRecordFs->GetRecording(); }
 
 	void StartRecording(const char *fileName);
 	void EndRecording();

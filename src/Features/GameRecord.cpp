@@ -6,6 +6,8 @@
 #include "Modules/Server.hpp"
 #include "Event.hpp"
 
+Variable p2gr_framerate("p2gr_framerate", "30", 1, 240, "Frame rate of P2GR recording.\n");
+
 GameRecordFs::GameRecordFs()
 	: recording(false) {
 }
@@ -176,6 +178,9 @@ GameRecord::~GameRecord() {
 }
 
 void GameRecord::StartRecording(const char *fileName) {
+	engine->ExecuteCommand("host_timescale 0");
+	engine->ExecuteCommand(Utils::ssprintf("host_framerate %d", p2gr_framerate.GetInt()).c_str());
+
 	gameRecordFs->StartRecording(fileName, GetP2grVersion());
 
 	if (GetRecording()) {
@@ -191,6 +196,9 @@ void GameRecord::EndRecording() {
 	}
 
 	gameRecordFs->EndRecording();
+
+	engine->ExecuteCommand("host_timescale 1.0");
+	engine->ExecuteCommand("host_framerate 0");
 
 	console->Print("P2FX: Stopped recording.\n");
 }
@@ -341,7 +349,8 @@ void GameRecord::OnPostToolMessage(HTOOLHANDLE hEntity, KeyValues *msg) {
 
 	if (!strcmp(msgName, "entity_state")) {
 		if (GetRecording()) {
-			// const char *className = client->GetClassname(client->g_ClientTools->ThisPtr(), hEntity);
+			const char *className = client->GetClassname(client->g_ClientTools->ThisPtr(), hEntity);
+			console->Print("%s\n", className);
 
 			bool wasVisible = false;
 			bool hasParentTransform = false;
@@ -420,12 +429,12 @@ void GameRecord::OnAfterFrameRenderEnd() {
 	gameRecordFs->EndFrame();
 }
 
-CON_COMMAND(p2fx_startrecording, "") {
+CON_COMMAND(p2gr_start, "Start P2GR recording.\n") {
 	if (args.ArgC() >= 2) {
 		gameRecord->StartRecording(Utils::ssprintf("%s.%s", args[1], "p2gr").c_str());
 	}
 }
 
-CON_COMMAND(p2fx_endrecording, "") {
+CON_COMMAND(p2gr_end, "End P2GR recording.\n") {
 	gameRecord->EndRecording();
 }
