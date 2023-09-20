@@ -364,9 +364,6 @@ void GameRecord::OnPostToolMessage(HTOOLHANDLE hEntity, KeyValues *msg) {
 
 	if (!strcmp(msgName, "entity_state")) {
 		if (GetRecording()) {
-			const char *className = client->GetClassname(client->g_ClientTools->ThisPtr(), hEntity);
-			// console->Print("%s\n", className);
-
 			void *ent = client->GetEntity(client->g_ClientTools->ThisPtr(), hEntity);
 
 			bool isPlayer = client->IsPlayer(client->g_ClientTools->ThisPtr(), ent);
@@ -466,9 +463,11 @@ void GameRecord::OnAfterFrameRenderEnd() {
 	gameRecordFs->EndFrame();
 }
 
-CON_COMMAND(p2gr_start, "Start P2GR recording.\n") {
+CON_COMMAND(p2gr_start, "p2gr_start <filename> - Start P2GR recording.\n") {
 	if (args.ArgC() >= 2) {
 		gameRecord->StartRecording(Utils::ssprintf("%s.%s", args[1], "p2gr").c_str());
+	} else {
+		console->Print(p2gr_start.ThisPtr()->m_pszHelpString);
 	}
 }
 
