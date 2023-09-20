@@ -6,6 +6,10 @@
 #include "Modules/Server.hpp"
 #include "Event.hpp"
 
+Variable p2gr_record_players("p2gr_record_players", "1", "Include players in P2GR recordings.\n");
+Variable p2gr_record_cameras("p2gr_record_cameras", "0", "Include cameras in P2GR recordings.\n");
+Variable p2gr_record_viewmodels("p2gr_record_viewmodels", "0", "Include viewmodels in P2GR recordings.\n");
+Variable p2gr_record_others("p2gr_record_others", "0", "Include others in P2GR recordings.\n");
 Variable p2gr_framerate("p2gr_framerate", "30", 1, 240, "Frame rate of P2GR recording.\n");
 
 GameRecordFs::GameRecordFs()
@@ -325,6 +329,17 @@ bool GameRecord::InvertMatrix(const matrix3x4_t &matrix, matrix3x4_t &out_matrix
 	return true;
 }
 
+double GameRecord::ScaleFov(double width, double height, double fov) {
+	if (!height) return fov;
+
+	double engineAspectRatio = width / height;
+	double defaultAscpectRatio = 4.0 / 3.0;
+	double ratio = engineAspectRatio / defaultAscpectRatio;
+	double halfAngle = 0.5 * fov * (2.0 * M_PI / 360.0);
+	double t = ratio * tan(halfAngle);
+	return 2.0 * atan(t) / (2.0 * M_PI / 360.0);
+}
+
 void GameRecord::CaptureBones(CStudioHdr *hdr, matrix3x4_t *pBoneState) {
 	boneStates.clear();
 	if (hdr != nullptr && pBoneState != nullptr) {
@@ -350,7 +365,13 @@ void GameRecord::OnPostToolMessage(HTOOLHANDLE hEntity, KeyValues *msg) {
 	if (!strcmp(msgName, "entity_state")) {
 		if (GetRecording()) {
 			const char *className = client->GetClassname(client->g_ClientTools->ThisPtr(), hEntity);
-			console->Print("%s\n", className);
+			// console->Print("%s\n", className);
+
+			void *ent = client->GetEntity(client->g_ClientTools->ThisPtr(), hEntity);
+
+			bool isPlayer = client->IsPlayer(client->g_ClientTools->ThisPtr(), ent);
+			bool isWeapon = client->IsWeapon(client->g_ClientTools->ThisPtr(), ent);
+			bool isViewModel = client->IsViewModel(client->g_ClientTools->ThisPtr(), ent);
 
 			bool wasVisible = false;
 			bool hasParentTransform = false;
@@ -369,33 +390,49 @@ void GameRecord::OnPostToolMessage(HTOOLHANDLE hEntity, KeyValues *msg) {
 				return;
 			}
 
-			WriteDictionary("entity_state");
-			Write((int)hEntity);
-			if (baseEntRs) {
-				wasVisible = baseEntRs->m_bVisible;
+			if (p2gr_record_others.GetBool() || (p2gr_record_players.GetBool() && (isPlayer || isWeapon)) || (p2gr_record_viewmodels.GetBool() && isViewModel)) {
+				WriteDictionary("entity_state");
+				Write((int)hEntity);
+				if (baseEntRs) {
+					wasVisible = baseEntRs->m_bVisible;
 
-				WriteDictionary("baseentity");
-				WriteDictionary(baseEntRs->m_pModelName);
-				Write((bool)wasVisible);
+					WriteDictionary("baseentity");
+					WriteDictionary(baseEntRs->m_pModelName);
+					Write((bool)wasVisible);
 
-				hasParentTransform = true;
-				Math::AngleMatrix(baseEntRs->m_vecRenderAngles, baseEntRs->m_vecRenderOrigin, parentTransform);
-				WriteMatrix3x4(parentTransform);
+					hasParentTransform = true;
+					Math::AngleMatrix(baseEntRs->m_vecRenderAngles, baseEntRs->m_vecRenderOrigin, parentTransform);
+					WriteMatrix3x4(parentTransform);
+				}
+
+				trackedHandles[hEntity] = wasVisible;
+
+				auto baseAnimRs = (BaseAnimatingRecordingState_t *)(msg->GetPtr("baseanimating"));
+				if (baseAnimRs && hasParentTransform) {
+					WriteDictionary("baseanimating");
+					WriteBones(baseAnimRs->m_pBoneList != nullptr, parentTransform);
+				}
+
+				if (p2gr_record_cameras.GetBool()) {
+					auto *camRs = (CameraRecordingState_t *)(msg->GetPtr("camera"));
+					if (camRs) {
+						int x, y;
+						engine->GetScreenSize(nullptr, x, y);
+
+						WriteDictionary("camera");
+						Write((bool)camRs->m_bThirdPerson);
+						Write(camRs->m_vecEyePosition);
+						Write(camRs->m_vecEyeAngles);
+						Write((float)ScaleFov(x, y, (float)camRs->m_flFOV));
+					}
+				}
+
+				WriteDictionary("/");
+
+				bool viewModel = msg->GetBool("viewmodel");
+
+				Write((bool)viewModel);
 			}
-
-			trackedHandles[hEntity] = wasVisible;
-
-			auto baseAnimRs = (BaseAnimatingRecordingState_t *)(msg->GetPtr("baseanimating"));
-			if (baseAnimRs && hasParentTransform) {
-				WriteDictionary("baseanimating");
-				WriteBones(baseAnimRs->m_pBoneList != nullptr, parentTransform);
-			}
-
-			WriteDictionary("/");
-
-			bool viewModel = msg->GetBool("viewmodel");
-
-			Write((bool)viewModel);
 		}
 	} else if (!strcmp(msgName, "deleted")) {
 		std::map<HTOOLHANDLE, bool>::iterator it = trackedHandles.find(hEntity);

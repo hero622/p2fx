@@ -114,6 +114,10 @@ void Menu::Draw() {
 			CImGui::Checkbox("Skip Coop Videos", "p2fx_render_skip_coop_videos");
 			break;
 		case 4:
+			CImGui::Checkbox("Record Players", "p2gr_record_players");
+			CImGui::Checkbox("Record Player Cameras", "p2gr_record_cameras");
+			CImGui::Checkbox("Record Player Viewmodels", "p2gr_record_viewmodels");
+			CImGui::Checkbox("Record Other Entities", "p2gr_record_others");
 			CImGui::Slider("Frame Rate", "p2gr_framerate", 0, 240, "%dfps");
 			static char grFileName[32];
 			ImGui::InputText("Filename", grFileName, IM_ARRAYSIZE(grFileName));

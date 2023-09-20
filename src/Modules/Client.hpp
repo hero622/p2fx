@@ -43,11 +43,15 @@ public:
 	using _StartMessageMode = void(__rescall *)(void *thisptr, int type);
 	using _IN_ActivateMouse = void (*)(void *thisptr);
 	using _IN_DeactivateMouse = void (*)(void *thisptr);
+
 	using _GetEntity = void *(__rescall *)(void *thisptr, HTOOLHANDLE handle);
 	using _SetRecording = void *(__rescall *)(void *thisptr, HTOOLHANDLE handle, bool recording);
 	using _ShouldRecord = bool(__rescall *)(void *thisptr, HTOOLHANDLE handle);
 	using _GetClassname = const char *(__rescall *)(void *thisptr, HTOOLHANDLE handle);
 	using _EnableRecordingMode = void(__rescall *)(void *thisptr, bool bEnable);
+	using _IsPlayer = bool(__rescall *)(void *thisptr, void *currentEnt);
+	using _IsViewModel = bool(__rescall *)(void *thisptr, void *currentEnt);
+	using _IsWeapon = bool(__rescall *)(void *thisptr, void *currentEnt);
 
 	_GetClientEntity GetClientEntity = nullptr;
 	_GetAllClasses GetAllClasses = nullptr;
@@ -56,11 +60,15 @@ public:
 	_StartMessageMode StartMessageMode = nullptr;
 	_IN_ActivateMouse IN_ActivateMouse = nullptr;
 	_IN_DeactivateMouse IN_DeactivateMouse = nullptr;
+
 	_GetEntity GetEntity = nullptr;
 	_SetRecording SetRecording = nullptr;
 	_ShouldRecord ShouldRecord = nullptr;
 	_GetClassname GetClassname = nullptr;
 	_EnableRecordingMode EnableRecordingMode = nullptr;
+	_IsPlayer IsPlayer = nullptr;
+	_IsViewModel IsViewModel = nullptr;
+	_IsWeapon IsWeapon = nullptr;
 
 	std::string lastLevelName;
 	void **gamerules;

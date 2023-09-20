@@ -124,3 +124,10 @@ struct BaseAnimatingRecordingState_t {
 	int m_nSequence;
 	CBoneList *m_pBoneList;
 };
+
+struct CameraRecordingState_t {
+	bool m_bThirdPerson;
+	float m_flFOV;
+	Vector m_vecEyePosition;
+	QAngle m_vecEyeAngles;
+};

@@ -555,6 +555,9 @@ bool Client::Init() {
 		this->ShouldRecord = this->g_ClientTools->Original<_ShouldRecord>(11);
 		this->GetClassname = this->g_ClientTools->Original<_GetClassname>(15);
 		this->EnableRecordingMode = this->g_ClientTools->Original<_EnableRecordingMode>(32);
+		this->IsPlayer = this->g_ClientTools->Original<_IsPlayer>(40);
+		this->IsViewModel = this->g_ClientTools->Original<_IsViewModel>(44);
+		this->IsWeapon = this->g_ClientTools->Original<_IsWeapon>(46);
 	}
 
 #ifdef _WIN32

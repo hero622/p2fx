@@ -91,6 +91,7 @@ public:
 	void EndRecording();
 
 	static bool InvertMatrix(const matrix3x4_t &matrix, matrix3x4_t &out_matrix);
+	double ScaleFov(double width, double height, double fov);
 
 	void CaptureBones(CStudioHdr *hdr, matrix3x4_t *pBoneState);
 
