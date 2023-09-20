@@ -550,14 +550,14 @@ bool Client::Init() {
 	}
 
 	if (this->g_ClientTools = Interface::Create(this->Name(), "VCLIENTTOOLS001")) {
-		this->GetEntity = this->g_ClientTools->Original<_GetEntity>(3);
-		this->SetRecording = this->g_ClientTools->Original<_SetRecording>(10);
-		this->ShouldRecord = this->g_ClientTools->Original<_ShouldRecord>(11);
-		this->GetClassname = this->g_ClientTools->Original<_GetClassname>(15);
-		this->EnableRecordingMode = this->g_ClientTools->Original<_EnableRecordingMode>(32);
-		this->IsPlayer = this->g_ClientTools->Original<_IsPlayer>(40);
-		this->IsViewModel = this->g_ClientTools->Original<_IsViewModel>(44);
-		this->IsWeapon = this->g_ClientTools->Original<_IsWeapon>(46);
+		this->GetEntity = this->g_ClientTools->Original<_GetEntity>(Offsets::GetEntity);
+		this->SetRecording = this->g_ClientTools->Original<_SetRecording>(Offsets::SetRecording);
+		this->ShouldRecord = this->g_ClientTools->Original<_ShouldRecord>(Offsets::ShouldRecord);
+		this->GetClassname = this->g_ClientTools->Original<_GetClassname>(Offsets::GetClassname);
+		this->EnableRecordingMode = this->g_ClientTools->Original<_EnableRecordingMode>(Offsets::EnableRecordingMode);
+		this->IsPlayer = this->g_ClientTools->Original<_IsPlayer>(Offsets::ClientToolsIsPlayer);
+		this->IsViewModel = this->g_ClientTools->Original<_IsViewModel>(Offsets::IsViewModel);
+		this->IsWeapon = this->g_ClientTools->Original<_IsWeapon>(Offsets::IsWeapon);
 	}
 
 #ifdef _WIN32

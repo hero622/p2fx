@@ -85,10 +85,10 @@ bool ShaderApi::Init() {
 
 	this->g_d3dDevice = reinterpret_cast<IDirect3DDevice9 *>(g_d3dDeviceAddr);
 	if (this->g_d3dDevice) {
-		Reset = Memory::VMT<long(__stdcall *)(IDirect3DDevice9 *, D3DPRESENT_PARAMETERS *)>(this->g_d3dDevice, 16);
+		Reset = Memory::VMT<long(__stdcall *)(IDirect3DDevice9 *, D3DPRESENT_PARAMETERS *)>(this->g_d3dDevice, Offsets::Reset);
 		Reset_Hook.SetFunc(Reset);
 
-		Present = Memory::VMT<long(__stdcall *)(IDirect3DDevice9 *, const RECT *, const RECT *, HWND, const RGNDATA *)>(this->g_d3dDevice, 17);
+		Present = Memory::VMT<long(__stdcall *)(IDirect3DDevice9 *, const RECT *, const RECT *, HWND, const RGNDATA *)>(this->g_d3dDevice, Offsets::Present);
 		Present_Hook.SetFunc(Present);
 	}
 

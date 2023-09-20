@@ -856,8 +856,8 @@ bool Engine::Init() {
 	}
 
 	if (this->clientEngineTools = Interface::Create(this->Name(), "VCLIENTENGINETOOLS001")) {
-		this->clientEngineTools->Hook(Engine::PostToolMessage_Hook, Engine::PostToolMessage, 7);
-		this->clientEngineTools->Hook(Engine::InToolMode_Hook, Engine::InToolMode, 14);
+		this->clientEngineTools->Hook(Engine::PostToolMessage_Hook, Engine::PostToolMessage, Offsets::PostToolMessage);
+		this->clientEngineTools->Hook(Engine::InToolMode_Hook, Engine::InToolMode, Offsets::InToolMode);
 	}
 
 	if (auto s_EngineAPI = Interface::Create(this->Name(), "VENGINE_LAUNCHER_API_VERSION004", false)) {

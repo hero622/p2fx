@@ -204,7 +204,7 @@ void VGui::EnumerateFiles(CUtlVector<ExtraInfo_t> &m_ExtraInfos, std::string pat
 }
 
 DETOUR(VGui::PopulateFromScript) {
-	vgui->g_ExtraInfos = (uintptr_t)thisptr + 0x830;
+	vgui->g_ExtraInfos = (uintptr_t)thisptr + Offsets::g_ExtraInfos;
 	auto &m_ExtraInfos = *(CUtlVector<ExtraInfo_t> *)vgui->g_ExtraInfos;
 
 	vgui->EnumerateFiles(m_ExtraInfos, vgui->g_curDirectory);
@@ -216,7 +216,7 @@ Hook g_PopulateFromScriptHook(&VGui::PopulateFromScript_Hook);
 DETOUR(VGui::ApplySchemeSettings, void *pScheme) {
 	vgui->g_extrasDialog = thisptr;
 	vgui->g_pScheme = pScheme;
-	vgui->g_pInfoList = *reinterpret_cast<GenericPanelList **>((uintptr_t)thisptr + 0x84C);
+	vgui->g_pInfoList = *reinterpret_cast<GenericPanelList **>((uintptr_t)thisptr + Offsets::g_pInfoList);
 
 	g_ApplySchemeSettingsHook.Disable();
 	auto ret = VGui::ApplySchemeSettings(thisptr, pScheme);
@@ -274,30 +274,30 @@ bool VGui::Init() {
 	this->ipanel = Interface::Create(this->Name(), "VGUI_Panel009");
 
 	if (this->ipanel) {
-		this->SetVisible = this->ipanel->Original<_SetVisible>(14);
-		this->IsVisible = this->ipanel->Original<_IsVisible>(15);
-		this->GetName = this->ipanel->Original<_GetName>(36);
-		this->GetPanel = this->ipanel->Original<_GetPanel>(55);
+		this->SetVisible = this->ipanel->Original<_SetVisible>(Offsets::SetVisible);
+		this->IsVisible = this->ipanel->Original<_IsVisible>(Offsets::IsVisible);
+		this->GetName = this->ipanel->Original<_GetName>(Offsets::IPanelGetName);
+		this->GetPanel = this->ipanel->Original<_GetPanel>(Offsets::GetPanel);
 
-		this->ipanel->Hook(VGui::PaintTraverse_Hook, VGui::PaintTraverse, 41);
+		this->ipanel->Hook(VGui::PaintTraverse_Hook, VGui::PaintTraverse, Offsets::PaintTraverse);
 	}
 
 	this->InitImgs();
 
 	// vgui stuff are all over everywhere, base level stuff is in vgui2, most panels are in client
-	VGui::PopulateFromScript = (decltype(VGui::PopulateFromScript))Memory::Scan(MODULE("client"), "55 8B EC 83 EC 1C 6A 24 89 4D F8 E8 ? ? ? ? 83 C4 04 85 C0 74 11 68 ? ? ? ? 8B C8 E8 ? ? ? ? 89 45 FC EB 07");
+	VGui::PopulateFromScript = (decltype(VGui::PopulateFromScript))Memory::Scan(MODULE("client"), "55 8B EC 83 EC 1C 6A 24 89 4D F8 E8 ? ? ? ? 83 C4 04 85 C0 74 11");
 	g_PopulateFromScriptHook.SetFunc(VGui::PopulateFromScript);
 
-	VGui::ApplySchemeSettings = (decltype(VGui::ApplySchemeSettings))Memory::Scan(MODULE("client"), "55 8B EC 8B 45 08 56 57 50 8B F1 E8 ? ? ? ? 6A 00 68 ? ? ? ? 68 ? ? ? ? 6A 00 6A 00 68 ? ? ? ? 8B CE E8 ? ? ? ? 50 E8 ? ? ? ? 83 C4 14 68 ? ? ? ? 89 86 ? ? ? ? E8 ? ? ? ?");
+	VGui::ApplySchemeSettings = (decltype(VGui::ApplySchemeSettings))Memory::Scan(MODULE("client"), "55 8B EC 8B 45 08 56 57 50 8B F1 E8 ? ? ? ? 6A 00 68 ? ? ? ? 68 ? ? ? ? 6A 00 6A 00 68 ? ? ? ? 8B CE E8 ? ? ? ? 50 E8 ? ? ? ? 83 C4 14 68 ? ? ? ?");
 	g_ApplySchemeSettingsHook.SetFunc(VGui::ApplySchemeSettings);
 
-	VGui::OpenWindow = (decltype(VGui::OpenWindow))Memory::Scan(MODULE("client"), "55 8B EC 83 EC 10 53 56 8B F1 F3 0F 10 86 ? ? ? ? 0F 2E 05 ? ? ? ? 9F 57 F6 C4 44 7B 10 F3 0F 10 05 ? ? ? ? F3 0F 11 86 ? ? ? ?");
+	VGui::OpenWindow = (decltype(VGui::OpenWindow))Memory::Scan(MODULE("client"), "55 8B EC 83 EC 10 53 56 8B F1 F3 0F 10 86 ? ? ? ?");
 	g_OpenWindowHook.SetFunc(VGui::OpenWindow);
 
-	VGui::MainMenuOnCommand = (decltype(VGui::MainMenuOnCommand))Memory::Scan(MODULE("client"), "55 8B EC 81 EC ? ? ? ? 53 56 57 8B F9 E8 ? ? ? ? 8B C8 E8 ? ? ? ? 8B F0 89 75 FC E8 ? ? ? ? 8B 5D 08 85 C0 74 11 56 56 53 68 ? ? ? ? FF 15 ? ? ? ? 83 C4 10");
+	VGui::MainMenuOnCommand = (decltype(VGui::MainMenuOnCommand))Memory::Scan(MODULE("client"), "55 8B EC 81 EC ? ? ? ? 53 56 57 8B F9 E8 ? ? ? ? 8B C8 E8 ? ? ? ?");
 	g_MainMenuOnCommandHook.SetFunc(VGui::MainMenuOnCommand);
 
-	VGui::InGameMainMenuOnCommand = (decltype(VGui::InGameMainMenuOnCommand))Memory::Scan(MODULE("client"), "55 8B EC 83 EC 3C 53 56 57 8B F1 E8 ? ? ? ? 8B C8 E8 ? ? ? ? 8B F8 E8 ? ? ? ? 8B 5D 08 85 C0 74 11 57 57 53 68 ? ? ? ? FF 15 ? ? ? ? 83 C4 10");
+	VGui::InGameMainMenuOnCommand = (decltype(VGui::InGameMainMenuOnCommand))Memory::Scan(MODULE("client"), "55 8B EC 83 EC 3C 53 56 57 8B F1 E8 ? ? ? ? 8B C8 E8 ? ? ? ?");
 	g_InGameMainMenuOnCommandHook.SetFunc(VGui::InGameMainMenuOnCommand);
 
 	return this->hasLoaded = this->ipanel;

@@ -72,9 +72,15 @@ OFFSET_DEFAULT(IsTextureIDValid, 40, 40)
 OFFSET_DEFAULT(CreateNewTextureID, 41, 41)
 
 // IPanel
-OFFSET_DEFAULT(SetVisible, 14, 14)
-OFFSET_DEFAULT(IPanelGetName, 36, 36)
-OFFSET_DEFAULT(PaintTraverse, 41, 41)
+OFFSET_DEFAULT(SetVisible, 14, 14);
+OFFSET_DEFAULT(IsVisible, 15, 15);
+OFFSET_DEFAULT(IPanelGetName, 36, 36);
+OFFSET_DEFAULT(PaintTraverse, 41, 41);
+OFFSET_DEFAULT(GetPanel, 55, 55);
+
+// CExtrasDialog
+OFFSET_DEFAULT(g_ExtraInfos, 2096, 2096);
+OFFSET_DEFAULT(g_pInfoList, 2124, 2124);
 
 // CInputSystem
 OFFSET_DEFAULT(StringToButtonCode, 31, 31)
@@ -171,6 +177,20 @@ OFFSET_DEFAULT(ClientTick, 49, 50)
 OFFSET_DEFAULT(ServerTick, 45, 46)
 OFFSET_DEFAULT(HostTick, 41, 42)
 
+// IClientEngineTools
+OFFSET_DEFAULT(PostToolMessage, 7, 7)
+OFFSET_DEFAULT(InToolMode, 14, 14)
+
+// CClientTools
+OFFSET_DEFAULT(GetEntity, 3, 3)
+OFFSET_DEFAULT(SetRecording, 10, 10)
+OFFSET_DEFAULT(ShouldRecord, 11, 11)
+OFFSET_DEFAULT(GetClassname, 15, 15)
+OFFSET_DEFAULT(EnableRecordingMode, 32, 32)
+OFFSET_DEFAULT(ClientToolsIsPlayer, 40, 40)
+OFFSET_DEFAULT(IsViewModel, 44, 44)
+OFFSET_DEFAULT(IsWeapon, 46, 46)
+
 // CSchemeManager
 OFFSET_DEFAULT(GetIScheme, 8, 9)
 
@@ -263,6 +283,10 @@ OFFSET_DEFAULT(GetSearchPath, 16, 16)
 
 // CGameRules
 OFFSET_DEFAULT(IsMultiplayer, 33, 34)
+
+// IDirect3DDevice9
+OFFSET_DEFAULT(Reset, 16, 16)
+OFFSET_DEFAULT(Present, 17, 17)
 
 // Others
 OFFSET_DEFAULT(tickcount, 95, 64)
