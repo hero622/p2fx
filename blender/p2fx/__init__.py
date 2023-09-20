@@ -1,0 +1,39 @@
+import bpy
+
+bl_info = {
+	"name": "p2fx Blender Scripts",
+	"author": "Zyntex",
+	"version": (1, 0, 0),
+	"blender": (3, 5, 0),
+	"location": "File > Import/Export",
+	"description": "For inter-operation with P2FX.",
+	#"warning": "",
+	"category": "Import-Export",
+}
+
+from . import utils, import_p2gr
+
+classes = (
+	import_p2gr.P2grImporter,
+)
+
+def menu_func_import_p2gr(self, context):
+	self.layout.operator(import_p2gr.P2grImporter.bl_idname, text="P2FX p2fxGameRecord (.p2gr)")
+
+def register():
+	from bpy.utils import register_class
+	for cls in classes:
+		register_class(cls)
+	
+	bpy.types.TOPBAR_MT_file_import.append(menu_func_import_p2gr)
+
+def unregister():
+	from bpy.utils import unregister_class
+	for cls in reversed(classes):
+		unregister_class(cls)
+	
+	bpy.types.TOPBAR_MT_file_import.remove(menu_func_import_p2gr)
+
+if __name__ == "__main__":
+	unregister()
+	register()

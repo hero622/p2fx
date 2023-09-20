@@ -32,6 +32,20 @@ jobs:
           name: p2fx-windows-pdb
           path: bin\p2fx.pdb
           if-no-files-found: error
+  blender-scripts:
+    name: Blender Scripts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Zip File
+        uses: montudor/action-zip@v1
+        with:
+          args: zip -qq -r p2fx-blender-scripts.zip blender\p2fx
+      - name: Upload Zip Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: p2fx-blender-scripts
+          path: p2fx-blender-scripts.zip
+          if-no-files-found: error
   release:
     name: Release
     if: github.repository == 'Zyntex1/p2fx'
@@ -49,6 +63,10 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: p2fx-windows-pdb
+      - name: Download Blender Scripts
+        uses: actions/download-artifact@v3
+        with:
+          name: p2fx-blender-scripts
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
@@ -69,5 +87,6 @@ jobs:
           files: |
             p2fx.dll
             p2fx.pdb
+            p2fx-blender-scripts.zip
           prerelease: ${{ contains(github.ref, '-pre') }}
           fail_on_unmatched_files: true
