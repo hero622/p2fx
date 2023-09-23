@@ -2991,7 +2991,7 @@ bool ImGui::SliderScalar(const char* label, ImGuiDataType data_type, void* p_dat
     const ImRect frame_bb(total_bb.Min + ImVec2(0, label_size.y + 5), total_bb.Max);
 
     ItemSize(total_bb, style.FramePadding.y);
-    if (!ItemAdd(total_bb, id, &frame_bb))
+	if (!ItemAdd(total_bb, id, &frame_bb, ImGuiItemFlags_Inputable))
         return false;
 
     // Default format string when passing NULL
@@ -3002,14 +3002,30 @@ bool ImGui::SliderScalar(const char* label, ImGuiDataType data_type, void* p_dat
 
     // Tabbing or CTRL-clicking on Slider turns it into an input box
     const bool hovered = ItemHoverable(frame_bb, id);
-    const bool clicked = (hovered && g.IO.MouseClicked[0]);
-    if (clicked)
-    {
-        SetActiveID(id, window);
-        SetFocusID(id, window);
-        FocusWindow(window);
-        g.ActiveIdUsingNavDirMask |= (1 << ImGuiDir_Left) | (1 << ImGuiDir_Right);
-    }
+	bool temp_input_is_active = TempInputIsActive(id);
+	if (!temp_input_is_active) {
+        // Tabbing or CTRL-clicking on Drag turns it into an InputText
+        const bool input_requested_by_tabbing = (g.LastItemData.StatusFlags & ImGuiItemStatusFlags_FocusedByTabbing) != 0;
+        const bool clicked = (hovered && g.IO.MouseClicked[0]);
+        const bool double_clicked = (hovered && g.IO.MouseClickedCount[0] == 2);
+        const bool make_active = (input_requested_by_tabbing || clicked || double_clicked || g.NavActivateId == id || g.NavActivateInputId == id);
+        if (make_active)
+            if (input_requested_by_tabbing || (clicked && g.IO.KeyCtrl) || double_clicked || g.NavActivateInputId == id)
+                temp_input_is_active = true;
+
+		if (make_active && !temp_input_is_active) {
+            SetActiveID(id, window);
+            SetFocusID(id, window);
+            FocusWindow(window);
+            g.ActiveIdUsingNavDirMask = (1 << ImGuiDir_Left) | (1 << ImGuiDir_Right);
+        }
+	}
+
+    if (temp_input_is_active) {
+		// Only clamp CTRL+Click input when ImGuiSliderFlags_AlwaysClamp is set
+		const bool is_clamp_input = (flags & ImGuiSliderFlags_AlwaysClamp) != 0;
+		return TempInputScalar(frame_bb, id, label, data_type, p_data, format, is_clamp_input ? p_min : NULL, is_clamp_input ? p_max : NULL);
+	}
 
     static std::map <ImGuiID, slider_element> anim;
     auto it_anim = anim.find(id);
