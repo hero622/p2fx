@@ -3005,12 +3005,11 @@ bool ImGui::SliderScalar(const char* label, ImGuiDataType data_type, void* p_dat
 	bool temp_input_is_active = TempInputIsActive(id);
 	if (!temp_input_is_active) {
         // Tabbing or CTRL-clicking on Drag turns it into an InputText
-        const bool input_requested_by_tabbing = (g.LastItemData.StatusFlags & ImGuiItemStatusFlags_FocusedByTabbing) != 0;
-        const bool clicked = (hovered && g.IO.MouseClicked[0]);
-        const bool double_clicked = (hovered && g.IO.MouseClickedCount[0] == 2);
-        const bool make_active = (input_requested_by_tabbing || clicked || double_clicked || g.NavActivateId == id || g.NavActivateInputId == id);
+		const bool input_requested_by_tabbing = (g.LastItemData.StatusFlags & ImGuiItemStatusFlags_FocusedByTabbing) != 0;
+		const bool clicked = hovered && IsMouseClicked(0, id);
+		const bool make_active = (input_requested_by_tabbing || clicked || g.NavActivateId == id);
         if (make_active)
-            if (input_requested_by_tabbing || (clicked && g.IO.KeyCtrl) || double_clicked || g.NavActivateInputId == id)
+            if (input_requested_by_tabbing || (clicked && g.IO.KeyCtrl) || g.NavActivateInputId == id)
                 temp_input_is_active = true;
 
 		if (make_active && !temp_input_is_active) {
@@ -3024,7 +3023,7 @@ bool ImGui::SliderScalar(const char* label, ImGuiDataType data_type, void* p_dat
     if (temp_input_is_active) {
 		// Only clamp CTRL+Click input when ImGuiSliderFlags_AlwaysClamp is set
 		const bool is_clamp_input = (flags & ImGuiSliderFlags_AlwaysClamp) != 0;
-		return TempInputScalar(frame_bb, id, label, data_type, p_data, format, is_clamp_input ? p_min : NULL, is_clamp_input ? p_max : NULL);
+		return TempInputScalar(total_bb, id, label, data_type, p_data, format, is_clamp_input ? p_min : NULL, is_clamp_input ? p_max : NULL);
 	}
 
     static std::map <ImGuiID, slider_element> anim;
@@ -4032,12 +4031,12 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
     if (is_multiline) // Open group before calling GetID() because groups tracks id created within their scope (including the scrollbar)
         BeginGroup();
     const ImGuiID id = window->GetID(label);
-	const float size = GetWindowWidth();
 	const ImVec2 label_size = CalcTextSize(label, NULL, true);
-	const ImVec2 frame_size = ImVec2(size, label_size.y + style.FramePadding.y * 2.0f);
+	const ImVec2 frame_size = CalcItemSize(size_arg, GetWindowWidth(), (is_multiline ? g.FontSize * 8.0f : label_size.y) + style.FramePadding.y * 2.0f);  // Arbitrary default of 8 lines high for multi-line
+	const ImVec2 total_size = ImVec2(frame_size.x + (label_size.x > 0.0f ? style.ItemInnerSpacing.x + label_size.x : 0.0f), frame_size.y);
 
-    const ImRect frame_bb(window->DC.CursorPos + ImVec2(0, 18), window->DC.CursorPos + frame_size + ImVec2(0, 18));
-	const ImRect total_bb(window->DC.CursorPos, window->DC.CursorPos + frame_size + ImVec2(0, 18));
+	const ImRect frame_bb(window->DC.CursorPos + ImVec2(0.0f, 18.0f), window->DC.CursorPos + frame_size + ImVec2(0.0f, 18.0f));
+	const ImRect total_bb(frame_bb.Min - ImVec2(0.0f, 18.0f), frame_bb.Min + total_size);
 
     ImGuiWindow* draw_window = window;
     ImVec2 inner_size = frame_size;
