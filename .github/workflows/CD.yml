@@ -14,24 +14,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with: { fetch-depth: 0 }
-      # - name: Setup MSBuild
-      #   uses: microsoft/setup-msbuild@v1.1
-      # - name: Build
-      #   env:
-      #     RELEASE_BUILD: 1
-      #   run: msbuild -m -t:p2fx -p:"Configuration=Release;Platform=x86" p2fx.sln
-      # - name: Upload Artifact
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: p2fx-windows
-      #     path: bin\p2fx.dll
-      #     if-no-files-found: error
-      # - name: Upload PDB Artifact
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: p2fx-windows-pdb
-      #     path: bin\p2fx.pdb
-      #     if-no-files-found: error
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1.1
+      - name: Build
+        env:
+          RELEASE_BUILD: 1
+        run: msbuild -m -t:p2fx -p:"Configuration=Release;Platform=x86" p2fx.sln
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: p2fx-windows
+          path: bin\p2fx.dll
+          if-no-files-found: error
+      - name: Upload PDB Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: p2fx-windows-pdb
+          path: bin\p2fx.pdb
+          if-no-files-found: error
       - name: Upload Blender Scripts Artifact
         uses: actions/upload-artifact@v3
         with:
@@ -47,20 +47,22 @@ jobs:
       - name: Get Release Version
         id: get_release
         run: echo ::set-output name=version::${GITHUB_REF:10}
-      # - name: Download Windows Build
-      #   uses: actions/download-artifact@v3
-      #   with:
-      #     name: p2fx-windows
-      # - name: Download Windows PDB
-      #   uses: actions/download-artifact@v3
-      #   with:
-      #     name: p2fx-windows-pdb
+      - name: Download Windows Build
+        uses: actions/download-artifact@v3
+        with:
+          name: p2fx-windows
+      - name: Download Windows PDB
+        uses: actions/download-artifact@v3
+        with:
+          name: p2fx-windows-pdb
       - name: Download Blender Scripts
         uses: actions/download-artifact@v3
         with:
           name: p2fx-blender-scripts
-      - name: Display structure of downloaded files
-        run: ls -R
+      - name: Zip Blender Scripts
+        uses: montudor/action-zip@v1
+        with:
+            args: zip -qq -r p2fx-blender-scripts.zip p2fx
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
@@ -78,9 +80,9 @@ jobs:
 
             **Changelog**
             TODO
-          files: # |
-            # p2fx.dll
-            # p2fx.pdb
+          files: |
+            p2fx.dll
+            p2fx.pdb
             p2fx-blender-scripts.zip
           prerelease: ${{ contains(github.ref, '-pre') }}
           fail_on_unmatched_files: true
