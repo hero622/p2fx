@@ -79,6 +79,6 @@ jobs:
           files: |
             p2fx.dll
             p2fx.pdb
-            p2fx-blender-scripts.zip
+            p2fx-blender-scripts
           prerelease: ${{ contains(github.ref, '-pre') }}
           fail_on_unmatched_files: true

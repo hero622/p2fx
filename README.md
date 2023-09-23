@@ -4,8 +4,8 @@
 
 ![](./doc/showcase.png)
 
-[![CI](https://github.com/p2sr/SourceAutoRecord/workflows/CI/badge.svg)](https://github.com/Zyntex1/p2fx/actions?query=workflow%3ACI+branch%3Amaster)
-[![CD](https://github.com/p2sr/SourceAutoRecord/workflows/CD/badge.svg)](https://github.com/Zyntex1/p2fx/actions?query=workflow%3ACD+branch%3Amaster)
+[![CI](https://github.com/Zyntex1/p2fx/workflows/CI/badge.svg)](https://github.com/Zyntex1/p2fx/actions?query=workflow%3ACI+branch%3Amaster)
+[![CD](https://github.com/Zyntex1/p2fx/workflows/CD/badge.svg)](https://github.com/Zyntex1/p2fx/actions?query=workflow%3ACD+branch%3Amaster)
 
 </div>
 
