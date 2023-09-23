@@ -1,7 +1,29 @@
-[![CI](https://github.com/p2sr/SourceAutoRecord/workflows/CI/badge.svg)](https://github.com/Zyntex1/p2fx/actions?query=workflow%3ACI+branch%3Amaster) [![CD](https://github.com/p2sr/SourceAutoRecord/workflows/CD/badge.svg)](https://github.com/Zyntex1/p2fx/actions?query=workflow%3ACD+branch%3Amaster)
-
 # P2FX
+
+<div align="center">
+
+![](./doc/showcase.png)
+
+[![CI](https://github.com/p2sr/SourceAutoRecord/workflows/CI/badge.svg)](https://github.com/Zyntex1/p2fx/actions?query=workflow%3ACI+branch%3Amaster)
+[![CD](https://github.com/p2sr/SourceAutoRecord/workflows/CD/badge.svg)](https://github.com/Zyntex1/p2fx/actions?query=workflow%3ACD+branch%3Amaster)
+
+</div>
+
+## About
 **P2FX** is a plugin based on [SourceAutoRecord](https://github.com/p2sr/SourceAutoRecord) for creating Portal 2 videos.
+
+## Features
+- Improved **DemoUI**
+- Advanced **Cinematic mode**
+- **Fog** and **Depth of Field** editor
+- **Post processing** effects
+- Easy to use in-game **Renderer**
+- Export complete **Demo data** to **Blender**, including:
+    - Player **Cameras** and **Viewmodels**
+    - Player **Animations**
+    - **Animations** of all other models
+- **Config system** for saving your settings and cinematics
+- **Custom menu** for browsing Demos
 
 ## Installation
 - Download the newest release from [here](https://github.com/Zyntex1/p2fx/releases).
@@ -11,22 +33,6 @@
 
 ## Support
 **P2FX** currently does not support any operating system other than **Windows**. The plugin only works on Portal 2, no other modifications. **P2FX** is not intended to be used with any other plugins loaded.
-
-## Features
-- Play demos straight from the menu
-![](./doc/demochooser.gif)
-
-- Easily change between demos
-![](./doc/changingdemos.gif)
-
-- Intuitively create cinematic shots
-![](./doc/makingcines.gif)
-
-- Easy Lighting, Fog, and DOF editor
-![](./doc/dialingfx.gif)
-
-- Save your camera paths and settings with P2FX's config system
-![](./doc/configsystem.gif)
 
 ## Contributing
 If you want to contribute to the project, feel free to fork the repo and create a pull request.
