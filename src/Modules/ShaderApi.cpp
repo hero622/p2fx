@@ -7,15 +7,50 @@
 #include "../lib/imgui/imgui_impl_dx9.h"
 #include "../lib/imgui/imgui_impl_win32.h"
 
+#include "Fonts.hpp"
 #include "Menu.hpp"
 
 void ShaderApi::InitImGui(IDirect3DDevice9 *d3dDevice) {
 	static bool g_init = false;
 	if (!g_init) {
 		ImGui::CreateContext();
+		
 		ImGui_ImplDX9_Init(d3dDevice);
 		ImGui_ImplWin32_Init(Input::g_hWnd);
+
+		ImGuiIO &io = ImGui::GetIO();
+		ImGui::StyleColorsDark();
+
+		ImFontConfig fontcfg;
+		fontcfg.PixelSnapH = false;
+		fontcfg.OversampleH = 5;
+		fontcfg.OversampleV = 5;
+		fontcfg.RasterizerMultiply = 1.2f;
+
+		static const ImWchar ranges[] =
+		{
+			0x0020,
+			0x00FF,  // Basic Latin + Latin Supplement
+			0x0400,
+			0x052F,  // Cyrillic + Cyrillic Supplement
+			0x2DE0,
+			0x2DFF,  // Cyrillic Extended-A
+			0xA640,
+			0xA69F,  // Cyrillic Extended-B
+			0xE000,
+			0xE226,  // icons
+			0,
+		};
+
+		fontcfg.GlyphRanges = ranges;
+
+		Fonts::medium = io.Fonts->AddFontFromMemoryTTF(InterMedium, sizeof(InterMedium), 15.0f, &fontcfg, ranges);
+		Fonts::semibold = io.Fonts->AddFontFromMemoryTTF(InterSemiBold, sizeof(InterSemiBold), 17.0f, &fontcfg, ranges);
+
+		Fonts::logo = io.Fonts->AddFontFromMemoryTTF(catrine_logo, sizeof(catrine_logo), 17.0f, &fontcfg, ranges);
+
 		Menu::Init();
+		
 		g_init = true;
 	}
 }

@@ -1,8 +1,16 @@
 #pragma once
+
 #include "Modules/Engine.hpp"
 #include "Variable.hpp"
 
-#include "../lib/imgui/imgui.h"
+#include <cstdint>
+#include <algorithm>
+#include <iostream>
+#include <iomanip>
+#include <map>
+
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include "../lib/imgui/imgui_internal.h"
 
 namespace Menu {
 	inline bool g_shouldDraw = false;
@@ -11,7 +19,50 @@ namespace Menu {
 	void Init();
 };  // namespace Menu
 
+namespace Fonts {
+	inline ImFont *medium;
+	inline ImFont *semibold;
+
+	inline ImFont *logo;
+}  // namespace fonts
+
+#define ALPHA (ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_NoTooltip | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_InputRGB | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_PickerHueBar | ImGuiColorEditFlags_NoBorder)
+#define NO_ALPHA (ImGuiColorEditFlags_NoTooltip | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_InputRGB | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_NoDragDrop | ImGuiColorEditFlags_PickerHueBar | ImGuiColorEditFlags_NoBorder)
+
 namespace CImGui {
+	inline bool Tab(const char *name, bool boolean) {
+		ImGuiWindow *window = ImGui::GetCurrentWindow();
+		if (window->SkipItems)
+			return false;
+
+		ImGuiContext &g = *GImGui;
+		const ImGuiStyle &style = g.Style;
+		const ImGuiID id = window->GetID(name);
+		const ImVec2 label_size = ImGui::CalcTextSize(name, NULL, true);
+		ImVec2 pos = window->DC.CursorPos;
+
+		const ImRect rect(pos, ImVec2(pos.x + label_size.x, pos.y + label_size.y));
+		ImGui::ItemSize(ImVec4(rect.Min.x, rect.Min.y, rect.Max.x + 10, rect.Max.y), style.FramePadding.y);
+		if (!ImGui::ItemAdd(rect, id))
+			return false;
+
+		bool hovered, held;
+		bool pressed = ImGui::ButtonBehavior(rect, id, &hovered, &held, NULL);
+
+		static std::map<ImGuiID, float> anim;
+		auto it_anim = anim.find(id);
+		if (it_anim == anim.end()) {
+			anim.insert({id, 0.0f});
+			it_anim = anim.find(id);
+		}
+
+		it_anim->second = ImLerp(it_anim->second, (boolean ? 0.8f : hovered ? 0.6f : 0.4f), 0.07f * (1.0f - ImGui::GetIO().DeltaTime));
+
+		window->DrawList->AddText(rect.Min, ImColor(1.0f, 1.0f, 1.0f, it_anim->second), name);
+
+		return pressed;
+	}
+
 	inline void Checkbox(const char *label, const char *var, int onvalue = 1) {
 		bool val = Variable(var).GetInt() == onvalue ? true : false;
 		ImGui::Checkbox(label, &val);
@@ -45,7 +96,8 @@ namespace CImGui {
 	inline void Colorpicker(const char *label, const char *var) {
 		auto val = Utils::GetColor(Variable(var).GetString());
 		float col[3] = {val->r / 255.0f, val->g / 255.0f, val->b / 255.0f};
-		ImGui::ColorEdit3(label, col, ImGuiColorEditFlags_NoInputs);
+		ImGui::SameLine(ImGui::GetWindowWidth() - 16);
+		ImGui::ColorEdit4(label, col, NO_ALPHA);
 		Variable(var).SetValue(Utils::ssprintf("%.0f %.0f %.0f", col[0] * 255.0f, col[1] * 255.0f, col[2] * 255.0f).c_str());
 	}
 
@@ -54,7 +106,8 @@ namespace CImGui {
 		auto g = Variable(var2).GetFloat();
 		auto b = Variable(var3).GetFloat();
 		float col[3] = {r, g, b};
-		ImGui::ColorEdit3(label, col, ImGuiColorEditFlags_NoInputs);
+		ImGui::SameLine(ImGui::GetWindowWidth() - 16);
+		ImGui::ColorEdit4(label, col, NO_ALPHA);
 		Variable(var1).SetValue(col[0]);
 		Variable(var2).SetValue(col[1]);
 		Variable(var3).SetValue(col[2]);
