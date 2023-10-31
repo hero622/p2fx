@@ -158,7 +158,7 @@ void Menu::Draw() {
 				CImGui::Checkbox("Record Player Cameras", "p2gr_record_cameras");
 				CImGui::Checkbox("Record Player Viewmodels", "p2gr_record_viewmodels");
 				CImGui::Checkbox("Record Other Entities", "p2gr_record_others");
-				CImGui::Slider("Frame Rate", "p2gr_framerate", 0, 240, "%dfps");
+				CImGui::Slider("Frame Rate", "p2gr_framerate", 1, 2000, "%dfps");
 				static char grFileName[32];
 				ImGui::InputText("Filename", grFileName, IM_ARRAYSIZE(grFileName));
 				if (!gameRecord->GetRecording()) {

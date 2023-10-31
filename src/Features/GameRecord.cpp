@@ -10,7 +10,7 @@ Variable p2gr_record_players("p2gr_record_players", "1", "Include players in P2G
 Variable p2gr_record_cameras("p2gr_record_cameras", "0", "Include cameras in P2GR recordings.\n");
 Variable p2gr_record_viewmodels("p2gr_record_viewmodels", "0", "Include viewmodels in P2GR recordings.\n");
 Variable p2gr_record_others("p2gr_record_others", "0", "Include others in P2GR recordings.\n");
-Variable p2gr_framerate("p2gr_framerate", "30", 1, 240, "Frame rate of P2GR recording.\n");
+Variable p2gr_framerate("p2gr_framerate", "30", 1, "Frame rate of P2GR recording.\n");
 
 GameRecordFs::GameRecordFs()
 	: recording(false) {
