@@ -66,15 +66,14 @@ void DemoViewer::Think() {
 		engine->ExecuteCommand("demo_togglepause", true);
 	}
 
-	if (Input::keys[VK_DOWN].IsPressed() || Input::keys[VK_UP].IsPressed()) {
-		auto host_timescale = Variable("host_timescale");
-		float timescale = host_timescale.GetFloat();
-		if (Input::keys[VK_DOWN].IsPressed()) {
-			timescale -= 0.2f;
-		}
-		if (Input::keys[VK_UP].IsPressed()) {
-			timescale += 0.2f;
-		}
+	auto host_timescale = Variable("host_timescale");
+	float timescale = host_timescale.GetFloat();
+	if (Input::keys[VK_DOWN].IsPressed()) {
+		timescale -= 0.2f;
+		host_timescale.SetValue(std::clamp(timescale, 0.2f, 2.0f));
+	}
+	if (Input::keys[VK_UP].IsPressed()) {
+		timescale += 0.2f;
 		host_timescale.SetValue(std::clamp(timescale, 0.2f, 2.0f));
 	}
 	
