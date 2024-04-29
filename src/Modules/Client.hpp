@@ -85,7 +85,7 @@ public:
 	void OpenChat();
 
 public:
-	// CHLClient::FrameStageNotify 
+	// CHLClient::FrameStageNotify
 	DECL_DETOUR(FrameStageNotify, int curStage);
 
 	// C_BaseAnimating::RecordBones
@@ -150,6 +150,15 @@ extern Variable cl_forwardspeed;
 extern Variable in_forceuser;
 extern Variable cl_fov;
 extern Variable prevent_crouch_jump;
+extern Variable r_PortalTestEnts;
 extern Variable r_portalsopenall;
 extern Variable r_drawviewmodel;
 extern Variable crosshairVariable;
+
+extern Variable soundfade;
+extern Variable leaderboard_open;
+extern Variable gameui_activate;
+extern Variable gameui_allowescape;
+extern Variable gameui_preventescape;
+extern Variable setpause;
+extern Variable snd_ducktovolume;

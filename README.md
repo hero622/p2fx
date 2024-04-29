@@ -4,8 +4,8 @@
 
 ![](./doc/showcase.png)
 
-[![CI](https://github.com/Zyntex1/p2fx/workflows/CI/badge.svg)](https://github.com/Zyntex1/p2fx/actions?query=workflow%3ACI+branch%3Amaster)
-[![CD](https://github.com/Zyntex1/p2fx/workflows/CD/badge.svg)](https://github.com/Zyntex1/p2fx/actions?query=workflow%3ACD+branch%3Amaster)
+[![CI](https://github.com/hero622/p2fx/workflows/CI/badge.svg)](https://github.com/hero622/p2fx/actions?query=workflow%3ACI+branch%3Amaster)
+[![CD](https://github.com/hero622/p2fx/workflows/CD/badge.svg)](https://github.com/hero622/p2fx/actions?query=workflow%3ACD+branch%3Amaster)
 
 </div>
 
@@ -26,7 +26,7 @@
 - **Custom menu** for browsing Demos
 
 ## Installation
-- Download the newest release from [here](https://github.com/Zyntex1/p2fx/releases).
+- Download the newest release from [here](https://github.com/hero622/p2fx/releases).
 - Place it next to Portal 2's executable (typically in `SteamLibrary/steamapps/common/Portal 2`).
 - Add `+mat_hdr_level 3` to the game's launch options (or else some effects will not work).
 - Open the game and type `plugin_load p2fx` in the console.

@@ -40,7 +40,7 @@ jobs:
           if-no-files-found: error
   release:
     name: Release
-    if: github.repository == 'Zyntex1/p2fx'
+    if: github.repository == 'hero622/p2fx'
     needs: [build-win]
     runs-on: ubuntu-latest
     steps:
@@ -67,11 +67,11 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           body: |
-            ![CD](https://github.com/Zyntex1/p2fx/workflows/CD/badge.svg)
+            ![CD](https://github.com/hero622/p2fx/workflows/CD/badge.svg)
 
             **Installation**
             - Download:
-              - [Windows](https://github.com/Zyntex1/p2fx/releases/download/${{ steps.get_release.outputs.version }}/p2fx.dll)
+              - [Windows](https://github.com/hero622/p2fx/releases/download/${{ steps.get_release.outputs.version }}/p2fx.dll)
             - Place the binary into the game folder e.g. `Portal 2`
             - Add `+mat_hdr_level 3` to the game's launch options
             - Open developer console and enter `plugin_load p2fx`

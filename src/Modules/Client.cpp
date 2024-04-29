@@ -6,9 +6,9 @@
 #include "Event.hpp"
 #include "Features/Camera.hpp"
 #include "Features/FovChanger.hpp"
+#include "Features/GameRecord.hpp"
 #include "Features/OverlayRender.hpp"
 #include "Features/Session.hpp"
-#include "Features/GameRecord.hpp"
 #include "Game.hpp"
 #include "Hook.hpp"
 #include "Interface.hpp"
@@ -29,9 +29,17 @@ Variable in_forceuser;
 Variable crosshairVariable;
 Variable cl_fov;
 Variable prevent_crouch_jump;
-Variable r_portaltestents;
+Variable r_PortalTestEnts;
 Variable r_portalsopenall;
 Variable r_drawviewmodel;
+
+Variable soundfade;
+Variable leaderboard_open;
+Variable gameui_activate;
+Variable gameui_allowescape;
+Variable gameui_preventescape;
+Variable setpause;
+Variable snd_ducktovolume;
 
 Variable p2fx_disable_coop_score_hud("p2fx_disable_coop_score_hud", "0", "Disables the coop score HUD which appears in demo playback.\n");
 Variable p2fx_disable_save_status_hud("p2fx_disable_save_status_hud", "0", "Disables the saving/saved HUD which appears when you make a save.\n");
@@ -366,7 +374,7 @@ DETOUR(Client::FrameStageNotify, int curStage) {
 	auto ret = Client::FrameStageNotify(thisptr, curStage);
 
 	// FRAME_RENDER_END
-	if (curStage == 6) 
+	if (curStage == 6)
 		gameRecord->OnAfterFrameRenderEnd();
 
 	return ret;
@@ -567,19 +575,23 @@ bool Client::Init() {
 	cl_backspeed = Variable("cl_backspeed");
 	prevent_crouch_jump = Variable("prevent_crouch_jump");
 	crosshairVariable = Variable("crosshair");
-	r_portaltestents = Variable("r_portaltestents");
+	r_PortalTestEnts = Variable("r_PortalTestEnts");
 	r_portalsopenall = Variable("r_portalsopenall");
 	r_drawviewmodel = Variable("r_drawviewmodel");
 
-	// Useful for fixing rendering bugs
-	r_portaltestents.RemoveFlag(FCVAR_CHEAT);
+	soundfade = Variable("soundfade");
+	leaderboard_open = Variable("leaderboard_open");
+	gameui_activate = Variable("gameui_activate");
+	gameui_allowescape = Variable("gameui_allowescape");
+	gameui_preventescape = Variable("gameui_preventescape");
+	setpause = Variable("setpause");
+	snd_ducktovolume = Variable("snd_ducktovolume");
 
 	CVAR_HOOK_AND_CALLBACK(cl_fov);
 
 	return this->hasLoaded = this->g_ClientDLL && this->s_EntityList;
 }
 void Client::Shutdown() {
-	r_portaltestents.AddFlag(FCVAR_CHEAT);
 	Interface::Delete(this->g_ClientDLL);
 	Interface::Delete(this->g_pClientMode);
 	Interface::Delete(this->g_HUDChallengeStats);

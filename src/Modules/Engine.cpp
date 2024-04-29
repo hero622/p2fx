@@ -4,24 +4,24 @@
 #include "Console.hpp"
 #include "EngineDemoPlayer.hpp"
 #include "Event.hpp"
-#include "InputSystem.hpp"
 #include "Features/Camera.hpp"
 #include "Features/Cvars.hpp"
 #include "Features/Demo/DemoParser.hpp"
+#include "Features/GameRecord.hpp"
 #include "Features/OverlayRender.hpp"
 #include "Features/Renderer.hpp"
 #include "Features/Session.hpp"
-#include "Features/GameRecord.hpp"
 #include "Game.hpp"
 #include "Hook.hpp"
+#include "InputSystem.hpp"
 #include "Interface.hpp"
 #include "P2FX.hpp"
 #include "Server.hpp"
 #include "Utils.hpp"
 #include "Variable.hpp"
 
-#include <cstring>
 #include <cmath>
+#include <cstring>
 
 #ifdef _WIN32
 // clang-format off
@@ -80,10 +80,10 @@ REDECL(Engine::ParseSmoothingInfo_Mid_Trampoline);
 #endif
 
 void Engine::ExecuteCommand(const char *cmd, bool immediately) {
+	this->Cbuf_AddText(0, cmd, 0);  // kCommandSrcCode (source 0) has no restrictions
 	if (immediately) {
-		this->ExecuteClientCmd(this->engineClient->ThisPtr(), cmd);
-	} else {
-		this->ClientCmd(this->engineClient->ThisPtr(), cmd);
+		// HACKHACK: This effectively just does Cbuf_Execute, could we get at that by itself?
+		this->ExecuteClientCmd(this->engineClient->ThisPtr(), "");
 	}
 }
 int Engine::GetTick() {
@@ -138,7 +138,6 @@ int Engine::PointToScreen(const Vector &point, Vector &screen) {
 	return this->ScreenPosition(nullptr, point, screen);
 }
 void Engine::SafeUnload(const char *postCommand) {
-
 	// give events some time to execute before plugin is disabled
 	Event::Trigger<Event::P2FX_UNLOAD>({});
 	this->ExecuteCommand("p2fx_exit");
@@ -180,7 +179,7 @@ std::string Engine::GetCurrentMapName() {
 
 bool Engine::IsCoop() {
 	if (*client->gamerules) {
-		using _IsMultiplayer = bool (__rescall *)(void *thisptr);
+		using _IsMultiplayer = bool(__rescall *)(void *thisptr);
 		return Memory::VMT<_IsMultiplayer>(*client->gamerules, Offsets::IsMultiplayer)(*client->gamerules);
 	}
 	return sv_portal_players.GetInt() == 2 || (engine->demoplayer->IsPlaying() && engine->GetMaxClients() >= 2);
@@ -271,7 +270,7 @@ float Engine::GetClientTime() {
 }
 
 float Engine::GetHostTime() {
-	return this->engineTool->Original<float (__rescall *)(void *thisptr)>(Offsets::HostTick - 1)(this->engineTool->ThisPtr());
+	return this->engineTool->Original<float(__rescall *)(void *thisptr)>(Offsets::HostTick - 1)(this->engineTool->ThisPtr());
 }
 
 // CClientState::Disconnect
@@ -337,7 +336,7 @@ DETOUR(Engine::Frame) {
 		Event::Trigger<Event::POST_TICK>({false, session->GetTick()});
 	}
 
-	//demoplayer
+	//	demoplayer
 	if (engine->demoplayer->demoQueueSize > 0 && !engine->demoplayer->IsPlaying() && engine->demoplayer->IsPlaybackFixReady()) {
 		DemoParser parser;
 		auto name = engine->demoplayer->demoQueue[engine->demoplayer->currentDemoID];
@@ -590,7 +589,7 @@ void Host_AccumulateTime_Detour(float dt) {
 		Host_AccumulateTime_Hook.Enable();
 	} else if (g_advance > 0) {
 		Host_AccumulateTime_Hook.Disable();
-		Host_AccumulateTime(1.0f/60);
+		Host_AccumulateTime(1.0f / 60);
 		Host_AccumulateTime_Hook.Enable();
 		--g_advance;
 	} else {
@@ -617,8 +616,8 @@ void _Host_RunFrame_Render_Detour() {
 		// in response to portal teleportations (and it probably breaks some
 		// other stuff too). This would normally be done within
 		// SCR_UpdateScreen, wrapping the main rendering calls
-		client->ClFrameStageNotify(5); // FRAME_RENDER_START
-		client->ClFrameStageNotify(6); // FRAME_RENDER_END
+		client->ClFrameStageNotify(5);  // FRAME_RENDER_START
+		client->ClFrameStageNotify(6);  // FRAME_RENDER_END
 	} else {
 		// Just do a normal render
 		_Host_RunFrame_Render_Hook.Disable();
@@ -659,8 +658,8 @@ ON_EVENT(FRAME) {
 
 static int framesToRun(void *bink) {
 	// BINK datastructure in bink.h from SE2007 leak
-	//uint32_t nframes = ((uint32_t *)bink)[2];
-	//uint32_t last_frame = ((uint32_t *)bink)[4];
+	//	uint32_t nframes = ((uint32_t *)bink)[2];
+	//	uint32_t last_frame = ((uint32_t *)bink)[4];
 	double framerate = (double)((uint32_t *)bink)[5] / (double)((uint32_t *)bink)[6];
 
 	double now = engine->GetHostTime();
@@ -675,16 +674,16 @@ static int framesToRun(void *bink) {
 	}
 
 	double to_run = (now - last) * framerate;
-	//int possible = nframes - last_frame - 1;
+	//	int possible = nframes - last_frame - 1;
 
-	//if (to_run > possible) return possible;
+	//	if (to_run > possible) return possible;
 	return (int)to_run;
 }
 
 static void advFrame(void *bink) {
 	// BINK datastructure in bink.h from SE2007 leak
-	//uint32_t nframes = ((uint32_t *)bink)[2];
-	//uint32_t last_frame = ((uint32_t *)bink)[4];
+	//	uint32_t nframes = ((uint32_t *)bink)[2];
+	//	uint32_t last_frame = ((uint32_t *)bink)[4];
 	double framerate = (double)((uint32_t *)bink)[5] / (double)((uint32_t *)bink)[6];
 
 	auto it = g_bink_last_frames.find(bink);
@@ -695,7 +694,7 @@ static void advFrame(void *bink) {
 	}
 }
 
-void (__stdcall *BinkNextFrame)(void *bink);
+void(__stdcall *BinkNextFrame)(void *bink);
 void __stdcall BinkNextFrame_Detour(void *bink);
 static Hook BinkNextFrame_Hook(&BinkNextFrame_Detour);
 void __stdcall BinkNextFrame_Detour(void *bink) {
@@ -705,7 +704,7 @@ void __stdcall BinkNextFrame_Detour(void *bink) {
 	if (g_bink_override_active) advFrame(bink);
 }
 
-int (__stdcall *BinkShouldSkip)(void *bink);
+int(__stdcall *BinkShouldSkip)(void *bink);
 int __stdcall BinkShouldSkip_Detour(void *bink);
 static Hook BinkShouldSkip_Hook(&BinkShouldSkip_Detour);
 int __stdcall BinkShouldSkip_Detour(void *bink) {
@@ -719,7 +718,7 @@ int __stdcall BinkShouldSkip_Detour(void *bink) {
 	}
 }
 
-int (__stdcall *BinkWait)(void *bink);
+int(__stdcall *BinkWait)(void *bink);
 int __stdcall BinkWait_Detour(void *bink);
 static Hook BinkWait_Hook(&BinkWait_Detour);
 int __stdcall BinkWait_Detour(void *bink) {
@@ -986,8 +985,8 @@ bool Engine::Init() {
 	/* TODO Memory::Scan data segments
 	char *s = (char *)Memory::Scan(this->Name(), "25 2d 38 30 73 20 2d 20 25 2e 38 30 73 0a 00");  // "%-80s - %.80s"
 	if (s) {
-		Memory::UnProtect(s, 11);
-		strcpy(s, "%-80s - %s");
+	 Memory::UnProtect(s, 11);
+	 strcpy(s, "%-80s - %s");
 	}*/
 
 	if (this->g_physCollision = Interface::Create(MODULE("vphysics"), "VPhysicsCollision007")) {
@@ -1001,11 +1000,11 @@ bool Engine::Init() {
 	auto bink_mod = Memory::GetModuleHandleByName(MODULE("valve_avi"));
 #endif
 	if (bink_mod) {
-		BinkNextFrame = Memory::GetSymbolAddress<void (__stdcall *)(void *bink)>(bink_mod, STDCALL_NAME("BinkNextFrame", 4));
+		BinkNextFrame = Memory::GetSymbolAddress<void(__stdcall *)(void *bink)>(bink_mod, STDCALL_NAME("BinkNextFrame", 4));
 		BinkNextFrame_Hook.SetFunc(BinkNextFrame);
-		BinkShouldSkip = Memory::GetSymbolAddress<int (__stdcall *)(void *bink)>(bink_mod, STDCALL_NAME("BinkShouldSkip", 4));
+		BinkShouldSkip = Memory::GetSymbolAddress<int(__stdcall *)(void *bink)>(bink_mod, STDCALL_NAME("BinkShouldSkip", 4));
 		BinkShouldSkip_Hook.SetFunc(BinkShouldSkip);
-		BinkWait = Memory::GetSymbolAddress<int (__stdcall *)(void *bink)>(bink_mod, STDCALL_NAME("BinkWait", 4));
+		BinkWait = Memory::GetSymbolAddress<int(__stdcall *)(void *bink)>(bink_mod, STDCALL_NAME("BinkWait", 4));
 		BinkWait_Hook.SetFunc(BinkWait);
 		Memory::CloseModuleHandle(bink_mod);
 	}

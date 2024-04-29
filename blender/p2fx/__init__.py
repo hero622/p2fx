@@ -2,7 +2,7 @@ import bpy
 
 bl_info = {
 	"name": "p2fx Blender Scripts",
-	"author": "Zyntex",
+	"author": "hero",
 	"version": (1, 0, 0),
 	"blender": (3, 5, 0),
 	"location": "File > Import/Export",

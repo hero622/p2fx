@@ -171,11 +171,19 @@ void Cvars::Lock() {
 		hide_gun_when_holding.Lock();
 		cl_viewmodelfov.Lock();
 		r_flashlightbrightness.Lock();
-		r_flashlightbrightness.AddFlag(FCVAR_CHEAT);
+		r_PortalTestEnts.Lock();
 
-		cl_forwardspeed.AddFlag(FCVAR_CHEAT);
-		cl_sidespeed.AddFlag(FCVAR_CHEAT);
-		cl_backspeed.AddFlag(FCVAR_CHEAT);
+		cl_forwardspeed.Lock();
+		cl_sidespeed.Lock();
+		cl_backspeed.Lock();
+
+		soundfade.Lock();
+		leaderboard_open.Lock();
+		gameui_activate.Lock();
+		gameui_allowescape.Lock();
+		gameui_preventescape.Lock();
+		setpause.Lock();
+		snd_ducktovolume.Lock();
 
 		this->locked = true;
 	}
@@ -202,10 +210,30 @@ void Cvars::Unlock() {
 		cl_viewmodelfov.Unlock(false);
 		r_flashlightbrightness.Unlock(false);
 		r_flashlightbrightness.RemoveFlag(FCVAR_CHEAT);
+		r_PortalTestEnts.Unlock(false);
+		r_PortalTestEnts.RemoveFlag(FCVAR_CHEAT);
 
+		cl_forwardspeed.Unlock(false);
+		cl_sidespeed.Unlock(false);
+		cl_backspeed.Unlock(false);
 		cl_forwardspeed.RemoveFlag(FCVAR_CHEAT);
 		cl_sidespeed.RemoveFlag(FCVAR_CHEAT);
 		cl_backspeed.RemoveFlag(FCVAR_CHEAT);
+
+		soundfade.Unlock(false);
+		leaderboard_open.Unlock(false);
+		gameui_activate.Unlock(false);
+		gameui_allowescape.Unlock(false);
+		gameui_preventescape.Unlock(false);
+		setpause.Unlock(false);
+		snd_ducktovolume.Unlock(false);
+		soundfade.AddFlag(FCVAR_CLIENTCMD_CAN_EXECUTE);
+		leaderboard_open.AddFlag(FCVAR_CLIENTCMD_CAN_EXECUTE | FCVAR_SERVER_CAN_EXECUTE);
+		gameui_activate.AddFlag(FCVAR_CLIENTCMD_CAN_EXECUTE | FCVAR_SERVER_CAN_EXECUTE);
+		gameui_allowescape.AddFlag(FCVAR_CLIENTCMD_CAN_EXECUTE | FCVAR_SERVER_CAN_EXECUTE);
+		gameui_preventescape.AddFlag(FCVAR_CLIENTCMD_CAN_EXECUTE | FCVAR_SERVER_CAN_EXECUTE);
+		setpause.AddFlag(FCVAR_SERVER_CAN_EXECUTE);
+		snd_ducktovolume.AddFlag(FCVAR_SERVER_CAN_EXECUTE);
 
 		this->locked = false;
 	}

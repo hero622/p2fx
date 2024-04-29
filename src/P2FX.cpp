@@ -17,10 +17,10 @@
 #include "Features.hpp"
 #include "Game.hpp"
 #include "Hook.hpp"
+#include "Input.hpp"
 #include "Interface.hpp"
 #include "Modules.hpp"
 #include "Variable.hpp"
-#include "Input.hpp"
 
 P2FX p2fx;
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(P2FX, IServerPluginCallbacks, INTERFACEVERSION_ISERVERPLUGINCALLBACKS, p2fx);
@@ -223,7 +223,7 @@ void P2FX::Unload() {
 
 CON_COMMAND(p2fx_about, "p2fx_about - prints info about P2FX plugin\n") {
 	console->Print("p2fx is a speedrun plugin for Source Engine games.\n");
-	console->Print("More information at: https://github.com/Zyntex1/p2fx or https://wiki.portal2.sr/P2FX\n");
+	console->Print("More information at: https://github.com/hero622/p2fx or https://wiki.portal2.sr/P2FX\n");
 	console->Print("Game: %s\n", p2fx.game->Version());
 	console->Print("Version: " P2FX_VERSION "\n");
 	console->Print("Built: " P2FX_BUILT "\n");

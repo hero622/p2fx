@@ -32,7 +32,7 @@ std::string DemoParser::DecodeCustomData(char *data) {
 		size_t inputnameLen = strlen(inputname);
 		char *parameter = data + 4 + targetnameLen + classnameLen + inputnameLen;
 
-		//console->Print("%s %s %s %s\n", targetname, classname, inputname, parameter);
+		//	console->Print("%s %s %s %s\n", targetname, classname, inputname, parameter);
 
 		return Utils::ssprintf("%s %s %s %s", targetname, classname, inputname, parameter);
 	}
@@ -60,7 +60,7 @@ std::string DemoParser::DecodeCustomData(char *data) {
 		return Utils::ssprintf("%d", slot);
 	}
 
-	if (data[0] == 0x0A) { // Speedrun time
+	if (data[0] == 0x0A) {  // Speedrun time
 		data += 1;
 
 		speedrunTime.nSplits = *(size_t *)(data);
@@ -123,7 +123,7 @@ bool DemoParser::Parse(std::string filePath, Demo *demo, bool ghostRequest) {
 		demo->segmentTicks = -1;
 
 		if (!headerOnly) {
-			//Ghosts
+			//	Ghosts
 			bool waitForNext = false;
 			int lastTick = 0;
 
@@ -211,7 +211,7 @@ bool DemoParser::Parse(std::string filePath, Demo *demo, bool ghostRequest) {
 						if (ghostRequest) {
 							char *data = new char[length];
 							file.read(data, length);
-							
+
 							this->DecodeCustomData(data + 8);
 						} else {
 							file.ignore(length);
@@ -241,7 +241,7 @@ bool DemoParser::Parse(std::string filePath, Demo *demo, bool ghostRequest) {
 	} catch (const std::exception &ex) {
 		console->Warning(
 			"P2FX: Error occurred when trying to parse the demo file.\n"
-			"If you think this is an issue, report it at: https://github.com/Zyntex1/p2fx/issues\n"
+			"If you think this is an issue, report it at: https://github.com/hero622/p2fx/issues\n"
 			"%s\n",
 			std::string(ex.what()));
 		return false;
