@@ -21,19 +21,19 @@ jobs:
           RELEASE_BUILD: 1
         run: msbuild -m -t:p2fx -p:"Configuration=Release;Platform=x86" p2fx.sln
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: p2fx-windows
           path: bin\p2fx.dll
           if-no-files-found: error
       - name: Upload PDB Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: p2fx-windows-pdb
           path: bin\p2fx.pdb
           if-no-files-found: error
       - name: Upload Blender Scripts Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: p2fx-blender-scripts
           path: blender
