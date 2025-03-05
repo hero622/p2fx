@@ -35,6 +35,7 @@ P2FX::P2FX()
 }
 
 bool P2FX::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServerFactory) {
+	// hey so this comment is here only so github reruns CI, awesome
 	console = new Console();
 	if (!console->Init())
 		return false;
