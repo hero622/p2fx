@@ -248,7 +248,7 @@ void Menu::Draw() {
 				if (ImGui::Button("Create")) {
 					if (strlen(campathName) != 0)
 						Campath::g_Campaths.push_back(campathName);
-						Config::Save(campathName);
+						Campath::Save(campathName);
 				}
 				if (ImGui::Button("Save")) {
 					if (!selectedCampath.empty())
